@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeFilled, TrendCharts, Trophy } from '@element-plus/icons-vue'
+import { HomeFilled, TrendCharts, Trophy, ForkSpoon } from '@element-plus/icons-vue'
 import type { Component } from 'vue'
 
 interface MenuItem {
@@ -17,6 +17,7 @@ const menuItems: MenuItem[] = [
   { path: '/', title: '首页', icon: HomeFilled },
   { path: '/health', title: '健康数据', icon: TrendCharts },
   { path: '/workout', title: '运动记录', icon: Trophy },
+  { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
 ]
 
 const activeMenu = ref<string>(route.path)

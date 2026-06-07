@@ -46,6 +46,42 @@
 * **API 管理**：必须在 `src/api/` 目录下创建 `.ts` 文件统一管理接口函数。
 * **Axios 封装**（对应 `src/utils/request.ts`）：请求拦截器自动从同目录下 `currentUser.ts` 读取 7 位数字工号并注入 `X-Emp-No` 请求头。
 
+### 3.3 布局与页面架构
+
+#### 3.3.1 布局组件组织
+* **布局根目录**：所有布局相关组件必须置于 `src/components/layout/` 目录下。
+* **组件拆分**：
+  * `Layout.vue` —— 主网格容器，负责整体的 CSS Grid 骨架渲染。
+  * `HeaderBar.vue` —— 顶部导航栏（含应用标题、Logo 等）。
+  * `SideMenu.vue` —— 左侧导航菜单（基于 Element Plus `el-menu`，支持路由跳转）。
+  * `StatusBar.vue` —— 底部状态栏（系统时间 + 登录 IP）。
+
+#### 3.3.2 经典网格布局框架 (CSS Grid)
+主环境布局 `src/components/layout/Layout.vue` 必须严格基于以下网格骨架进行渲染，禁止随意修改结构：
+
+* **结构划分**：
+```css
+.layout-wrapper {
+  display: grid;
+  grid-template-columns: 240px 1fr; /* 左侧菜单宽 240px */
+  grid-template-rows: auto 1fr 34px; /* 顶栏自适应，中间主视图，底栏 34px */
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+}
+
+```
+
+* **网格区域映射**：
+```
+grid-template-areas:
+  "sidebar header"
+  "sidebar main"
+  "status-bar status-bar";
+```
+
+* **状态持久栏 (Status Bar)**：底部必须保留统一的 `status-bar`，用于展示通过定时器（每秒刷新）驱动的系统本地化时间，以及通过 `src/api/system.ts` 获取并放行的用户真实 `Login IP`。
+
 ---
 
 ## 4. 微信小程序前端规范 (官方原生 TS)

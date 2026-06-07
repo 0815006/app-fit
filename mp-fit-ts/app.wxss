@@ -1,0 +1,12 @@
+page {
+  --td-brand-color: #409eff;
+  background-color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  color: #303133;
+}
+
+.container {
+  padding: 24rpx;
+}

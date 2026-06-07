@@ -1,0 +1,76 @@
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🏋️ Fit 全栈稳健版</text>
+    <text class="page-subtitle">Java 21 + Vue 3 + 微信原生小程序</text>
+  </view>
+
+  <!-- ========== 登录统计 内容区 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'stats' }}">
+    <view class="loading-area" wx:if="{{ loading }}">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view class="card" wx:if="{{ !loading }}">
+      <view class="card-header">
+        <text class="card-title">📊 登录统计</text>
+      </view>
+
+      <view class="info-row">
+        <text class="info-label">当前工号</text>
+        <text class="info-value">{{ empNo }}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">登录来源</text>
+        <view class="tag tag-primary"><text>小程序端</text></view>
+      </view>
+
+      <view class="divider"></view>
+
+      <view class="stat-area">
+        <text class="count-number">{{ loginCount !== null ? loginCount : '-' }}</text>
+        <text class="count-unit">次</text>
+      </view>
+      <view class="stat-hint">
+        <text>每次进入页面自动记录一次登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 技术选型 内容区 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'tech' }}">
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">🛠️ 技术选型</text>
+      </view>
+      <view class="tech-list">
+        <view class="tech-row" wx:for="{{ techStack }}" wx:key="name">
+          <view class="tech-left">
+            <text class="tech-category">{{ item.category }}</text>
+            <text class="tech-name">{{ item.name }}</text>
+          </view>
+          <view class="tech-right">
+            <text class="tech-version">{{ item.version }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位，防止内容被 tab-bar 遮挡 -->
+  <view class="tab-placeholder"></view>
+
+  <!-- ========== 底部菜单栏 ========== -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{ activeTab === item.key ? 'tab-item-active' : '' }}"
+      wx:for="{{ tabBars }}"
+      wx:key="key"
+      data-key="{{ item.key }}"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">{{ item.icon }}</text>
+      <text class="tab-label">{{ item.label }}</text>
+    </view>
+  </view>
+</view>

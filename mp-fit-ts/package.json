@@ -1,0 +1,11 @@
+{
+  "name": "mp-fit-ts",
+  "version": "1.0.0",
+  "description": "Fit 微信小程序 (Native TS + TDesign)",
+  "scripts": {
+    "build:npm": "npm install --production"
+  },
+  "dependencies": {
+    "tdesign-miniprogram": "^1.9.0"
+  }
+}

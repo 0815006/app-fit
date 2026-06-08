@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Clock, Connection } from '@element-plus/icons-vue'
-import { getSystemInfo, type SystemInfo } from '@/api/system'
+import { getSystemInfo } from '@/api/system'
 
 const currentTime = ref<string>('')
 const loginIp = ref<string>('--')

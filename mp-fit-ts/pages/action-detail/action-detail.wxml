@@ -1,0 +1,117 @@
+<!-- 加载中 -->
+<view class="adetail-loading" wx:if="{{ loading }}">
+  <text class="adetail-loading-text">⏳ 加载中...</text>
+</view>
+
+<!-- 错误 -->
+<view class="adetail-error" wx:elif="{{ error }}">
+  <text class="adetail-error-ico">😢</text>
+  <text class="adetail-error-msg">{{ errorMsg }}</text>
+</view>
+
+<!-- 详情内容 -->
+<scroll-view scroll-y class="adetail-scroll" wx:else>
+  <!-- ══════ 顶部：动作要领文字展示 ══════ -->
+  <view class="adetail-section" wx:if="{{ action.actionGuide }}">
+    <view class="adetail-section-header">
+      <text class="adetail-section-icon">📖</text>
+      <text class="adetail-section-title">动作要领</text>
+    </view>
+    <view class="adetail-guide-card">
+      <text class="adetail-guide-text">{{ action.actionGuide }}</text>
+    </view>
+  </view>
+
+  <!-- 无图占位（无动作要领时） -->
+  <view class="adetail-media-placeholder" wx:if="{{ !action.actionGuide }}">
+    <text class="adetail-placeholder-ico">📖</text>
+    <text class="adetail-placeholder-text">暂无动作要领</text>
+  </view>
+
+  <!-- ══════ 中部：器械与肌群全解 ══════ -->
+
+  <!-- ① 所需器械清单 -->
+  <view class="adetail-section" wx:if="{{ equipments.length > 0 }}">
+    <view class="adetail-section-header">
+      <text class="adetail-section-icon">🔧</text>
+      <text class="adetail-section-title">所需器械</text>
+    </view>
+    <view class="adetail-equip-list">
+      <view
+        class="adetail-equip-chip"
+        wx:for="{{ equipments }}"
+        wx:key="name"
+      >
+        <text class="adetail-equip-name">{{ item.name }}</text>
+        <text class="adetail-equip-type">{{ item.typeDesc }}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ② 肌肉参与全景图 -->
+  <view class="adetail-section" wx:if="{{ muscles.primary.length > 0 || muscles.secondary.length > 0 }}">
+    <view class="adetail-section-header">
+      <text class="adetail-section-icon">💪</text>
+      <text class="adetail-section-title">肌肉参与</text>
+    </view>
+
+    <!-- 主要目标肌群 -->
+    <view class="adetail-muscle-group" wx:if="{{ muscles.primary.length > 0 }}">
+      <text class="adetail-muscle-label primary-label">🎯 主要目标</text>
+      <view class="adetail-muscle-chips">
+        <view
+          class="adetail-muscle-chip primary-chip"
+          wx:for="{{ muscles.primary }}"
+          wx:key="name"
+        >
+          <text>{{ item.name }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 协同参与肌群 -->
+    <view class="adetail-muscle-group" wx:if="{{ muscles.secondary.length > 0 }}">
+      <text class="adetail-muscle-label secondary-label">🤝 协同参与</text>
+      <view class="adetail-muscle-chips">
+        <view
+          class="adetail-muscle-chip secondary-chip"
+          wx:for="{{ muscles.secondary }}"
+          wx:key="name"
+        >
+          <text>{{ item.name }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI 提示语 -->
+    <view class="adetail-muscle-tip" wx:if="{{ muscles.primary.length > 0 && muscles.secondary.length > 0 }}">
+      <text class="adetail-tip-text">
+        💡 <text class="adetail-tip-bold">{{ muscles.primary[0].name }}</text>负责主要发力推满，<text wx:for="{{ muscles.secondary }}" wx:for-item="s" wx:key="name" class="adetail-tip-bold">{{ s.name }}<text wx:if="{{ index < muscles.secondary.length - 1 }}">、</text></text>协助支撑稳固。
+      </text>
+    </view>
+  </view>
+
+  <!-- ══════ 下部：安全盾牌 ══════ -->
+
+  <!-- 安全提示 -->
+  <view class="adetail-section" wx:if="{{ action.safetyTips }}">
+    <view class="adetail-section-header">
+      <text class="adetail-section-icon">⚠️</text>
+      <text class="adetail-section-title">安全提示</text>
+    </view>
+    <view class="adetail-safety-card">
+      <text class="adetail-safety-text">⚠️ {{ action.safetyTips }}</text>
+    </view>
+  </view>
+
+  <!-- 底部占位（为加入计划按钮预留空间） -->
+  <view class="adetail-bottom-spacer"></view>
+</scroll-view>
+
+<!-- 底部固定：加入计划按钮 -->
+<view class="adetail-footer" wx:if="{{ !loading && !error }}">
+  <button class="adetail-add-plan-btn" open-type="share">
+    <text class="adetail-btn-icon">📋</text>
+    <text class="adetail-btn-label">将该动作加入我的周计划</text>
+  </button>
+</view>

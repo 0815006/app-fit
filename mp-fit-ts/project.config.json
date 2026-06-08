@@ -41,12 +41,14 @@
     "minifyWXSS": true,
     "localPlugins": false,
     "disableUseStrict": false,
-    "useCompilerPlugins": ["typescript"],
+    "useCompilerPlugins": [
+      "typescript"
+    ],
     "swc": true,
     "disableSWC": false
   },
   "compileType": "miniprogram",
-  "libVersion": "3.6.0",
+  "libVersion": "3.16.1",
   "appid": "wx6bb890ad9c1e9c52",
   "projectname": "mp-fit-ts",
   "simulatorType": "wechat",

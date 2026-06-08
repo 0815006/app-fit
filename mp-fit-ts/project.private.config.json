@@ -1,6 +1,6 @@
 {
-  "libVersion": "3.16.1",
-  "projectname": "fit",
+  "libVersion": "3.16.0",
+  "projectname": "mp-fit-ts",
   "condition": {},
   "setting": {
     "urlCheck": false,

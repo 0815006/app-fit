@@ -1,21 +1,39 @@
-<view class="container">
-  <!-- 页面标题 -->
-  <view class="page-header">
-    <text class="page-title">🏋️ Fit 全栈稳健版</text>
-    <text class="page-subtitle">Java 21 + Vue 3 + 微信原生小程序</text>
-  </view>
+<wxs module="fmt">
+  function formatPrice(price) {
+    if (price === 0) return '免费'
+    return '¥' + price.toFixed(2)
+  }
+  function getCalorieClass(kcal) {
+    if (kcal <= 0) return ''
+    if (kcal <= 100) return 'cal-low'
+    if (kcal >= 500) return 'cal-high'
+    return 'cal-mid'
+  }
+  function getMealColor(type) {
+    if (type === '早餐') return '#e6a23c'
+    if (type === '午餐') return '#e67e22'
+    if (type === '晚餐') return '#8e44ad'
+    if (type === '夜宵') return '#5b6abf'
+    return '#e67e22'
+  }
+  module.exports = {
+    formatPrice: formatPrice,
+    getCalorieClass: getCalorieClass,
+    getMealColor: getMealColor
+  }
+</wxs>
 
-  <!-- ========== 登录统计 内容区 ========== -->
+<view class="container">
+  <scroll-view scroll-y class="main-scroll" style="height: {{ scrollHeight }}px">
+  <!-- ========== 登录统计 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'stats' }}">
     <view class="loading-area" wx:if="{{ loading }}">
       <text class="loading-text">加载中...</text>
     </view>
-
     <view class="card" wx:if="{{ !loading }}">
       <view class="card-header">
         <text class="card-title">📊 登录统计</text>
       </view>
-
       <view class="info-row">
         <text class="info-label">当前工号</text>
         <text class="info-value">{{ empNo }}</text>
@@ -24,9 +42,7 @@
         <text class="info-label">登录来源</text>
         <view class="tag tag-primary"><text>小程序端</text></view>
       </view>
-
       <view class="divider"></view>
-
       <view class="stat-area">
         <text class="count-number">{{ loginCount !== null ? loginCount : '-' }}</text>
         <text class="count-unit">次</text>
@@ -37,7 +53,132 @@
     </view>
   </view>
 
-  <!-- ========== 技术选型 内容区 ========== -->
+  <!-- ========== 今日菜单 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'menu' }}">
+    <!-- ══════ 三层控制区 ══════ -->
+    <view class="menu-ctrl-wrap">
+      <!-- Tier 1: 食堂分段控制器 -->
+      <view class="segmented-ctrl">
+        <view
+          class="seg-btn {{ todayZone === '一期' ? 'seg-on' : '' }}"
+          data-zone="一期"
+          bindtap="handleTodayZoneChange"
+        ><text>🏢 一期食堂</text></view>
+        <view
+          class="seg-btn {{ todayZone === '二期' ? 'seg-on' : '' }}"
+          data-zone="二期"
+          bindtap="handleTodayZoneChange"
+        ><text>🏢 二期食堂</text></view>
+      </view>
+
+      <!-- Tier 2: 日期导航 -->
+      <view class="date-row">
+        <view class="date-arrow" bindtap="goToPrevDay">
+          <text>◀ 前一天</text>
+        </view>
+        <picker mode="date" value="{{ todayDate }}" bindchange="handleTodayDateChange">
+          <view class="date-display">
+            <text>{{ todayDateDisplay }}</text>
+          </view>
+        </picker>
+        <view class="date-arrow" bindtap="goToNextDay">
+          <text>后一天 ▶</text>
+        </view>
+      </view>
+      <view class="back-home-row" wx:if="{{ !isTodaySelected }}">
+        <view class="back-today-btn breathing" bindtap="goToToday">
+          <text>⭕ 回到今天</text>
+        </view>
+      </view>
+
+      <!-- Tier 3: 餐次胶囊 -->
+      <view class="capsule-row">
+        <view
+          wx:for="{{ todayMealTypes }}"
+          wx:key="value"
+          class="capsule capsule-{{ item.key }} {{ todayMealType === item.value ? 'capsule-on' : '' }}"
+          data-type="{{ item.value }}"
+          bindtap="handleTodayMealChange"
+        >
+          <text class="capsule-ico">{{ item.icon }}</text>
+          <text class="capsule-lbl">{{ item.label }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ══════ 数据展示区 ══════ -->
+    <!-- 骨架屏 -->
+    <view class="menu-skel-grid" wx:if="{{ todayShowSkeleton }}">
+      <view class="menu-skel-card" wx:for="{{ [1,2,3] }}" wx:key="*this">
+        <view class="sk-head">
+          <view class="sk-bar sk-bar-title"></view>
+          <view class="sk-bar sk-bar-badge"></view>
+        </view>
+        <view class="sk-body">
+          <block wx:for="{{ [1,2,3] }}" wx:key="*this">
+            <view class="sk-row">
+              <view class="sk-bar sk-bar-name"></view>
+              <view class="sk-bar sk-bar-info"></view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="menu-empty" wx:elif="{{ !todayLoading && todayMenuRecords.length === 0 }}">
+      <text class="empty-ico floating">🍽️</text>
+      <text class="empty-msg">今日该餐次暂无菜单排期</text>
+      <text class="empty-hint">去其他时段看看吧~</text>
+    </view>
+
+    <!-- 分类卡片 -->
+    <view class="menu-grid" wx:else>
+      <view
+        class="menu-card"
+        wx:for="{{ todayGrouped }}"
+        wx:key="name"
+      >
+        <!-- 卡片头部 -->
+        <view
+          class="menu-card-head"
+          style="border-bottom-color: {{ fmt.getMealColor(todayMealType) }};"
+        >
+          <text class="menu-card-title">{{ item.name }}</text>
+          <text class="menu-card-num">共 {{ item.items.length }} 款</text>
+        </view>
+
+        <!-- 卡片内容 -->
+        <view class="menu-card-body">
+          <view
+            class="dish {{ it.isSpicy === 1 ? 'dish-hot' : '' }}"
+            wx:for="{{ item.items }}"
+            wx:for-item="it"
+            wx:key="id"
+          >
+            <!-- 菜品名 + 辣标签 -->
+            <view class="dish-top">
+              <text class="dish-name">{{ it.dishName }}</text>
+              <view class="hot-tag" wx:if="{{ it.isSpicy === 1 }}">
+                <text>🌶️ 辣</text>
+              </view>
+            </view>
+
+            <!-- 价格 + 热量 -->
+            <view class="dish-bot">
+              <text class="dish-price">{{ fmt.formatPrice(it.price) }}<text wx:if="{{ it.unit }}" class="dish-price-unit">/{{ it.unit }}</text></text>
+              <text
+                wx:if="{{ it.energyKcal > 0 }}"
+                class="dish-kcal {{ fmt.getCalorieClass(it.energyKcal) }}"
+              >🔥 {{ it.energyKcal }} kcal</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 技术选型 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'tech' }}">
     <view class="card">
       <view class="card-header">
@@ -57,10 +198,9 @@
     </view>
   </view>
 
-  <!-- 底部占位，防止内容被 tab-bar 遮挡 -->
-  <view class="tab-placeholder"></view>
+  </scroll-view>
 
-  <!-- ========== 底部菜单栏 ========== -->
+  <!-- 底部菜单栏 -->
   <view class="tab-bar">
     <view
       class="tab-item {{ activeTab === item.key ? 'tab-item-active' : '' }}"

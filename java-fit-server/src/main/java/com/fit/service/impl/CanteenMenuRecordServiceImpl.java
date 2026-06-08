@@ -150,8 +150,10 @@ public class CanteenMenuRecordServiceImpl implements CanteenMenuRecordService {
 
             // Detect meal section header — strip spaces because Excel cells
             // often have spaces between characters ("一 期 每 周 早 餐 菜 单")
+            // "夜宵" does not contain "餐", so match on "菜单" (which forms "菜 单" after
+            // space removal) and "周" instead of requiring "餐" separately.
             String compact = firstCell.replaceAll("\\s+", "");
-            if (compact.contains("餐") && compact.contains("单") && compact.contains("周")) {
+            if (compact.contains("菜单") && compact.contains("周")) {
                 String mealType = extractMealType(compact);
 
                 // Phase 2 only has breakfast & lunch; skip dinner / supper

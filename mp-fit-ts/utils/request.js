@@ -5,7 +5,7 @@
  * - 返回 Promise，自动解析 Result 结构
  */
 
-var BASE_URL = 'http://localhost:8080/api'
+var BASE_URL = 'http://localhost:8082/api'
 
 function request(options) {
   return new Promise(function (resolve, reject) {

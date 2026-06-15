@@ -1,0 +1,62 @@
+# 本地开发环境全家桶一键部署
+services:
+  app:
+    build:
+      context: ../java-fit-server     # 指向上一层后端源码目录
+      dockerfile: Dockerfile
+    container_name: fit-server
+    ports:
+      - "8091:8091"                    # 暴露后端本地端口
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: root123
+    networks:
+      - fit-internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8091/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  nginx:
+    build:
+      context: ../web-fit-vue
+      dockerfile: Dockerfile
+    container_name: fit-nginx
+    ports:
+      - "80:80"
+    networks:
+      - fit-internal
+    depends_on:
+      app:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    container_name: fit-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: fit_db
+    volumes:
+      - fit-mysql-data:/var/lib/mysql
+    networks:
+      - fit-internal
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  fit-mysql-data:
+
+networks:
+  fit-internal:
+    driver: bridge

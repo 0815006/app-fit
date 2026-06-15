@@ -5,7 +5,7 @@
  * - 返回 Promise，自动解析 Result 结构
  */
 
-// var BASE_URL = 'http://localhost:8082/api'
+// var BASE_URL = 'http://localhost:8091/api'
 // 切换为线上生产环境域名，专走 443 端口
 const BASE_URL = 'https://realapex.site/api';
 

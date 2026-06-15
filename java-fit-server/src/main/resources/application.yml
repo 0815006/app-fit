@@ -30,7 +30,7 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 server:
-  port: 8082
+  port: 8091
 
 logging:
   level:

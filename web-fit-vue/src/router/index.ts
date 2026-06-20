@@ -4,6 +4,7 @@ import HealthView from '@/views/HealthView.vue'
 import WorkoutView from '@/views/WorkoutView.vue'
 import CanteenMenuView from '@/views/CanteenMenuView.vue'
 import GymActionLibraryView from '@/views/GymActionLibraryView.vue'
+import TripCheckView from '@/views/TripCheckView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,6 +33,11 @@ const router = createRouter({
       path: '/gym-library',
       name: 'gymLibrary',
       component: GymActionLibraryView,
+    },
+    {
+      path: '/trip-check',
+      name: 'tripCheck',
+      component: TripCheckView,
     },
   ],
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeFilled, TrendCharts, Trophy, Tools } from '@element-plus/icons-vue'
+import { HomeFilled, TrendCharts, Trophy, Tools, ForkSpoon } from '@element-plus/icons-vue'
 import type { Component } from 'vue'
 
 interface MenuItem {
@@ -17,7 +17,7 @@ const menuItems: MenuItem[] = [
   { path: '/', title: '首页', icon: HomeFilled },
   { path: '/health', title: '健康数据', icon: TrendCharts },
   { path: '/workout', title: '运动记录', icon: Trophy },
-  // { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
+  { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
   { path: '/gym-library', title: '健身动作库', icon: Tools },
   // { path: '/trip-check', title: '出行清单', icon: Suitcase },
 ]

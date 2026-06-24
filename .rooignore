@@ -91,7 +91,7 @@ build/
 *.jpeg
 *.gif
 *.ico
-*.svg
+
 *.woff
 *.woff2
 *.ttf

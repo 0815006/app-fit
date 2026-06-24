@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { currentEmpNo } from '@/utils/currentUser'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Search, Refresh, Loading } from '@element-plus/icons-vue'
 import {
@@ -10,6 +11,9 @@ import {
   type CanteenMenuRecord,
   type PageData,
 } from '@/api/canteenMenu'
+
+// ── Admin check ──
+const isAdmin = computed(() => currentEmpNo.value === '2036377')
 
 // ── Upload ──
 const uploading = ref(false)
@@ -311,7 +315,7 @@ onMounted(() => {
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- Upload Section -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <el-card shadow="hover" class="upload-card">
+    <el-card v-if="isAdmin" shadow="hover" class="upload-card">
       <template #header>
         <span class="card-title">📋 食堂菜单导入</span>
       </template>

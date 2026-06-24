@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeFilled, TrendCharts, Trophy, Tools, ForkSpoon, Cpu } from '@element-plus/icons-vue'
+import { HomeFilled, TrendCharts, Tools, ForkSpoon, Cpu } from '@element-plus/icons-vue'
 import type { Component } from 'vue'
 
 interface MenuItem {

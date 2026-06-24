@@ -22,14 +22,14 @@ if %BUILD_RESULT% neq 0 (
 echo ===================================================
 echo [2/3] 正在清空云端旧静态资源并上传新 dist 目录...
 echo ===================================================
-ssh root@%SERVER_IP% "mkdir -p %SERVER_DIR% && rm -rf %SERVER_DIR%/*"
-scp -r "%~dp0..\web-fit-vue\dist\*" root@%SERVER_IP%:%SERVER_DIR%/
+ssh -o StrictHostKeyChecking=accept-new root@%SERVER_IP% "mkdir -p %SERVER_DIR% && rm -rf %SERVER_DIR%/*"
+scp -o StrictHostKeyChecking=accept-new -r "%~dp0..\web-fit-vue\dist\*" root@%SERVER_IP%:%SERVER_DIR%/
 
 echo ===================================================
 echo [3/3] 正在上传 Nginx 配置并重载...
 echo ===================================================
-scp "%~dp0nginx-fit.conf" root@%SERVER_IP%:/etc/nginx/conf.d/app-fit.conf
-ssh root@%SERVER_IP% "nginx -t && nginx -s reload"
+scp -o StrictHostKeyChecking=accept-new "%~dp0nginx-fit.conf" root@%SERVER_IP%:/etc/nginx/conf.d/app-fit.conf
+ssh -o StrictHostKeyChecking=accept-new root@%SERVER_IP% "nginx -t && nginx -s reload"
 
 echo ===================================================
 echo 恭喜！项目前端静态页面部署成功！

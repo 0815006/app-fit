@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Edit, Delete, Search, Refresh, Check, Timer, Trophy, TrendCharts, Warning } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Search, Refresh, Check } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 
 // API imports
@@ -9,7 +9,6 @@ import {
   type TrainingPlan,
   type TrainingPlanDetail,
   queryTrainingPlan,
-  listAllTrainingPlan,
   getTrainingPlanDetails,
   createTrainingPlan,
   updateTrainingPlan,
@@ -33,7 +32,6 @@ import {
 import {
   type BodyMetric,
   queryBodyMetric,
-  listBodyMetric,
   createBodyMetric,
   updateBodyMetric,
   deleteBodyMetric
@@ -43,17 +41,7 @@ import type { PageData } from '@/api/gymEquipment'
 
 // 统计相关 API
 import {
-  calculate1RM,
-  getBest1RM,
-  getLastSession,
-  getMuscleFatigue,
-  getVolumeTrend,
-  getContributionWall,
-  getConsistencyRanking,
-  getProgressRanking,
-  detectPlateau,
-  checkPr,
-  compareStrength
+  getLastSession
 } from '@/api/trainingStats'
 
 // 新组件导入
@@ -690,15 +678,6 @@ async function deleteMetric(metric: BodyMetric) {
     ElMessage.success('删除成功')
     loadMetrics()
   } catch { /* cancelled */ }
-}
-
-// 计算BMI
-function calculateBmi() {
-  if (metricForm.weight && metricForm.bmi) {
-    // BMI = 体重(kg) / 身高(m)²
-    // 这里假设用户输入的是体重，需要身高才能计算BMI
-    // 暂时不实现，因为数据库没有身高字段
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════

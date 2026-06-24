@@ -22,7 +22,6 @@ import {
   updateTripPlanStatus,
   updateTripPlanDetailChecked,
   updateTripPlanDetailExcludeFlag,
-  updateTripPlanDetailQuantity,
   addTripPlanDetail,
   generateTripPlanDetails,
   listMyTripPlans,
@@ -447,17 +446,6 @@ async function toggleExclude(detail: TripPlanDetail) {
   }
 }
 
-// 更新物品数量
-async function updateQuantity(detail: TripPlanDetail, newQuantity: number) {
-  try {
-    await updateTripPlanDetailQuantity(detail.id, newQuantity)
-    detail.targetQuantity = newQuantity
-  } catch (e) {
-    console.error('更新数量失败', e)
-    ElMessage.error('更新数量失败')
-  }
-}
-
 // 手动添加物品
 async function addManualItem() {
   if (!newItemName.value.trim() || !currentPlan.value) {
@@ -517,36 +505,6 @@ function resetToHome() {
   filterTag.value = 'all'
   // 刷新计划列表
   loadMyPlans()
-}
-
-// 获取重要级别标签类型
-function getImportanceTagType(level: string): string {
-  switch (level) {
-    case 'CRITICAL': return 'danger'
-    case 'IMPORTANT': return 'warning'
-    case 'OPTIONAL': return 'info'
-    default: return 'info'
-  }
-}
-
-// 获取容器图标
-function getContainerIcon(container: string): string {
-  switch (container) {
-    case 'SUITCASE': return '📦'
-    case 'BACKPACK': return '🎒'
-    case 'POCKET': return '🧥'
-    default: return '📦'
-  }
-}
-
-// 获取容器名称
-function getContainerName(container: string): string {
-  switch (container) {
-    case 'SUITCASE': return '行李箱'
-    case 'BACKPACK': return '双肩包'
-    case 'POCKET': return '随身口袋'
-    default: return '未知'
-  }
 }
 
 onMounted(() => {

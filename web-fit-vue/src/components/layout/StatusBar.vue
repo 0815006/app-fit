@@ -49,19 +49,31 @@ onUnmounted(() => {
 
 <template>
   <footer class="status-bar">
-    <div class="status-left">
-      <span class="status-item">
-        <el-icon><Clock /></el-icon>
-        <span class="status-label">本地时间</span>
-        <span class="status-value">{{ currentTime }}</span>
-      </span>
+    <div class="status-row">
+      <div class="status-left">
+        <span class="status-item">
+          <el-icon><Clock /></el-icon>
+          <span class="status-label">本地时间</span>
+          <span class="status-value">{{ currentTime }}</span>
+        </span>
+      </div>
+      <div class="status-center">
+        <span class="copyright-text">
+          Copyright &copy; 2026 realapex.site 个人健身记录网站 All Rights Reserved. RealMadrid 版权所有
+        </span>
+      </div>
+      <div class="status-right">
+        <span class="status-item">
+          <el-icon><Connection /></el-icon>
+          <span class="status-label">登录 IP</span>
+          <span class="status-value">{{ loginIp }}</span>
+        </span>
+      </div>
     </div>
-    <div class="status-right">
-      <span class="status-item">
-        <el-icon><Connection /></el-icon>
-        <span class="status-label">登录 IP</span>
-        <span class="status-value">{{ loginIp }}</span>
-      </span>
+    <div class="status-row icp-row">
+      <a class="icp-link" href="https://beian.miit.gov.cn" target="_blank" rel="noopener">
+        沪ICP备2026003602号-2
+      </a>
     </div>
   </footer>
 </template>
@@ -69,8 +81,8 @@ onUnmounted(() => {
 <style scoped>
 .status-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   padding: 0 16px;
   height: 100%;
   background: #f5f7fa;
@@ -79,10 +91,43 @@ onUnmounted(() => {
   color: #606266;
 }
 
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icp-row {
+  justify-content: center;
+  margin-top: 1px;
+}
+
 .status-left,
+.status-center,
 .status-right {
   display: flex;
   align-items: center;
+}
+
+.status-center {
+  flex: 1;
+  justify-content: center;
+}
+
+.copyright-text {
+  color: #909399;
+  font-size: 12px;
+}
+
+.icp-link {
+  color: #909399;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.icp-link:hover {
+  color: #409eff;
 }
 
 .status-item {

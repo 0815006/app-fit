@@ -930,9 +930,11 @@ page {
 /* ===== 欢迎品尝卡片 ===== */
 
 .welcome-card {
-  background: linear-gradient(135deg, #fff7ed, #fef9f0);
-  border: 2rpx solid #fde68a;
-  box-shadow: 0 4rpx 18rpx rgba(251, 191, 36, 0.15);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  margin-bottom: 20rpx;
 }
 
 .welcome-text {
@@ -945,6 +947,6 @@ page {
 .welcome-text text {
   font-size: 28rpx;
   font-weight: 700;
-  color: #d97706;
+  color: #909399;
   letter-spacing: 4rpx;
 }

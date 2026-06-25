@@ -174,7 +174,7 @@
     </view>
 
     <!-- 欢迎品尝卡片 -->
-    <view class="card welcome-card" wx:if="{{ !todayLoading }}">
+    <view class="welcome-card" wx:if="{{ !todayLoading }}">
       <view class="welcome-text">
         <text>🍽️ 欢迎品尝</text>
       </view>

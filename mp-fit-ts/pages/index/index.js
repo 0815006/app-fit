@@ -537,4 +537,12 @@ Page({
       url: '/pages/action-detail/action-detail?actionId=' + actionId,
     })
   },
+
+  // ── Share ──
+  onShareAppMessage: function () {
+    return {
+      title: 'Fit 健身打卡',
+      path: '/pages/index/index',
+    }
+  },
 })

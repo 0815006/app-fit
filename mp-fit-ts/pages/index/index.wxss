@@ -926,3 +926,25 @@ page {
   font-weight: 300;
   color: #c0c4cc;
 }
+
+/* ===== 欢迎品尝卡片 ===== */
+
+.welcome-card {
+  background: linear-gradient(135deg, #fff7ed, #fef9f0);
+  border: 2rpx solid #fde68a;
+  box-shadow: 0 4rpx 18rpx rgba(251, 191, 36, 0.15);
+}
+
+.welcome-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 0;
+}
+
+.welcome-text text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #d97706;
+  letter-spacing: 4rpx;
+}

@@ -35,10 +35,6 @@
         <text class="card-title">📊 登录统计</text>
       </view>
       <view class="info-row">
-        <text class="info-label">当前工号</text>
-        <text class="info-value">{{ empNo }}</text>
-      </view>
-      <view class="info-row">
         <text class="info-label">登录来源</text>
         <view class="tag tag-primary"><text>小程序端</text></view>
       </view>
@@ -174,6 +170,13 @@
             </view>
           </view>
         </view>
+      </view>
+    </view>
+
+    <!-- 欢迎品尝卡片 -->
+    <view class="card welcome-card" wx:if="{{ !todayLoading }}">
+      <view class="welcome-text">
+        <text>🍽️ 欢迎品尝</text>
       </view>
     </view>
   </view>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeFilled, TrendCharts, Trophy, ForkSpoon, Tools, Suitcase } from '@element-plus/icons-vue'
+import { HomeFilled, TrendCharts, Tools, ForkSpoon, Cpu } from '@element-plus/icons-vue'
 import type { Component } from 'vue'
 
 interface MenuItem {
@@ -16,13 +16,19 @@ const route = useRoute()
 const menuItems: MenuItem[] = [
   { path: '/', title: '首页', icon: HomeFilled },
   { path: '/health', title: '健康数据', icon: TrendCharts },
-  { path: '/workout', title: '运动记录', icon: Trophy },
+  // { path: '/workout', title: '运动记录', icon: Trophy },
   { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
   { path: '/gym-library', title: '健身动作库', icon: Tools },
-  { path: '/trip-check', title: '出行清单', icon: Suitcase },
+  // { path: '/trip-check', title: '出行清单', icon: Suitcase },
+  { path: '/tech-stack', title: '技术选型', icon: Cpu },
 ]
 
 const activeMenu = ref<string>(route.path)
+
+// Sync sidebar highlight when route changes externally (e.g. HomeView quick links)
+watch(() => route.path, (newPath) => {
+  activeMenu.value = newPath
+})
 
 function handleSelect(index: string): void {
   activeMenu.value = index
@@ -33,8 +39,8 @@ function handleSelect(index: string): void {
 <template>
   <aside class="side-menu">
     <div class="menu-logo">
-      <span class="logo-icon">💪</span>
-      <span class="logo-text">Fit Admin</span>
+      <span class="logo-icon">🏆</span>
+      <span class="logo-text">Fit 个人健身</span>
     </div>
     <el-menu
       :default-active="activeMenu"

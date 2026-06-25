@@ -16,7 +16,7 @@ function handleSwitch(): void {
 <template>
   <header class="header-bar">
     <div class="header-left">
-      <h1 class="app-title">🏋️ Fit 全栈稳健版</h1>
+      <h1 class="app-title">🏋️ 健康管理从我做起</h1>
     </div>
     <div class="header-right">
       <span class="header-tag">Java 21 + Vue 3 + 微信原生小程序</span>

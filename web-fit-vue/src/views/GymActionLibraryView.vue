@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { currentEmpNo } from '@/utils/currentUser'
 
 // ── API imports ──
 import { type GymAction, queryGymAction, listAllGymAction, createGymAction, updateGymAction, deleteGymAction } from '@/api/gymAction'
@@ -37,6 +38,9 @@ const TRAINING_GOAL_MAP: Record<string, string> = {
 function enumOptions(map: Record<string, string>) {
   return Object.entries(map).map(([value, label]) => ({ value, label }))
 }
+
+// ── Admin check ──
+const isAdmin = computed(() => currentEmpNo.value === '2036377')
 
 // ── Active Tab ──
 const activeTab = ref('action')
@@ -399,7 +403,7 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadActions">查询</el-button>
           <el-button :icon="Refresh" @click="aFilters.name='';aFilters.actionType='';aFilters.movementPattern='';aFilters.difficultyLevel=undefined;loadActions()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddAction">新增动作</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddAction">新增动作</el-button>
         </div>
         <el-table :data="aData" v-loading="aLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="name" label="动作名称" width="160" show-overflow-tooltip />
@@ -420,7 +424,7 @@ onMounted(async () => {
           <el-table-column prop="status" label="状态" width="60" align="center">
             <template #default="{row}">{{ row.status === 1 ? '启用' : '禁用' }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="140" align="center" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="140" align="center" fixed="right">
             <template #default="{row}">
               <el-button type="primary" link :icon="Edit" size="small" @click="openEditAction(row)">编辑</el-button>
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteAction(row)">删除</el-button>
@@ -443,7 +447,7 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadMuscles">查询</el-button>
           <el-button :icon="Refresh" @click="mFilters.muscleName='';mFilters.muscleGroup='';loadMuscles()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddMuscle">新增肌群</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddMuscle">新增肌群</el-button>
         </div>
         <el-table :data="mData" v-loading="mLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="muscleCode" label="肌群编码" width="170" show-overflow-tooltip />
@@ -452,7 +456,7 @@ onMounted(async () => {
             <template #default="{row}"><el-tag size="small" type="warning">{{ MUSCLE_GROUP_MAP[row.muscleGroup] || row.muscleGroup }}</el-tag></template>
           </el-table-column>
           <el-table-column prop="sortNo" label="排序号" width="80" align="center" />
-          <el-table-column label="操作" width="140" align="center" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="140" align="center" fixed="right">
             <template #default="{row}">
               <el-button type="primary" link :icon="Edit" size="small" @click="openEditMuscle(row)">编辑</el-button>
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteMuscle(row)">删除</el-button>
@@ -475,7 +479,7 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadEquipments">查询</el-button>
           <el-button :icon="Refresh" @click="eFilters.equipmentName='';eFilters.equipmentType='';loadEquipments()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddEquipment">新增器械</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddEquipment">新增器械</el-button>
         </div>
         <el-table :data="eData" v-loading="eLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="equipmentCode" label="器械编码" width="170" show-overflow-tooltip />
@@ -485,7 +489,7 @@ onMounted(async () => {
           </el-table-column>
           <el-table-column prop="createTime" label="创建时间" width="160" />
           <el-table-column prop="updateTime" label="更新时间" width="160" />
-          <el-table-column label="操作" width="140" align="center" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="140" align="center" fixed="right">
             <template #default="{row}">
               <el-button type="primary" link :icon="Edit" size="small" @click="openEditEquipment(row)">编辑</el-button>
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteEquipment(row)">删除</el-button>
@@ -507,7 +511,7 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadActionMuscleRels">查询</el-button>
           <el-button :icon="Refresh" @click="amFilters.actionId='';amFilters.muscleId='';loadActionMuscleRels()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddActionMuscle">添加关联</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddActionMuscle">添加关联</el-button>
         </div>
         <el-table :data="amData" v-loading="amLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="actionName" label="动作名称" width="180" show-overflow-tooltip />
@@ -515,7 +519,7 @@ onMounted(async () => {
           <el-table-column prop="isPrimary" label="主肌群" width="80" align="center">
             <template #default="{row}">{{ row.isPrimary === 1 ? '⭐ 是' : '—' }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="80" align="center">
+          <el-table-column v-if="isAdmin" label="操作" width="80" align="center">
             <template #default="{row}">
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteActionMuscleRel(row)">删除</el-button>
             </template>
@@ -536,12 +540,12 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadActionEquipRels">查询</el-button>
           <el-button :icon="Refresh" @click="aeFilters.actionId='';aeFilters.equipmentId='';loadActionEquipRels()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddActionEquip">添加关联</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddActionEquip">添加关联</el-button>
         </div>
         <el-table :data="aeData" v-loading="aeLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="actionName" label="动作名称" width="200" show-overflow-tooltip />
           <el-table-column prop="equipmentName" label="器械名称" width="170" show-overflow-tooltip />
-          <el-table-column label="操作" width="80" align="center">
+          <el-table-column v-if="isAdmin" label="操作" width="80" align="center">
             <template #default="{row}">
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteActionEquipRel(row)">删除</el-button>
             </template>
@@ -565,7 +569,7 @@ onMounted(async () => {
           <el-button type="primary" :icon="Search" @click="loadRecommendations">查询</el-button>
           <el-button :icon="Refresh" @click="rFilters.actionId='';rFilters.trainingGoal='';loadRecommendations()">重置</el-button>
           <div style="flex:1" />
-          <el-button type="primary" :icon="Plus" @click="openAddRec">新增建议</el-button>
+          <el-button v-if="isAdmin" type="primary" :icon="Plus" @click="openAddRec">新增建议</el-button>
         </div>
         <el-table :data="rData" v-loading="rLoading" stripe border size="small" max-height="calc(100vh - 380px)">
           <el-table-column prop="actionName" label="动作名称" width="160" show-overflow-tooltip />
@@ -580,7 +584,7 @@ onMounted(async () => {
           </el-table-column>
           <el-table-column prop="recommendRestTime" label="组间休息(秒)" width="110" align="center" />
           <el-table-column prop="intensityTips" label="强度建议" width="220" show-overflow-tooltip />
-          <el-table-column label="操作" width="140" align="center" fixed="right">
+          <el-table-column v-if="isAdmin" label="操作" width="140" align="center" fixed="right">
             <template #default="{row}">
               <el-button type="primary" link :icon="Edit" size="small" @click="openEditRec(row)">编辑</el-button>
               <el-button type="danger" link :icon="Delete" size="small" @click="deleteRec(row)">删除</el-button>

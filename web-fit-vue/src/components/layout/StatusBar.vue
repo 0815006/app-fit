@@ -59,7 +59,8 @@ onUnmounted(() => {
       </div>
       <div class="status-center">
         <span class="copyright-text">
-          Copyright &copy; 2026 realapex.site 个人健身记录网站 All Rights Reserved. RealMadrid 版权所有
+          Copyright &copy; 2026 realapex.site 个人健身记录网站 All Rights Reserved. RealMadrid 版权所有 &nbsp;|&nbsp;
+          <a class="icp-link" href="https://beian.miit.gov.cn" target="_blank" rel="noopener">沪ICP备2026003602号-2</a>
         </span>
       </div>
       <div class="status-right">
@@ -69,11 +70,6 @@ onUnmounted(() => {
           <span class="status-value">{{ loginIp }}</span>
         </span>
       </div>
-    </div>
-    <div class="status-row icp-row">
-      <a class="icp-link" href="https://beian.miit.gov.cn" target="_blank" rel="noopener">
-        沪ICP备2026003602号-2
-      </a>
     </div>
   </footer>
 </template>
@@ -95,11 +91,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.icp-row {
-  justify-content: center;
-  margin-top: 1px;
 }
 
 .status-left,

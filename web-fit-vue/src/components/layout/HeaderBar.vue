@@ -1,49 +1,52 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { currentEmpNo, setEmpNo } from '@/utils/currentUser'
+import { useAuth } from '@/stores/auth'
+import ChangePasswordDialog from '@/components/user/ChangePasswordDialog.vue'
 
-const inputValue = ref<string>(currentEmpNo.value)
-
-function handleSwitch(): void {
-  const trimmed = inputValue.value.trim()
-  if (!/^\d{7}$/.test(trimmed)) {
-    return
-  }
-  setEmpNo(trimmed)
-}
+const { currentUser, logout } = useAuth()
+const pwdDialogVisible = ref(false)
 </script>
 
 <template>
-  <header class="header-bar">
-    <div class="header-left">
-      <h1 class="app-title">🏋️ 健康管理从我做起</h1>
-    </div>
-    <div class="header-right">
-      <span class="header-tag">Java 21 + Vue 3 + 微信原生小程序</span>
-      <el-divider direction="vertical" />
-      <div class="user-switch-area">
-        <el-input
-          v-model="inputValue"
-          placeholder="7位工号"
-          maxlength="7"
-          size="small"
-          class="emp-input"
-          clearable
-          @keyup.enter="handleSwitch"
-        />
-        <el-button type="primary" size="small" @click="handleSwitch">切换</el-button>
-        <el-tag
-          v-if="currentEmpNo !== '0000000'"
-          type="success"
-          size="small"
-          effect="dark"
-        >
-          {{ currentEmpNo }}
-        </el-tag>
-        <el-tag v-else type="info" size="small" effect="dark">未设置</el-tag>
+  <div>
+    <header class="header-bar">
+      <div class="header-left">
+        <h1 class="app-title">🏋️ 健康管理从我做起</h1>
       </div>
-    </div>
-  </header>
+      <div class="header-right">
+        <span class="header-tag">Java 21 + Vue 3 + 微信原生小程序</span>
+        <el-divider direction="vertical" />
+        <div class="user-switch-area">
+          <el-dropdown trigger="click" v-if="currentUser?.empNo && currentUser.empNo !== '0000000'">
+            <el-tag
+              type="success"
+              size="small"
+              effect="dark"
+              class="user-tag"
+            >
+              👤 {{ currentUser.empNo }}
+            </el-tag>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="pwdDialogVisible = true">
+                  <span>🔒 修改密码</span>
+                </el-dropdown-item>
+                <el-dropdown-item divided @click="logout">
+                  <span style="color: #f56c6c;">🚪 退出登录</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <el-tag v-else type="info" size="small" effect="dark">未登录</el-tag>
+        </div>
+      </div>
+    </header>
+
+    <ChangePasswordDialog
+      :visible="pwdDialogVisible"
+      @close="pwdDialogVisible = false"
+    />
+  </div>
 </template>
 
 <style scoped>
@@ -91,8 +94,8 @@ function handleSwitch(): void {
   gap: 8px;
 }
 
-.emp-input {
-  width: 100px;
+.user-tag {
+  cursor: pointer;
 }
 
 :deep(.el-divider--vertical) {

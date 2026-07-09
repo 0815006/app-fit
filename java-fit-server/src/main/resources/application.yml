@@ -38,3 +38,25 @@ mybatis-plus:
 logging:
   level:
     com.fit: debug
+
+# ========== Sa-Token 配置 ==========
+sa-token:
+  token-name: satoken
+  timeout: 2592000       # 30天过期
+  active-timeout: -1     # 永不过期（不活跃也不会踢出）
+  is-concurrent: true    # 允许同一账号并发登录
+  is-share: true         # 共用一个Token
+  token-style: uuid      # Token风格
+  is-log: false          # 关闭日志
+
+# ========== 微信小程序 ==========
+wx:
+  app-id: ${WX_APP_ID:wx6bb890ad9c1e9c52}
+  app-secret: ${WX_APP_SECRET:6e4c1ae7fcb99e203b13cd91c377a892}
+  mock: false            # 本地调试可临时改为 true
+
+# ========== 头像上传 ==========
+app:
+  upload:
+    avatar-path: ${AVATAR_PATH:./uploads/avatar}
+    avatar-url-prefix: /uploads/avatar

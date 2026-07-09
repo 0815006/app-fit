@@ -45,6 +45,7 @@ function makeDateDisplay(dateStr) {
 
 Page({
   data: {
+    showProfileModal: false,
     empNo: '0000000',
     loginCount: null,
     loading: false,
@@ -126,10 +127,22 @@ Page({
     var scrollHeight = sys.windowHeight - tabBarPx
     this.setData({ empNo: empNo, scrollHeight: scrollHeight })
     this.loadLoginData()
+
+    // 检查是否需要弹出资料完善弹窗
+    this._checkProfileModal()
+    // 监听 storage 变化（静默登录完成后触发）
+    var that = this
+    wx.onStorageChange(function (res) {
+      if (res.key === 'showProfileModal' && res.newValue === true) {
+        that.setData({ showProfileModal: true })
+      }
+    })
   },
 
   onShow: function () {
     this.loadLoginData()
+    // 每次回到前台也检查一次
+    this._checkProfileModal()
   },
 
   // ── Tab switching ──
@@ -536,6 +549,23 @@ Page({
     wx.navigateTo({
       url: '/pages/action-detail/action-detail?actionId=' + actionId,
     })
+  },
+
+  // ── 资料完善弹窗 ──
+  _checkProfileModal: function () {
+    if (wx.getStorageSync('showProfileModal')) {
+      this.setData({ showProfileModal: true })
+    }
+  },
+
+  onProfileClose: function () {
+    this.setData({ showProfileModal: false })
+  },
+
+  onProfileSuccess: function () {
+    this.setData({ showProfileModal: false })
+    // 刷新登录数据以显示新的 empNo
+    this.loadLoginData()
   },
 
   // ── Share ──

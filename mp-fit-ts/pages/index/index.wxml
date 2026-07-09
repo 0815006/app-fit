@@ -374,4 +374,10 @@
       <text class="tab-label">{{ item.label }}</text>
     </view>
   </view>
+  <!-- 资料完善弹窗 -->
+  <profile-completion
+    visible="{{ showProfileModal }}"
+    bind:close="onProfileClose"
+    bind:success="onProfileSuccess"
+  />
 </view>

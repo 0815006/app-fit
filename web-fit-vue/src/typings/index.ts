@@ -5,3 +5,9 @@ export interface LoginRecord {
   createTime: string
   updateTime: string
 }
+
+export interface ApiResult<T> {
+  code: number
+  message: string
+  data: T
+}

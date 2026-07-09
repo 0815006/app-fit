@@ -76,6 +76,19 @@
             <version>5.3.0</version>
         </dependency>
 
+        <!-- Sa-Token 权限认证框架 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <version>1.42.0</version>
+        </dependency>
+
+        <!-- BCrypt 密码加密（仅取 crypto，避免引入完整 Spring Security 自动配置） -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

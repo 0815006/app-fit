@@ -25,28 +25,155 @@
 
 <view class="container">
   <scroll-view scroll-y class="main-scroll" style="height: {{ scrollHeight }}px">
-  <!-- ========== 登录统计 ========== -->
-  <view class="content-area" wx:if="{{ activeTab === 'stats' }}">
-    <view class="loading-area" wx:if="{{ loading }}">
-      <text class="loading-text">加载中...</text>
+  <!-- ========== 会议预定 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'meeting' }}">
+    <!-- 加载中 -->
+    <view class="loading-area" wx:if="{{ meetingLoading && !meetingDataReady }}">
+      <text class="loading-text">加载会议室...</text>
     </view>
-    <view class="card" wx:if="{{ !loading }}">
-      <view class="card-header">
-        <text class="card-title">📊 登录统计</text>
+
+    <!-- 会议预定主体 -->
+    <block wx:if="{{ meetingDataReady }}">
+      <!-- ══════ 控制区 ══════ -->
+      <view class="meeting-ctrl-wrap">
+        <!-- 日期导航 -->
+        <view class="date-row">
+          <view class="date-arrow" bindtap="handleMeetingPrevDay">
+            <text>◀ 前一天</text>
+          </view>
+          <picker mode="date" value="{{ meetingDate }}" bindchange="handleMeetingDateChange">
+            <view class="date-display">
+              <text>{{ meetingDateDisplay }}</text>
+            </view>
+          </picker>
+          <view class="date-arrow" bindtap="handleMeetingNextDay">
+            <text>后一天 ▶</text>
+          </view>
+        </view>
+        <view class="back-home-row" wx:if="{{ !meetingIsToday }}">
+          <view class="back-today-btn breathing" bindtap="goToMeetingToday">
+            <text>⭕ 回到今天</text>
+          </view>
+        </view>
+
+        <!-- 视图切换按钮 -->
+        <view class="meeting-view-toggle-row">
+          <view class="meeting-view-btn" bindtap="handleMeetingViewToggle">
+            <text class="meeting-view-btn-ico">{{ meetingViewMode === 'name' ? '👤' : '📋' }}</text>
+            <text class="meeting-view-btn-label">{{ meetingViewLabel }}</text>
+            <text class="meeting-view-btn-hint">点击切换</text>
+          </view>
+        </view>
+
+        <!-- 会议室选择器（横向滚动） -->
+        <scroll-view scroll-x class="meeting-room-tabs" wx:if="{{ meetingRooms.length > 0 }}">
+          <view class="meeting-room-tabs-inner">
+            <view
+              wx:for="{{ meetingRooms }}"
+              wx:key="id"
+              class="meeting-room-tab {{ meetingActiveRoomId === item.id ? 'meeting-room-tab-active' : '' }}"
+              data-index="{{ index }}"
+              bindtap="handleMeetingRoomChange"
+            >
+              <text class="meeting-room-tab-name">{{ item.name }}</text>
+              <text class="meeting-room-tab-cap">容纳{{ item.capacity }}人</text>
+            </view>
+          </view>
+        </scroll-view>
       </view>
-      <view class="info-row">
-        <text class="info-label">登录来源</text>
-        <view class="tag tag-primary"><text>小程序端</text></view>
+
+      <!-- ══════ 时间网格 ══════ -->
+      <view class="meeting-grid-wrap" wx:if="{{ meetingBoardData }}">
+        <!-- 当前会议室信息条 -->
+        <view class="meeting-room-info-bar">
+          <text class="meeting-room-info-name">📍 {{ meetingBoardData.roomName }}</text>
+          <text class="meeting-room-info-cap">容纳 {{ meetingBoardData.capacity }} 人</text>
+          <view class="meeting-room-info-facilities" wx:if="{{ meetingBoardData.facilities && meetingBoardData.facilities.length > 0 }}">
+            <text
+              wx:for="{{ meetingBoardData.facilities }}"
+              wx:key="*this"
+              wx:for-item="f"
+              class="meeting-facility-tag"
+            >{{ f }}</text>
+          </view>
+        </view>
+
+        <!-- 图例 -->
+        <view class="meeting-legend">
+          <view class="meeting-legend-item">
+            <view class="meeting-legend-dot meeting-legend-free"></view>
+            <text>空闲</text>
+          </view>
+          <view class="meeting-legend-item">
+            <view class="meeting-legend-dot meeting-legend-mine"></view>
+            <text>我的预定</text>
+          </view>
+          <view class="meeting-legend-item">
+            <view class="meeting-legend-dot meeting-legend-booked"></view>
+            <text>已预定</text>
+          </view>
+          <view class="meeting-legend-item">
+            <view class="meeting-legend-dot meeting-legend-lock"></view>
+            <text>征用</text>
+          </view>
+        </view>
+
+        <!-- 时间网格表格 -->
+        <view class="meeting-grid-table">
+          <view
+            wx:for="{{ meetingBoardData.slots }}"
+            wx:key="slot"
+            wx:for-item="s"
+            class="meeting-grid-row {{ s.isPast ? 'meeting-grid-row-past' : '' }}"
+            data-slot="{{ s.slot }}"
+            bindtap="handleMeetingSlotClick"
+          >
+            <!-- 时间标签列 -->
+            <view class="meeting-grid-time">
+              <text class="meeting-time-label">{{ s.timeLabel }}</text>
+            </view>
+            <!-- 状态内容列 -->
+            <view class="meeting-grid-cell meeting-grid-cell-{{ s.type === 'MY_BOOKING' ? 'mine' : (s.type === 'BOOKED' ? 'booked' : (s.type === 'ADMIN_LOCK' ? 'lock' : 'free')) }}">
+              <!-- 免费 -->
+              <view wx:if="{{ s.type === 'FREE' }}" class="meeting-cell-inner meeting-cell-free">
+                <text class="meeting-cell-text">空闲</text>
+              </view>
+              <!-- 我的预定 -->
+              <view wx:elif="{{ s.type === 'MY_BOOKING' }}" class="meeting-cell-inner meeting-cell-mine">
+                <text class="meeting-cell-name">{{ meetingViewMode === 'name' ? (s.booking.empName || s.booking.empNo) : (s.booking.meetingTitle || '无标题') }}</text>
+                <text class="meeting-cell-sub" wx:if="{{ meetingViewMode === 'name' && s.booking.meetingTitle }}">{{ s.booking.meetingTitle }}</text>
+                <text class="meeting-cell-sub" wx:elif="{{ meetingViewMode === 'title' && s.booking.empName }}">{{ s.booking.empName }}</text>
+                <view class="meeting-cell-weekly-tag" wx:if="{{ s.booking.isWeeklyFix }}">
+                  <text>🔄 周期</text>
+                </view>
+              </view>
+              <!-- 他人预定 -->
+              <view wx:elif="{{ s.type === 'BOOKED' }}" class="meeting-cell-inner meeting-cell-booked">
+                <text class="meeting-cell-name">{{ meetingViewMode === 'name' ? (s.booking.empName || s.booking.empNo) : (s.booking.meetingTitle || '无标题') }}</text>
+                <text class="meeting-cell-sub" wx:if="{{ meetingViewMode === 'name' && s.booking.meetingTitle }}">{{ s.booking.meetingTitle }}</text>
+                <text class="meeting-cell-sub" wx:elif="{{ meetingViewMode === 'title' && s.booking.empName }}">{{ s.booking.empName }}</text>
+              </view>
+              <!-- 征用 -->
+              <view wx:elif="{{ s.type === 'ADMIN_LOCK' }}" class="meeting-cell-inner meeting-cell-lock">
+                <text class="meeting-cell-name">🔒 {{ s.lock.deptName || '行政征用' }}</text>
+                <text class="meeting-cell-sub">{{ s.lock.reason }}</text>
+              </view>
+              <!-- 已过期 -->
+              <view wx:else class="meeting-cell-inner meeting-cell-past">
+                <text class="meeting-cell-text">已过期</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
-      <view class="divider"></view>
-      <view class="stat-area">
-        <text class="count-number">{{ loginCount !== null ? loginCount : '-' }}</text>
-        <text class="count-unit">次</text>
+
+      <!-- 无会议室 -->
+      <view class="menu-empty" wx:elif="{{ !meetingLoading && meetingRooms.length === 0 }}">
+        <text class="empty-ico">🏢</text>
+        <text class="empty-msg">暂无可用的会议室</text>
+        <text class="empty-hint">请联系管理员添加会议室</text>
       </view>
-      <view class="stat-hint">
-        <text>每次进入页面自动记录一次登录</text>
-      </view>
-    </view>
+    </block>
   </view>
 
   <!-- ========== 今日菜单 ========== -->
@@ -380,4 +507,155 @@
     bind:close="onProfileClose"
     bind:success="onProfileSuccess"
   />
+
+  <!-- ══════ 会议预定弹窗 ══════ -->
+  <view class="meeting-modal-mask" wx:if="{{ meetingShowBookingModal }}" bindtap="closeMeetingModal">
+    <view class="meeting-modal" catchtap="noop">
+      <!-- 标题栏 -->
+      <view class="meeting-modal-header">
+        <text class="meeting-modal-title">
+          <block wx:if="{{ meetingBookingMode === 'create' }}">📅 预定会议</block>
+          <block wx:elif="{{ meetingBookingMode === 'edit-mine' }}">✏️ 我的预定</block>
+          <block wx:elif="{{ meetingBookingMode === 'view-others' }}">👀 查看预定</block>
+          <block wx:elif="{{ meetingBookingMode === 'view-lock' }}">🔒 行政征用</block>
+        </text>
+        <view class="meeting-modal-close" bindtap="closeMeetingModal">
+          <text>✕</text>
+        </view>
+      </view>
+
+      <!-- 时间段信息 -->
+      <view class="meeting-modal-time-info">
+        <text class="meeting-modal-time-label">{{ meetingSelectedSlot.timeLabel }}</text>
+        <text class="meeting-modal-time-end">{{ meetingSelectedSlotEndLabel }}</text>
+        <view class="meeting-modal-time-badge meeting-modal-badge-{{ meetingSelectedSlot.type === 'MY_BOOKING' ? 'mine' : (meetingSelectedSlot.type === 'BOOKED' ? 'booked' : (meetingSelectedSlot.type === 'ADMIN_LOCK' ? 'lock' : 'free')) }}">
+          <text>{{ meetingSelectedSlot.type === 'FREE' ? '空闲' : (meetingSelectedSlot.type === 'MY_BOOKING' ? '我的预定' : (meetingSelectedSlot.type === 'BOOKED' ? '已预定' : '征用')) }}</text>
+        </view>
+      </view>
+
+      <!-- 查看征用 -->
+      <block wx:if="{{ meetingBookingMode === 'view-lock' }}">
+        <view class="meeting-modal-section">
+          <view class="meeting-modal-row">
+            <text class="meeting-modal-label">征用部门</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.lock.deptName || '-' }}</text>
+          </view>
+          <view class="meeting-modal-row">
+            <text class="meeting-modal-label">征用原因</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.lock.reason || '-' }}</text>
+          </view>
+        </view>
+        <view class="meeting-modal-footer">
+          <view class="meeting-modal-btn-cancel" bindtap="closeMeetingModal">
+            <text>关闭</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 查看他人预定 -->
+      <block wx:elif="{{ meetingBookingMode === 'view-others' }}">
+        <view class="meeting-modal-section">
+          <view class="meeting-modal-row">
+            <text class="meeting-modal-label">预定人</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.booking.empName }} ({{ meetingSelectedSlot.booking.empNo }})</text>
+          </view>
+          <view class="meeting-modal-row">
+            <text class="meeting-modal-label">会议标题</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.booking.meetingTitle || '-' }}</text>
+          </view>
+          <view class="meeting-modal-row">
+            <text class="meeting-modal-label">参会人员</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.booking.attendees || '-' }}</text>
+          </view>
+          <view class="meeting-modal-row" wx:if="{{ meetingSelectedSlot.booking.isWeeklyFix }}">
+            <text class="meeting-modal-label">周期</text>
+            <text class="meeting-modal-value meeting-modal-tag-weekly">🔄 周期例会</text>
+          </view>
+        </view>
+        <view class="meeting-modal-footer">
+          <view class="meeting-modal-btn-cancel" bindtap="closeMeetingModal">
+            <text>关闭</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- 创建 / 编辑我的预定 -->
+      <block wx:else>
+        <view class="meeting-modal-section">
+          <!-- 预定人信息 -->
+          <view class="meeting-modal-row" wx:if="{{ meetingBookingMode === 'edit-mine' }}">
+            <text class="meeting-modal-label">预定人</text>
+            <text class="meeting-modal-value">{{ meetingSelectedSlot.booking.empName }} ({{ meetingSelectedSlot.booking.empNo }})</text>
+          </view>
+          <!-- 会议标题 -->
+          <view class="meeting-modal-field">
+            <text class="meeting-modal-label">会议标题</text>
+            <input
+              class="meeting-modal-input"
+              placeholder="请输入会议标题"
+              value="{{ meetingFormTitle }}"
+              bindinput="onMeetingTitleInput"
+              maxlength="100"
+            />
+          </view>
+          <!-- 参会人员 -->
+          <view class="meeting-modal-field">
+            <text class="meeting-modal-label">参会人员</text>
+            <input
+              class="meeting-modal-input"
+              placeholder="可选：参会人员姓名"
+              value="{{ meetingFormAttendees }}"
+              bindinput="onMeetingAttendeesInput"
+              maxlength="200"
+            />
+          </view>
+          <!-- 周期约（仅创建时） -->
+          <view class="meeting-modal-field" wx:if="{{ meetingBookingMode === 'create' }}">
+            <view class="meeting-modal-row">
+              <text class="meeting-modal-label">周期例会</text>
+              <switch
+                checked="{{ meetingFormWeeklyEnabled }}"
+                bindchange="onMeetingWeeklyToggle"
+                color="#409eff"
+              />
+            </view>
+            <view class="meeting-modal-field" wx:if="{{ meetingFormWeeklyEnabled }}">
+              <text class="meeting-modal-label">持续周数</text>
+              <input
+                class="meeting-modal-input meeting-modal-input-sm"
+                type="number"
+                value="{{ meetingFormWeeklyWeeks }}"
+                bindinput="onMeetingWeeklyInput"
+                maxlength="1"
+              />
+              <text class="meeting-modal-hint ml-8">1~8 周</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 按钮区域 -->
+        <view class="meeting-modal-footer">
+          <view wx:if="{{ meetingBookingMode === 'create' }}" class="meeting-modal-footer-full">
+            <view class="meeting-modal-btn-cancel" bindtap="closeMeetingModal">
+              <text>取消</text>
+            </view>
+            <view class="meeting-modal-btn-primary" bindtap="handleMeetingCreate">
+              <text>{{ meetingSaving ? '预定中...' : '确认预定' }}</text>
+            </view>
+          </view>
+          <view wx:if="{{ meetingBookingMode === 'edit-mine' }}" class="meeting-modal-footer-edit">
+            <view class="meeting-modal-btn-cancel" bindtap="handleMeetingCancelGroup">
+              <text>一键取消后续</text>
+            </view>
+            <view class="meeting-modal-btn-danger" bindtap="handleMeetingCancel">
+              <text>取消本次</text>
+            </view>
+            <view class="meeting-modal-btn-primary" bindtap="handleMeetingUpdate">
+              <text>{{ meetingSaving ? '保存中...' : '保存修改' }}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
 </view>

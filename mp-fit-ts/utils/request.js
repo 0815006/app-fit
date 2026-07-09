@@ -74,4 +74,12 @@ function get(url, data) {
   return request({ url: url, method: 'GET', data: data })
 }
 
-module.exports = { request: request, post: post, get: get }
+function put(url, data) {
+  return request({ url: url, method: 'PUT', data: data })
+}
+
+function del(url, data) {
+  return request({ url: url, method: 'DELETE', data: data })
+}
+
+module.exports = { request: request, post: post, get: get, put: put, del: del }

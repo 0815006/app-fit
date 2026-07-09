@@ -950,3 +950,625 @@ page {
   color: #909399;
   letter-spacing: 4rpx;
 }
+
+/* ===== 会议预定 ===== */
+
+/* ── 控制区 ── */
+.meeting-ctrl-wrap {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 16rpx 18rpx 18rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 视图切换按钮 */
+.meeting-view-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12rpx;
+}
+
+.meeting-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 18rpx;
+  background: #ecf5ff;
+  border: 1rpx solid #d9ecff;
+  border-radius: 20rpx;
+}
+
+.meeting-view-btn:active {
+  background: #d9ecff;
+}
+
+.meeting-view-btn-ico {
+  font-size: 22rpx;
+}
+
+.meeting-view-btn-label {
+  font-size: 22rpx;
+  color: #409eff;
+  font-weight: 600;
+}
+
+.meeting-view-btn-hint {
+  font-size: 18rpx;
+  color: #c0c4cc;
+}
+
+/* 会议室选择器（横向滚动） */
+.meeting-room-tabs {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.meeting-room-tabs-inner {
+  display: inline-flex;
+  gap: 10rpx;
+  padding: 4rpx 0;
+}
+
+.meeting-room-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 24rpx;
+  border-radius: 12rpx;
+  background: #f5f6f8;
+  border: 2rpx solid #e8eaed;
+  flex-shrink: 0;
+  min-width: 130rpx;
+}
+
+.meeting-room-tab:active {
+  background: #ecedf1;
+}
+
+.meeting-room-tab-active {
+  background: linear-gradient(135deg, #409eff, #337ecc);
+  border-color: #337ecc;
+  box-shadow: 0 4rpx 16rpx rgba(64, 158, 255, 0.35);
+}
+
+.meeting-room-tab-active .meeting-room-tab-name {
+  color: #fff;
+  font-weight: 700;
+}
+
+.meeting-room-tab-active .meeting-room-tab-cap {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.meeting-room-tab-name {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #303133;
+}
+
+.meeting-room-tab-cap {
+  font-size: 18rpx;
+  color: #909399;
+  margin-top: 2rpx;
+}
+
+/* ── 会议室信息条 ── */
+.meeting-room-info-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  padding: 14rpx 18rpx;
+  background: #fafbfc;
+  border-radius: 10rpx;
+  margin-bottom: 12rpx;
+  border: 1rpx solid #ebeef5;
+}
+
+.meeting-room-info-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+.meeting-room-info-cap {
+  font-size: 22rpx;
+  color: #909399;
+  background: #ecedf1;
+  border-radius: 6rpx;
+  padding: 2rpx 10rpx;
+}
+
+.meeting-room-info-facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6rpx;
+}
+
+.meeting-facility-tag {
+  font-size: 20rpx;
+  color: #409eff;
+  background: #ecf5ff;
+  border-radius: 6rpx;
+  padding: 2rpx 10rpx;
+  border: 1rpx solid #d9ecff;
+}
+
+/* ── 图例 ── */
+.meeting-legend {
+  display: flex;
+  gap: 20rpx;
+  padding: 10rpx 6rpx 16rpx;
+  flex-wrap: wrap;
+}
+
+.meeting-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.meeting-legend-item text {
+  font-size: 20rpx;
+  color: #909399;
+}
+
+.meeting-legend-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 4rpx;
+}
+
+.meeting-legend-free {
+  background: #f0f9eb;
+  border: 1rpx solid #c2e7b0;
+}
+
+.meeting-legend-mine {
+  background: #d9ecff;
+  border: 1rpx solid #b3d8ff;
+}
+
+.meeting-legend-booked {
+  background: #f5f5f5;
+  border: 1rpx solid #dcdfe6;
+}
+
+.meeting-legend-lock {
+  background: repeating-linear-gradient(
+    45deg,
+    #fef0f0,
+    #fef0f0 4rpx,
+    #fde2e2 4rpx,
+    #fde2e2 8rpx
+  );
+  border: 1rpx solid #fab6b6;
+}
+
+/* ── 时间网格表格 ── */
+.meeting-grid-wrap {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 20rpx;
+}
+
+.meeting-grid-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.meeting-grid-row {
+  display: flex;
+  border-bottom: 1rpx solid #f2f3f5;
+  min-height: 66rpx;
+}
+
+.meeting-grid-row:last-child {
+  border-bottom: none;
+}
+
+.meeting-grid-row:active {
+  opacity: 0.7;
+}
+
+.meeting-grid-row-past {
+  opacity: 0.45;
+}
+
+.meeting-grid-row-past:active {
+  opacity: 0.35;
+}
+
+/* 时间标签 */
+.meeting-grid-time {
+  width: 110rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid #ebeef5;
+  background: #fafbfc;
+}
+
+.meeting-time-label {
+  font-size: 22rpx;
+  color: #909399;
+  font-weight: 500;
+}
+
+/* 状态内容列 */
+.meeting-grid-cell {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  min-height: 66rpx;
+}
+
+.meeting-grid-cell-mine {
+  background: #ecf5ff;
+}
+
+.meeting-grid-cell-booked {
+  background: #f5f5f5;
+}
+
+.meeting-grid-cell-lock {
+  background: repeating-linear-gradient(
+    45deg,
+    #fef0f0,
+    #fef0f0 4rpx,
+    #fde2e2 4rpx,
+    #fde2e2 8rpx
+  );
+}
+
+.meeting-grid-cell-free {
+  background: #f0f9eb;
+}
+
+/* 状态内部 */
+.meeting-cell-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10rpx 14rpx;
+}
+
+.meeting-cell-free {
+  align-items: center;
+}
+
+.meeting-cell-text {
+  font-size: 22rpx;
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.meeting-cell-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.4;
+}
+
+.meeting-cell-mine .meeting-cell-name {
+  color: #409eff;
+}
+
+.meeting-cell-booked .meeting-cell-name {
+  color: #909399;
+}
+
+.meeting-cell-lock .meeting-cell-name {
+  color: #f56c6c;
+}
+
+.meeting-cell-sub {
+  font-size: 20rpx;
+  color: #909399;
+  margin-top: 2rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meeting-cell-weekly-tag {
+  margin-top: 4rpx;
+}
+
+.meeting-cell-weekly-tag text {
+  font-size: 18rpx;
+  color: #e6a23c;
+  background: #fdf6ec;
+  border-radius: 4rpx;
+  padding: 1rpx 8rpx;
+  border: 1rpx solid #f5dab1;
+}
+
+.meeting-cell-past {
+  align-items: center;
+}
+
+.meeting-cell-past .meeting-cell-text {
+  color: #c0c4cc;
+}
+
+/* ── 弹窗 ── */
+.meeting-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.meeting-modal {
+  width: 100%;
+  max-height: 75vh;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.meeting-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx 18rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.meeting-modal-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+.meeting-modal-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5f6f8;
+}
+
+.meeting-modal-close:active {
+  background: #e8eaed;
+}
+
+.meeting-modal-close text {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+/* 时间信息 */
+.meeting-modal-time-info {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 28rpx;
+  background: #fafbfc;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.meeting-modal-time-label {
+  font-size: 24rpx;
+  color: #303133;
+  font-weight: 600;
+}
+
+.meeting-modal-time-end {
+  font-size: 22rpx;
+  color: #909399;
+}
+
+.meeting-modal-time-badge {
+  margin-left: auto;
+  padding: 4rpx 14rpx;
+  border-radius: 6rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.meeting-modal-badge-free {
+  background: #f0f9eb;
+  color: #67c23a;
+  border: 1rpx solid #c2e7b0;
+}
+
+.meeting-modal-badge-mine {
+  background: #ecf5ff;
+  color: #409eff;
+  border: 1rpx solid #d9ecff;
+}
+
+.meeting-modal-badge-booked {
+  background: #f5f5f5;
+  color: #909399;
+  border: 1rpx solid #dcdfe6;
+}
+
+.meeting-modal-badge-lock {
+  background: #fef0f0;
+  color: #f56c6c;
+  border: 1rpx solid #fbc4c4;
+}
+
+/* 弹窗内容 */
+.meeting-modal-section {
+  padding: 20rpx 28rpx;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.meeting-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 0;
+}
+
+.meeting-modal-label {
+  font-size: 24rpx;
+  color: #909399;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+
+.meeting-modal-value {
+  font-size: 24rpx;
+  color: #303133;
+  font-weight: 500;
+  text-align: right;
+  word-break: break-all;
+}
+
+.meeting-modal-tag-weekly {
+  color: #e6a23c;
+  background: none;
+}
+
+/* 表单字段 */
+.meeting-modal-field {
+  padding: 12rpx 0;
+}
+
+.meeting-modal-field .meeting-modal-row {
+  padding: 0;
+}
+
+.meeting-modal-input {
+  width: 100%;
+  height: 72rpx;
+  background: #f5f6f8;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: #303133;
+  margin-top: 8rpx;
+  box-sizing: border-box;
+}
+
+.meeting-modal-input-sm {
+  width: 160rpx;
+  display: inline-block;
+}
+
+.meeting-modal-hint {
+  font-size: 20rpx;
+  color: #c0c4cc;
+  margin-left: 12rpx;
+}
+
+/* 弹窗按钮 */
+.meeting-modal-footer {
+  padding: 18rpx 28rpx;
+  padding-bottom: calc(18rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.meeting-modal-footer-full {
+  display: flex;
+  gap: 16rpx;
+}
+
+.meeting-modal-footer-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.meeting-modal-footer-edit .meeting-modal-btn-cancel {
+  flex: 0 0 auto;
+}
+
+.meeting-modal-footer-edit .meeting-modal-btn-danger {
+  flex: 1;
+}
+
+.meeting-modal-footer-edit .meeting-modal-btn-primary {
+  flex: 1;
+  width: 100%;
+  min-width: 100%;
+}
+
+.meeting-modal-btn-cancel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 0;
+  background: #f5f6f8;
+  border-radius: 12rpx;
+}
+
+.meeting-modal-btn-cancel:active {
+  background: #e8eaed;
+}
+
+.meeting-modal-btn-cancel text {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #909399;
+}
+
+.meeting-modal-btn-primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 0;
+  background: linear-gradient(135deg, #409eff, #337ecc);
+  border-radius: 12rpx;
+}
+
+.meeting-modal-btn-primary:active {
+  background: linear-gradient(135deg, #337ecc, #2b6cb0);
+}
+
+.meeting-modal-btn-primary text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.meeting-modal-btn-danger {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18rpx 0;
+  background: #fef0f0;
+  border: 1rpx solid #fbc4c4;
+  border-radius: 12rpx;
+}
+
+.meeting-modal-btn-danger:active {
+  background: #fde2e2;
+}
+
+.meeting-modal-btn-danger text {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #f56c6c;
+}

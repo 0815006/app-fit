@@ -7,6 +7,7 @@ import CanteenMenuView from '@/views/CanteenMenuView.vue'
 import GymActionLibraryView from '@/views/GymActionLibraryView.vue'
 import TechStackView from '@/views/TechStackView.vue'
 import TripCheckView from '@/views/TripCheckView.vue'
+import MeetingRoomView from '@/views/MeetingRoomView.vue'
 import LoginView from '@/views/LoginView.vue'
 
 const TOKEN_KEY = 'satoken'
@@ -58,6 +59,12 @@ const routes: RouteRecordRaw[] = [
     path: '/trip-check',
     name: 'tripCheck',
     component: TripCheckView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/meeting-room',
+    name: 'meetingRoom',
+    component: MeetingRoomView,
     meta: { requiresAuth: true },
   },
 ]

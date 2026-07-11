@@ -2,9 +2,11 @@ package com.fit.service;
 
 import com.fit.vo.DashboardVO;
 import com.fit.vo.TimeoutRecordVO;
+import com.fit.vo.WeeklyWorkoutVO;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface GymWorkoutRecordService {
 
@@ -40,4 +42,9 @@ public interface GymWorkoutRecordService {
      * 检查超时：status=0 且 now - start_time > 2小时 的记录
      */
     TimeoutRecordVO checkTimeout(String userId);
+
+    /**
+     * 本周训练摘要：返回本周一至周日所有已结束的训练记录，含动作名和肌群中文名
+     */
+    List<WeeklyWorkoutVO> getWeeklySummary(String userId);
 }

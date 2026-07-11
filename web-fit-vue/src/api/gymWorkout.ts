@@ -26,6 +26,16 @@ export interface TimeoutRecordVO {
   startTimeLabel: string
 }
 
+/** 本周训练摘要记录 */
+export interface WeeklyWorkoutVO {
+  actionName: string
+  muscleGroup: string
+  muscleGroupName: string
+  startTime: string
+  exhaustionScore: number
+  dayOfWeek: number
+}
+
 /** POST /api/gym-workout/start */
 export function startWorkout(actionId: string): Promise<ApiResult<string>> {
   return request.post('/gym-workout/start', { actionId })
@@ -62,4 +72,9 @@ export function makeupWorkout(
 /** GET /api/gym-workout/timeout-check */
 export function checkTimeout(): Promise<ApiResult<TimeoutRecordVO | null>> {
   return request.get('/gym-workout/timeout-check')
+}
+
+/** GET /api/gym-workout/weekly-summary */
+export function getWeeklySummary(): Promise<ApiResult<WeeklyWorkoutVO[]>> {
+  return request.get('/gym-workout/weekly-summary')
 }

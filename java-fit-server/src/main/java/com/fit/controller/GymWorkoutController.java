@@ -9,10 +9,13 @@ import com.fit.dto.StartWorkoutDTO;
 import com.fit.service.GymWorkoutRecordService;
 import com.fit.vo.DashboardVO;
 import com.fit.vo.TimeoutRecordVO;
+import com.fit.vo.WeeklyWorkoutVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -83,5 +86,14 @@ public class GymWorkoutController {
     @GetMapping("/timeout-check")
     public Result<TimeoutRecordVO> checkTimeout() {
         return Result.success(workoutService.checkTimeout(currentUserId()));
+    }
+
+    /**
+     * 本周训练摘要
+     * GET /api/gym-workout/weekly-summary
+     */
+    @GetMapping("/weekly-summary")
+    public Result<List<WeeklyWorkoutVO>> getWeeklySummary() {
+        return Result.success(workoutService.getWeeklySummary(currentUserId()));
     }
 }

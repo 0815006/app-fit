@@ -520,7 +520,7 @@
 
     <view class="card">
       <view class="card-header card-header-collapse" bindtap="toggleTechCollapse">
-        <text class="card-title">👤 个人信息</text>
+        <text class="card-title">📋 技术选型</text>
         <text class="collapse-arrow {{ techCollapsed ? '' : 'collapse-arrow-open' }}">▾</text>
       </view>
       <view class="tech-list" wx:if="{{ !techCollapsed }}">
@@ -712,3 +712,4 @@
     </view>
   </view>
 </view>
+

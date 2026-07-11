@@ -5,8 +5,10 @@ import {
   getDashboard,
   startWorkout,
   endWorkout,
+  getWeeklySummary,
   type DashboardVO,
   type TimeoutRecordVO,
+  type WeeklyWorkoutVO,
 } from '@/api/gymWorkout'
 import { listAllGymMuscle, type GymMuscle } from '@/api/gymMuscle'
 import MuscleDashboard from '@/components/workout/MuscleDashboard.vue'
@@ -15,6 +17,7 @@ import TrainingTimerDialog from '@/components/workout/TrainingTimerDialog.vue'
 import ExhaustionDialog from '@/components/workout/ExhaustionDialog.vue'
 import TimeoutCorrectDialog from '@/components/workout/TimeoutCorrectDialog.vue'
 import MakeupDialog from '@/components/workout/MakeupDialog.vue'
+import WeeklySummary from '@/components/workout/WeeklySummary.vue'
 
 // ---- 状态 ----
 const loading = ref(false)
@@ -22,6 +25,10 @@ const dashboard = ref<DashboardVO | null>(null)
 
 /** 所有肌肉数据，用于双层展示的第二层 */
 const allMuscles = ref<GymMuscle[]>([])
+
+/** 本周训练摘要 */
+const weeklyRecords = ref<WeeklyWorkoutVO[]>([])
+const weeklyLoading = ref(false)
 
 // 弹窗控制
 const actionSelectVisible = ref(false)
@@ -78,6 +85,19 @@ async function loadMuscles(): Promise<void> {
   }
 }
 
+/** 加载本周训练摘要 */
+async function loadWeeklySummary(): Promise<void> {
+  weeklyLoading.value = true
+  try {
+    const res = await getWeeklySummary()
+    weeklyRecords.value = res.data || []
+  } catch {
+    // 静默失败
+  } finally {
+    weeklyLoading.value = false
+  }
+}
+
 // ---- 大肌群入口（第一层快捷按钮）----
 function handleMuscleSelect(group: string): void {
   selectedMuscleGroup.value = group
@@ -116,6 +136,7 @@ async function handleExhaustionSubmit(score: number): Promise<void> {
     await endWorkout(currentRecordId.value, score)
     ElMessage.success('训练记录已保存')
     await loadDashboard()
+    await loadWeeklySummary()
   } catch {
     ElMessage.error('保存失败')
   }
@@ -129,16 +150,19 @@ function handleTimerCancel(): void {
 // ---- 超时修正 ----
 async function handleTimeoutCorrected(): Promise<void> {
   await loadDashboard()
+  await loadWeeklySummary()
 }
 
 // ---- 补打卡 ----
 async function handleMakeupCompleted(): Promise<void> {
   await loadDashboard()
+  await loadWeeklySummary()
 }
 
 onMounted(() => {
   loadDashboard()
   loadMuscles()
+  loadWeeklySummary()
 })
 </script>
 
@@ -167,6 +191,12 @@ onMounted(() => {
       :loading="loading"
       @select="handleMuscleSelect"
       @select-muscle="handleMuscleSelectDetail"
+    />
+
+    <!-- 本周训练摘要 -->
+    <WeeklySummary
+      :records="weeklyRecords"
+      :loading="weeklyLoading"
     />
 
     <!-- 动作选择弹窗 -->

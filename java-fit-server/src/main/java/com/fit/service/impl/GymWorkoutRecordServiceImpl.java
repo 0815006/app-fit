@@ -7,6 +7,7 @@ import com.fit.service.GymWorkoutRecordService;
 import com.fit.vo.DashboardVO;
 import com.fit.vo.MuscleGroupStatusVO;
 import com.fit.vo.TimeoutRecordVO;
+import com.fit.vo.WeeklyWorkoutVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -299,5 +300,37 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
             long days = ChronoUnit.DAYS.between(date, today);
             return days + "天前 " + timeStr;
         }
+    }
+
+    @Override
+    public List<WeeklyWorkoutVO> getWeeklySummary(String userId) {
+        LocalDateTime weekStart = LocalDateTime.now()
+                .with(DayOfWeek.MONDAY)
+                .with(LocalTime.MIN);
+        LocalDateTime weekEnd = weekStart.plusDays(7);
+
+        LambdaQueryWrapper<GymWorkoutRecord> qw = new LambdaQueryWrapper<>();
+        qw.eq(GymWorkoutRecord::getUserId, userId)
+          .in(GymWorkoutRecord::getStatus, 1, 2)
+          .ge(GymWorkoutRecord::getStartTime, weekStart)
+          .lt(GymWorkoutRecord::getStartTime, weekEnd)
+          .orderByAsc(GymWorkoutRecord::getStartTime);
+
+        List<GymWorkoutRecord> records = recordMapper.selectList(qw);
+
+        return records.stream().map(r -> {
+            GymAction action = actionMapper.selectById(r.getActionId());
+            String actionName = action != null ? action.getName() : "未知动作";
+            String groupName = GROUP_NAME_MAP.getOrDefault(r.getMuscleGroup(), r.getMuscleGroup());
+
+            return WeeklyWorkoutVO.builder()
+                    .actionName(actionName)
+                    .muscleGroup(r.getMuscleGroup())
+                    .muscleGroupName(groupName)
+                    .startTime(r.getStartTime())
+                    .exhaustionScore(r.getExhaustionScore())
+                    .dayOfWeek(r.getStartTime().getDayOfWeek().getValue())
+                    .build();
+        }).toList();
     }
 }

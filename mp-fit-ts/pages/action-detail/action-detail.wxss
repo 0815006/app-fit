@@ -38,7 +38,7 @@ page {
 
 /* 滚动区 */
 .adetail-scroll {
-  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  padding: 0 24rpx calc(120rpx + env(safe-area-inset-bottom));
 }
 
 /* ===== 顶部：多媒体轮播 ===== */
@@ -123,9 +123,9 @@ page {
 
 .adetail-section {
   background: #fff;
-  margin: 16rpx 20rpx;
+  margin: 16rpx 24rpx;
   border-radius: 14rpx;
-  padding: 20rpx 22rpx;
+  padding: 20rpx 24rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
   border: 1rpx solid #ebeef5;
 }
@@ -301,7 +301,7 @@ page {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 14rpx 20rpx;
+  padding: 14rpx 24rpx;
   padding-bottom: calc(14rpx + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 2rpx solid #e4e7ed;

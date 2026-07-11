@@ -8,6 +8,7 @@ Page({
     avatarUrl: '',
     nickname: '',
     empNo: '',
+    empName: '',
     saving: false
   },
 
@@ -28,11 +29,13 @@ Page({
         var user = res.data
         // "0000000" 视为未维护，显示为空
         var empNo = (user.empNo && user.empNo !== '0000000') ? user.empNo : ''
+        var empName = user.empName || ''
         that.setData({
           user: user,
           avatarUrl: user.avatarUrl || '',
           nickname: user.nickname || '',
           empNo: empNo,
+          empName: empName,
           loading: false
         })
       })
@@ -67,6 +70,13 @@ Page({
   },
 
   /**
+   * 员工姓名输入
+   */
+  onEmpNameInput: function (e) {
+    this.setData({ empName: e.detail.value })
+  },
+
+  /**
    * 保存资料
    */
   saveProfile: function () {
@@ -89,6 +99,10 @@ Page({
       // 只在有非空工号时传递
       if (that.data.empNo && that.data.empNo !== '0000000') {
         payload.empNo = that.data.empNo
+      }
+      // 员工姓名
+      if (that.data.empName && that.data.empName.trim() !== '') {
+        payload.empName = that.data.empName.trim()
       }
 
       request.post('/user/update-profile', payload)

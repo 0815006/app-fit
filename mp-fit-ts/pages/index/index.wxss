@@ -10,11 +10,12 @@ page {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  padding: 0 24rpx;
 }
 
 .main-scroll {
   flex-shrink: 0;
-  padding: 16rpx 20rpx 0;
+  padding: 16rpx 0 0;
 }
 
 .content-area {
@@ -44,7 +45,7 @@ page {
 }
 
 .card-header {
-  padding: 22rpx 26rpx 16rpx;
+  padding: 22rpx 24rpx 16rpx;
 }
 
 .card-title {
@@ -76,7 +77,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14rpx 26rpx;
+  padding: 14rpx 24rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
@@ -109,7 +110,7 @@ page {
 .divider {
   height: 1rpx;
   background: #ebeef5;
-  margin: 14rpx 26rpx;
+  margin: 14rpx 24rpx;
 }
 
 /* 统计 */
@@ -149,7 +150,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16rpx 26rpx;
+  padding: 16rpx 24rpx;
   border-bottom: 1rpx solid #f5f5f5;
 }
 
@@ -216,7 +217,7 @@ page {
 .menu-ctrl-wrap {
   background: #fff;
   border-radius: 16rpx;
-  padding: 16rpx 18rpx 18rpx;
+  padding: 16rpx 24rpx 18rpx;
   margin-bottom: 16rpx;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
@@ -395,13 +396,13 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18rpx 22rpx;
+  padding: 18rpx 24rpx;
   border-bottom: 3rpx solid #ebeef5;
   background: #fafbfc;
 }
 
 .sk-body {
-  padding: 14rpx 22rpx;
+  padding: 14rpx 24rpx;
   display: flex;
   flex-direction: column;
   gap: 16rpx;
@@ -492,7 +493,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16rpx 22rpx;
+  padding: 16rpx 24rpx;
   border-bottom: 3rpx solid #e67e22;
   background: #fafbfc;
 }
@@ -519,7 +520,7 @@ page {
 
 /* -- 菜品行 -- */
 .dish {
-  padding: 14rpx 22rpx;
+  padding: 14rpx 24rpx;
   border-bottom: 1rpx solid #f2f3f5;
 }
 
@@ -851,7 +852,7 @@ page {
 /* 信息区域 */
 .faction-info {
   flex: 1;
-  padding: 16rpx 18rpx;
+  padding: 16rpx 24rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -975,7 +976,7 @@ page {
 .meeting-ctrl-wrap {
   background: #fff;
   border-radius: 16rpx;
-  padding: 16rpx 18rpx 18rpx;
+  padding: 16rpx 24rpx 18rpx;
   margin-bottom: 16rpx;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
@@ -1078,7 +1079,7 @@ page {
   align-items: center;
   flex-wrap: wrap;
   gap: 10rpx;
-  padding: 14rpx 18rpx;
+  padding: 14rpx 24rpx;
   background: #fafbfc;
   border-radius: 10rpx;
   margin-bottom: 12rpx;
@@ -1112,6 +1113,22 @@ page {
   border-radius: 6rpx;
   padding: 2rpx 10rpx;
   border: 1rpx solid #d9ecff;
+}
+
+/* 视图切换（信息条内联） */
+.meeting-view-toggle-inline {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #409eff;
+  background: #ecf5ff;
+  border-radius: 8rpx;
+  padding: 4rpx 14rpx;
+  border: 1rpx solid #d9ecff;
+  flex-shrink: 0;
+}
+
+.meeting-view-toggle-inline:active {
+  background: #d9ecff;
 }
 
 /* ── 图例 ── */
@@ -1171,7 +1188,8 @@ page {
   border-radius: 16rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
+  padding-bottom: 8rpx;
 }
 
 .meeting-grid-table {
@@ -1182,7 +1200,7 @@ page {
 .meeting-grid-row {
   display: flex;
   border-bottom: 1rpx solid #f2f3f5;
-  min-height: 66rpx;
+  min-height: 74rpx;
 }
 
 .meeting-grid-row:last-child {
@@ -1213,7 +1231,7 @@ page {
 }
 
 .meeting-time-label {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #909399;
   font-weight: 500;
 }
@@ -1223,7 +1241,7 @@ page {
   flex: 1;
   display: flex;
   align-items: stretch;
-  min-height: 66rpx;
+  min-height: 74rpx;
 }
 
 .meeting-grid-cell-mine {
@@ -1314,6 +1332,174 @@ page {
 
 .meeting-cell-past .meeting-cell-text {
   color: #c0c4cc;
+}
+
+/* ── 午休分隔线 ── */
+.meeting-divider {
+  display: flex;
+  align-items: center;
+  padding: 6rpx 0;
+}
+
+.meeting-divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #dcdfe6;
+}
+
+.meeting-divider-text {
+  margin: 0 16rpx;
+  font-size: 20rpx;
+  color: #b0b3b8;
+  white-space: nowrap;
+}
+
+/* ── 合并行：左整点标签 + 右两段左右并排 ── */
+.meeting-hour-row {
+  display: flex;
+  border-bottom: 1rpx solid #f2f3f5;
+  min-height: 74rpx;
+}
+
+/* 时间标签列 */
+.meeting-hour-label-col {
+  width: 180rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1rpx solid #ebeef5;
+  background: #fafbfc;
+}
+
+.meeting-hour-label {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #909399;
+  white-space: nowrap;
+}
+
+/* 右侧格子容器（flex row） */
+.meeting-hour-cells {
+  flex: 1;
+  display: flex;
+}
+
+/* 单个半小时格子 */
+.meeting-slot-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rpx 10rpx;
+  border-right: 1rpx solid #ebeef5;
+  min-height: 74rpx;
+}
+
+.meeting-slot-cell:last-child {
+  border-right: none;
+}
+
+.meeting-slot-cell:active {
+  opacity: 0.7;
+}
+
+.meeting-slot-cell-past {
+  opacity: 0.45;
+}
+
+.meeting-slot-cell-past:active {
+  opacity: 0.35;
+}
+
+/* 状态配色 */
+.meeting-slot-cell-mine {
+  background: #ecf5ff;
+}
+
+.meeting-slot-cell-booked {
+  background: #f5f5f5;
+}
+
+.meeting-slot-cell-lock {
+  background: repeating-linear-gradient(
+    45deg,
+    #fef0f0,
+    #fef0f0 4rpx,
+    #fde2e2 4rpx,
+    #fde2e2 8rpx
+  );
+}
+
+.meeting-slot-cell-free {
+  background: #f0f9eb;
+}
+
+/* 空占位 */
+.meeting-slot-cell-placeholder {
+  opacity: 0.25;
+}
+
+/* 空闲状态文字 */
+.meeting-slot-status-free {
+  font-size: 22rpx;
+  color: #67c23a;
+  font-weight: 500;
+  align-self: center;
+}
+
+/* 已过期文字 */
+.meeting-slot-status-past {
+  font-size: 22rpx;
+  color: #c0c4cc;
+  align-self: center;
+}
+
+/* 预定人名/会议标题 */
+.meeting-slot-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meeting-slot-cell-mine .meeting-slot-name {
+  color: #409eff;
+}
+
+.meeting-slot-cell-booked .meeting-slot-name {
+  color: #909399;
+}
+
+.meeting-slot-cell-lock .meeting-slot-name {
+  color: #f56c6c;
+}
+
+/* 副标题 */
+.meeting-slot-sub {
+  font-size: 20rpx;
+  color: #909399;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 周期标签 */
+.meeting-slot-weekly {
+  margin-top: 2rpx;
+}
+
+.meeting-slot-weekly text {
+  font-size: 18rpx;
+  color: #e6a23c;
+  background: #fdf6ec;
+  border-radius: 4rpx;
+  padding: 1rpx 8rpx;
+  border: 1rpx solid #f5dab1;
 }
 
 /* ── 弹窗 ── */
@@ -1464,6 +1650,12 @@ page {
 .meeting-modal-tag-weekly {
   color: #e6a23c;
   background: none;
+}
+
+/* 周期例会开关（缩小） */
+.meeting-modal-switch {
+  transform: scale(0.7);
+  margin-left: auto;
 }
 
 /* 表单字段 */
@@ -1658,7 +1850,7 @@ page {
 .stats-card {
   background: linear-gradient(135deg, #409eff, #337ecc);
   border-radius: 16rpx;
-  padding: 28rpx 20rpx;
+  padding: 28rpx 24rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 4rpx 20rpx rgba(64, 158, 255, 0.30);
 }

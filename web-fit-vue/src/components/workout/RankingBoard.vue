@@ -6,8 +6,8 @@ const loading = ref(false)
 const activeTab = ref('consistency')
 const days = ref(30)
 
-const consistencyData = ref<Array<{ empNo: string; days: number }>>([])
-const progressData = ref<Array<{ empNo: string; growthRate: number; beforeTotal: number; afterTotal: number }>>([])
+const consistencyData = ref<Array<{ userId: string; days: number }>>([])
+const progressData = ref<Array<{ userId: string; growthRate: number; beforeTotal: number; afterTotal: number }>>([])
 
 async function loadData() {
   loading.value = true
@@ -16,8 +16,8 @@ async function loadData() {
       getConsistencyRanking(days.value),
       getProgressRanking(days.value)
     ])
-    consistencyData.value = (cRes.data || []) as Array<{ empNo: string; days: number }>
-    progressData.value = (pRes.data || []) as Array<{ empNo: string; growthRate: number; beforeTotal: number; afterTotal: number }>
+    consistencyData.value = (cRes.data || []) as Array<{ userId: string; days: number }>
+    progressData.value = (pRes.data || []) as Array<{ userId: string; growthRate: number; beforeTotal: number; afterTotal: number }>
   } catch {
     consistencyData.value = []
     progressData.value = []
@@ -52,7 +52,7 @@ onMounted(loadData)
           <el-table-column label="排名" width="60" align="center">
             <template #default="{ $index }">{{ getMedal($index) }}</template>
           </el-table-column>
-          <el-table-column prop="empNo" label="工号" />
+          <el-table-column prop="userId" label="用户ID" />
           <el-table-column prop="days" label="训练天数" align="center">
             <template #default="{ row }">
               <el-tag type="success">{{ row.days }} 天</el-tag>
@@ -65,7 +65,7 @@ onMounted(loadData)
           <el-table-column label="排名" width="60" align="center">
             <template #default="{ $index }">{{ getMedal($index) }}</template>
           </el-table-column>
-          <el-table-column prop="empNo" label="工号" />
+          <el-table-column prop="userId" label="用户ID" />
           <el-table-column prop="growthRate" label="增长率" align="center">
             <template #default="{ row }">
               <el-tag :type="row.growthRate > 0 ? 'success' : 'danger'">

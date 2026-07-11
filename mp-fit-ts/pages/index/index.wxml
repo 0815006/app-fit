@@ -56,15 +56,6 @@
           </view>
         </view>
 
-        <!-- 视图切换按钮 -->
-        <view class="meeting-view-toggle-row">
-          <view class="meeting-view-btn" bindtap="handleMeetingViewToggle">
-            <text class="meeting-view-btn-ico">{{ meetingViewMode === 'name' ? '👤' : '📋' }}</text>
-            <text class="meeting-view-btn-label">{{ meetingViewLabel }}</text>
-            <text class="meeting-view-btn-hint">点击切换</text>
-          </view>
-        </view>
-
         <!-- 会议室选择器（横向滚动） -->
         <scroll-view scroll-x class="meeting-room-tabs" wx:if="{{ meetingRooms.length > 0 }}">
           <view class="meeting-room-tabs-inner">
@@ -84,7 +75,7 @@
 
       <!-- ══════ 时间网格 ══════ -->
       <view class="meeting-grid-wrap" wx:if="{{ meetingBoardData }}">
-        <!-- 当前会议室信息条 -->
+        <!-- 当前会议室信息条 + 视图切换 -->
         <view class="meeting-room-info-bar">
           <text class="meeting-room-info-name">📍 {{ meetingBoardData.roomName }}</text>
           <text class="meeting-room-info-cap">容纳 {{ meetingBoardData.capacity }} 人</text>
@@ -95,6 +86,9 @@
               wx:for-item="f"
               class="meeting-facility-tag"
             >{{ f }}</text>
+          </view>
+          <view class="meeting-view-toggle-inline" bindtap="handleMeetingViewToggle">
+            <text>{{ meetingViewMode === 'name' ? '👤 预定人' : '📋 会议名' }}</text>
           </view>
         </view>
 
@@ -118,52 +112,77 @@
           </view>
         </view>
 
-        <!-- 时间网格表格 -->
+        <!-- 时间网格表格（左整点标签 + 右两段左右并排，右侧只显示状态） -->
         <view class="meeting-grid-table">
-          <view
-            wx:for="{{ meetingBoardData.slots }}"
-            wx:key="slot"
-            wx:for-item="s"
-            class="meeting-grid-row {{ s.isPast ? 'meeting-grid-row-past' : '' }}"
-            data-slot="{{ s.slot }}"
-            bindtap="handleMeetingSlotClick"
-          >
-            <!-- 时间标签列 -->
-            <view class="meeting-grid-time">
-              <text class="meeting-time-label">{{ s.timeLabel }}</text>
+          <block wx:for="{{ meetingBoardData.displayRows }}" wx:key="key" wx:for-item="row">
+            <!-- 午间分隔线 -->
+            <view wx:if="{{ row.type === 'divider' }}" class="meeting-divider">
+              <view class="meeting-divider-line"></view>
+              <text class="meeting-divider-text">午 休</text>
+              <view class="meeting-divider-line"></view>
             </view>
-            <!-- 状态内容列 -->
-            <view class="meeting-grid-cell meeting-grid-cell-{{ s.type === 'MY_BOOKING' ? 'mine' : (s.type === 'BOOKED' ? 'booked' : (s.type === 'ADMIN_LOCK' ? 'lock' : 'free')) }}">
-              <!-- 免费 -->
-              <view wx:if="{{ s.type === 'FREE' }}" class="meeting-cell-inner meeting-cell-free">
-                <text class="meeting-cell-text">空闲</text>
+            <!-- 正常时段行 -->
+            <view wx:else class="meeting-hour-row">
+              <!-- 左侧：整点标签 -->
+              <view class="meeting-hour-label-col">
+                <text class="meeting-hour-label">{{ row.hourLabel }}</text>
               </view>
-              <!-- 我的预定 -->
-              <view wx:elif="{{ s.type === 'MY_BOOKING' }}" class="meeting-cell-inner meeting-cell-mine">
-                <text class="meeting-cell-name">{{ meetingViewMode === 'name' ? (s.booking.empName || s.booking.empNo) : (s.booking.meetingTitle || '无标题') }}</text>
-                <text class="meeting-cell-sub" wx:if="{{ meetingViewMode === 'name' && s.booking.meetingTitle }}">{{ s.booking.meetingTitle }}</text>
-                <text class="meeting-cell-sub" wx:elif="{{ meetingViewMode === 'title' && s.booking.empName }}">{{ s.booking.empName }}</text>
-                <view class="meeting-cell-weekly-tag" wx:if="{{ s.booking.isWeeklyFix }}">
-                  <text>🔄 周期</text>
+              <!-- 右侧：两段格子左右并排 -->
+              <view class="meeting-hour-cells">
+                <!-- 第一段 -->
+                <view
+                  class="meeting-slot-cell meeting-slot-cell-{{ row.slots[0].type === 'MY_BOOKING' ? 'mine' : (row.slots[0].type === 'BOOKED' ? 'booked' : (row.slots[0].type === 'ADMIN_LOCK' ? 'lock' : 'free')) }} {{ row.slots[0].isPast ? 'meeting-slot-cell-past' : '' }}"
+                  data-slot="{{ row.slots[0].slot }}"
+                  bindtap="handleMeetingSlotClick"
+                >
+                  <block wx:if="{{ row.slots[0].type === 'FREE' }}">
+                    <text class="meeting-slot-status-free">{{ row.slots[0].isNonWorkTime ? '非上班时间' : '空闲' }}</text>
+                  </block>
+                  <block wx:elif="{{ row.slots[0].type === 'MY_BOOKING' }}">
+                    <text class="meeting-slot-name">{{ meetingViewMode === 'name' ? (row.slots[0].booking.empName || row.slots[0].booking.empNo) : (row.slots[0].booking.meetingTitle || '无标题') }}</text>
+                    <view class="meeting-slot-weekly" wx:if="{{ row.slots[0].booking.isWeeklyFix }}"><text>🔄 周期</text></view>
+                  </block>
+                  <block wx:elif="{{ row.slots[0].type === 'BOOKED' }}">
+                    <text class="meeting-slot-name">{{ meetingViewMode === 'name' ? (row.slots[0].booking.empName || row.slots[0].booking.empNo) : (row.slots[0].booking.meetingTitle || '无标题') }}</text>
+                  </block>
+                  <block wx:elif="{{ row.slots[0].type === 'ADMIN_LOCK' }}">
+                    <text class="meeting-slot-name">🔒 {{ row.slots[0].lock.deptName || '行政征用' }}</text>
+                    <text class="meeting-slot-sub">{{ row.slots[0].lock.reason }}</text>
+                  </block>
+                  <block wx:else>
+                    <text class="meeting-slot-status-past">已过期</text>
+                  </block>
                 </view>
-              </view>
-              <!-- 他人预定 -->
-              <view wx:elif="{{ s.type === 'BOOKED' }}" class="meeting-cell-inner meeting-cell-booked">
-                <text class="meeting-cell-name">{{ meetingViewMode === 'name' ? (s.booking.empName || s.booking.empNo) : (s.booking.meetingTitle || '无标题') }}</text>
-                <text class="meeting-cell-sub" wx:if="{{ meetingViewMode === 'name' && s.booking.meetingTitle }}">{{ s.booking.meetingTitle }}</text>
-                <text class="meeting-cell-sub" wx:elif="{{ meetingViewMode === 'title' && s.booking.empName }}">{{ s.booking.empName }}</text>
-              </view>
-              <!-- 征用 -->
-              <view wx:elif="{{ s.type === 'ADMIN_LOCK' }}" class="meeting-cell-inner meeting-cell-lock">
-                <text class="meeting-cell-name">🔒 {{ s.lock.deptName || '行政征用' }}</text>
-                <text class="meeting-cell-sub">{{ s.lock.reason }}</text>
-              </view>
-              <!-- 已过期 -->
-              <view wx:else class="meeting-cell-inner meeting-cell-past">
-                <text class="meeting-cell-text">已过期</text>
+                <!-- 第二段 -->
+                <view
+                  wx:if="{{ row.slots[1] }}"
+                  class="meeting-slot-cell meeting-slot-cell-{{ row.slots[1].type === 'MY_BOOKING' ? 'mine' : (row.slots[1].type === 'BOOKED' ? 'booked' : (row.slots[1].type === 'ADMIN_LOCK' ? 'lock' : 'free')) }} {{ row.slots[1].isPast ? 'meeting-slot-cell-past' : '' }}"
+                  data-slot="{{ row.slots[1].slot }}"
+                  bindtap="handleMeetingSlotClick"
+                >
+                  <block wx:if="{{ row.slots[1].type === 'FREE' }}">
+                    <text class="meeting-slot-status-free">{{ row.slots[1].isNonWorkTime ? '非上班时间' : '空闲' }}</text>
+                  </block>
+                  <block wx:elif="{{ row.slots[1].type === 'MY_BOOKING' }}">
+                    <text class="meeting-slot-name">{{ meetingViewMode === 'name' ? (row.slots[1].booking.empName || row.slots[1].booking.empNo) : (row.slots[1].booking.meetingTitle || '无标题') }}</text>
+                    <view class="meeting-slot-weekly" wx:if="{{ row.slots[1].booking.isWeeklyFix }}"><text>🔄 周期</text></view>
+                  </block>
+                  <block wx:elif="{{ row.slots[1].type === 'BOOKED' }}">
+                    <text class="meeting-slot-name">{{ meetingViewMode === 'name' ? (row.slots[1].booking.empName || row.slots[1].booking.empNo) : (row.slots[1].booking.meetingTitle || '无标题') }}</text>
+                  </block>
+                  <block wx:elif="{{ row.slots[1].type === 'ADMIN_LOCK' }}">
+                    <text class="meeting-slot-name">🔒 {{ row.slots[1].lock.deptName || '行政征用' }}</text>
+                    <text class="meeting-slot-sub">{{ row.slots[1].lock.reason }}</text>
+                  </block>
+                  <block wx:else>
+                    <text class="meeting-slot-status-past">已过期</text>
+                  </block>
+                </view>
+                <!-- 空占位 -->
+                <view wx:else class="meeting-slot-cell meeting-slot-cell-free meeting-slot-cell-placeholder"></view>
               </view>
             </view>
-          </view>
+          </block>
         </view>
       </view>
 
@@ -559,6 +578,7 @@
       <!-- 时间段信息 -->
       <view class="meeting-modal-time-info">
         <text class="meeting-modal-time-label">{{ meetingSelectedSlot.timeLabel }}</text>
+        <text class="meeting-modal-time-dash"> - </text>
         <text class="meeting-modal-time-end">{{ meetingSelectedSlotEndLabel }}</text>
         <view class="meeting-modal-time-badge meeting-modal-badge-{{ meetingSelectedSlot.type === 'MY_BOOKING' ? 'mine' : (meetingSelectedSlot.type === 'BOOKED' ? 'booked' : (meetingSelectedSlot.type === 'ADMIN_LOCK' ? 'lock' : 'free')) }}">
           <text>{{ meetingSelectedSlot.type === 'FREE' ? '空闲' : (meetingSelectedSlot.type === 'MY_BOOKING' ? '我的预定' : (meetingSelectedSlot.type === 'BOOKED' ? '已预定' : '征用')) }}</text>
@@ -646,6 +666,7 @@
             <view class="meeting-modal-row">
               <text class="meeting-modal-label">周期例会</text>
               <switch
+                class="meeting-modal-switch"
                 checked="{{ meetingFormWeeklyEnabled }}"
                 bindchange="onMeetingWeeklyToggle"
                 color="#409eff"

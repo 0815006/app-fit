@@ -47,6 +47,18 @@
         />
         <text class="form-hint" wx:if="{{ !empNo }}">（未维护工号，默认使用0000000）</text>
       </view>
+
+      <!-- 员工姓名 -->
+      <view class="form-item">
+        <text class="form-label">姓名</text>
+        <input
+          class="form-input"
+          placeholder="请输入员工姓名"
+          value="{{ empName }}"
+          bindinput="onEmpNameInput"
+          maxlength="20"
+        />
+      </view>
     </view>
 
     <!-- 操作按钮 -->

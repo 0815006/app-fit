@@ -56,6 +56,6 @@ export function checkPr(actionId: string, weight: number, reps: number): Promise
 }
 
 // 力量对比
-export function compareStrength(empNo2: string): Promise<ApiResult<Record<string, any>>> {
-  return request.get('/training-stats/compare', { params: { empNo2 } })
+export function compareStrength(userId2: string): Promise<ApiResult<Record<string, any>>> {
+  return request.get('/training-stats/compare', { params: { userId2 } })
 }

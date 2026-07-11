@@ -1,7 +1,7 @@
 package com.fit.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fit.common.EmpContext;
 import com.fit.common.Result;
 import com.fit.entity.TrainingPlan;
 import com.fit.entity.TrainingPlanDetail;
@@ -20,20 +20,23 @@ public class TrainingPlanController {
     private final TrainingPlanService planService;
     private final TrainingPlanDetailService detailService;
 
+    /** 从 Sa-Token 获取当前登录用户的 userId */
+    private String currentUserId() {
+        return String.valueOf(StpUtil.getLoginIdAsLong());
+    }
+
     @GetMapping
     public Result<Page<TrainingPlan>> queryPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String planName,
             @RequestParam(required = false) String muscleGroup) {
-        String empNo = EmpContext.getEmpNo();
-        return Result.success(planService.queryPage(page, size, empNo, planName, muscleGroup));
+        return Result.success(planService.queryPage(page, size, currentUserId(), planName, muscleGroup));
     }
 
     @GetMapping("/all")
     public Result<List<TrainingPlan>> listAll() {
-        String empNo = EmpContext.getEmpNo();
-        return Result.success(planService.listByEmpNo(empNo));
+        return Result.success(planService.listByUserId(currentUserId()));
     }
 
     @GetMapping("/{id}")
@@ -49,7 +52,7 @@ public class TrainingPlanController {
 
     @PostMapping
     public Result<TrainingPlan> create(@RequestBody TrainingPlan plan) {
-        plan.setEmpNo(EmpContext.getEmpNo());
+        plan.setUserId(currentUserId());
         return Result.success(planService.save(plan));
     }
 

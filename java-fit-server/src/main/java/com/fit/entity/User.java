@@ -29,6 +29,9 @@ public class User {
     /** 7位工号 */
     private String empNo;
 
+    /** 员工姓名 */
+    private String empName;
+
     /** 昵称 */
     private String nickname;
 

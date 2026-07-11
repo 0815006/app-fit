@@ -1,5 +1,6 @@
 package com.fit.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fit.common.EmpContext;
@@ -8,9 +9,11 @@ import com.fit.dto.BoardResponse;
 import com.fit.entity.MeetingAdminLock;
 import com.fit.entity.MeetingBooking;
 import com.fit.entity.MeetingRoom;
+import com.fit.entity.User;
 import com.fit.service.MeetingAdminLockService;
 import com.fit.service.MeetingBookingService;
 import com.fit.service.MeetingRoomService;
+import com.fit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,17 +31,36 @@ public class MeetingBookingController {
     private final MeetingBookingService bookingService;
     private final MeetingRoomService meetingRoomService;
     private final MeetingAdminLockService adminLockService;
+    private final UserService userService;
 
-    /** 创建预定 */
+    /** 创建预定（从 User 实体读取 empNo / empName，强制校验用户已维护身份信息） */
     @PostMapping
     public Result<List<MeetingBooking>> create(@RequestBody CreateBookingRequest req) {
+        long userId = StpUtil.getLoginIdAsLong();
+        User user = userService.getById(userId);
+        if (user == null) {
+            return Result.error(404, "用户不存在");
+        }
+
+        String empNo = user.getEmpNo();
+        String empName = user.getEmpName();
+
+        // 校验员工号是否已维护（不得为 null 或默认的 "0000000"）
+        if (empNo == null || "0000000".equals(empNo) || empNo.isBlank()) {
+            return Result.error(400, "请先在个人中心维护您的7位工号和员工姓名后再预约会议室");
+        }
+        // 校验员工姓名是否已维护
+        if (empName == null || empName.isBlank()) {
+            return Result.error(400, "请先在个人中心维护您的员工姓名后再预约会议室");
+        }
+
         MeetingBooking booking = new MeetingBooking();
         booking.setRoomId(req.roomId());
         booking.setBookingDate(req.bookingDate());
         booking.setStartSlot(req.startSlot());
         booking.setEndSlot(req.endSlot());
-        booking.setEmpNo(EmpContext.getEmpNo());
-        booking.setEmpName(req.empName() != null ? req.empName() : "");
+        booking.setEmpNo(empNo);
+        booking.setEmpName(empName);
         booking.setMeetingTitle(req.meetingTitle() != null ? req.meetingTitle() : "");
         booking.setAttendees(req.attendees() != null ? req.attendees() : "");
 
@@ -71,7 +93,7 @@ public class MeetingBookingController {
     /** 查询指定会议室某日所有预定 */
     @GetMapping("/room/{roomId}")
     public Result<List<MeetingBooking>> getRoomBookings(@PathVariable String roomId,
-                                                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+                                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return Result.success(bookingService.getRoomBookings(roomId, date));
     }
 
@@ -163,7 +185,6 @@ public class MeetingBookingController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDate,
             int startSlot,
             int endSlot,
-            String empName,
             String meetingTitle,
             String attendees,
             Integer weeklyWeeks) {

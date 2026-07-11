@@ -6,7 +6,7 @@ page {
 
 .profile-page {
   min-height: 100vh;
-  padding-bottom: 40rpx;
+  padding: 0 24rpx 40rpx;
 }
 
 /* 加载 */
@@ -81,7 +81,7 @@ page {
 .form-item {
   display: flex;
   align-items: center;
-  padding: 32rpx 30rpx;
+  padding: 32rpx 24rpx;
   border-bottom: 1rpx solid #f0f0f0;
   position: relative;
   flex-wrap: wrap;
@@ -121,7 +121,7 @@ page {
 
 /* 操作按钮 */
 .action-section {
-  padding: 40rpx 30rpx;
+  padding: 40rpx 24rpx;
 }
 
 .save-btn {

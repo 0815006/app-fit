@@ -16,7 +16,8 @@ public class BodyMetric {
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
 
-    private String empNo;
+    /** 所属用户ID（关联user表主键） */
+    private String userId;
     private LocalDate metricDate;
     private BigDecimal weight;
     private BigDecimal bodyFat;

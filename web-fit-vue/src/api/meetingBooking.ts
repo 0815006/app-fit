@@ -56,13 +56,12 @@ export interface LockInfo {
   deptName: string
 }
 
-/** 创建预定 */
+/** 创建预定（empNo/empName 由后端从登录用户信息自动读取） */
 export function createBooking(params: {
   roomId: string
   bookingDate: string
   startSlot: number
   endSlot: number
-  empName?: string
   meetingTitle?: string
   attendees?: string
   weeklyWeeks?: number

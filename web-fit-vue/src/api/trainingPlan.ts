@@ -5,7 +5,7 @@ import type { PageData } from './gymEquipment'
 // 训练计划
 export interface TrainingPlan {
   id: string
-  empNo: string
+  userId: string
   planName: string
   description: string
   muscleGroup: string

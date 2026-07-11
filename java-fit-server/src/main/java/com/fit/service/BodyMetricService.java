@@ -7,8 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface BodyMetricService {
-    Page<BodyMetric> queryPage(int page, int size, String empNo, LocalDate startDate, LocalDate endDate);
-    List<BodyMetric> listByEmpNo(String empNo, LocalDate startDate, LocalDate endDate);
+    Page<BodyMetric> queryPage(int page, int size, String userId, LocalDate startDate, LocalDate endDate);
+    List<BodyMetric> listByUserId(String userId, LocalDate startDate, LocalDate endDate);
     BodyMetric getById(String id);
     BodyMetric save(BodyMetric metric);
     BodyMetric update(BodyMetric metric);

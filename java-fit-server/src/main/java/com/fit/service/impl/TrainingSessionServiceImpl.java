@@ -19,10 +19,10 @@ public class TrainingSessionServiceImpl implements TrainingSessionService {
     private final TrainingSessionMapper mapper;
 
     @Override
-    public Page<TrainingSession> queryPage(int page, int size, String empNo, LocalDate startDate, LocalDate endDate) {
+    public Page<TrainingSession> queryPage(int page, int size, String userId, LocalDate startDate, LocalDate endDate) {
         LambdaQueryWrapper<TrainingSession> qw = new LambdaQueryWrapper<>();
-        if (empNo != null && !empNo.isBlank()) {
-            qw.eq(TrainingSession::getEmpNo, empNo);
+        if (userId != null && !userId.isBlank()) {
+            qw.eq(TrainingSession::getUserId, userId);
         }
         if (startDate != null) {
             qw.ge(TrainingSession::getSessionDate, startDate);
@@ -43,7 +43,7 @@ public class TrainingSessionServiceImpl implements TrainingSessionService {
     @Override
     public TrainingSession save(TrainingSession session) {
         mapper.insert(session);
-        log.info("Created training session: id={}, empNo={}, date={}", session.getId(), session.getEmpNo(), session.getSessionDate());
+        log.info("Created training session: id={}, userId={}, date={}", session.getId(), session.getUserId(), session.getSessionDate());
         return session;
     }
 

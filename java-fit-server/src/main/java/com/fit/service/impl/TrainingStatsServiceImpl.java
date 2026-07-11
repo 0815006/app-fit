@@ -42,9 +42,9 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     }
 
     @Override
-    public BigDecimal getBestOneRepMax(String empNo, String actionId) {
+    public BigDecimal getBestOneRepMax(String userId, String actionId) {
         // 获取该用户该动作所有已完成的训练详情
-        List<TrainingSessionDetail> details = getCompletedDetailsByAction(empNo, actionId);
+        List<TrainingSessionDetail> details = getCompletedDetailsByAction(userId, actionId);
         return details.stream()
                 .map(d -> calculateOneRepMax(d.getActualWeight(), d.getActualReps()))
                 .max(BigDecimal::compareTo)
@@ -52,9 +52,9 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     }
 
     @Override
-    public Map<String, Object> getLastSessionDetail(String empNo, String actionId) {
+    public Map<String, Object> getLastSessionDetail(String userId, String actionId) {
         // 获取该用户该动作最近一次训练数据
-        List<TrainingSessionDetail> details = getCompletedDetailsByAction(empNo, actionId);
+        List<TrainingSessionDetail> details = getCompletedDetailsByAction(userId, actionId);
         if (details.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -75,14 +75,14 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // ═══════════════════════════════════════════════════════════
 
     @Override
-    public Map<String, Integer> calculateMuscleFatigue(String empNo) {
+    public Map<String, Integer> calculateMuscleFatigue(String userId) {
         // 标准肌群列表
         String[] muscleGroups = {"CHEST", "BACK", "SHOULDER", "ARM", "LEG", "GLUTE", "CORE"};
         Map<String, Integer> fatigue = new LinkedHashMap<>();
 
         // 获取所有训练记录（按日期倒序）
         LambdaQueryWrapper<TrainingSession> sessionQw = new LambdaQueryWrapper<>();
-        sessionQw.eq(TrainingSession::getEmpNo, empNo)
+        sessionQw.eq(TrainingSession::getUserId, userId)
                 .orderByDesc(TrainingSession::getSessionDate);
         List<TrainingSession> sessions = sessionMapper.selectList(sessionQw);
 
@@ -137,9 +137,9 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // ═══════════════════════════════════════════════════════════
 
     @Override
-    public List<Map<String, Object>> getVolumeTrend(String empNo, String groupBy, LocalDate startDate, LocalDate endDate) {
+    public List<Map<String, Object>> getVolumeTrend(String userId, String groupBy, LocalDate startDate, LocalDate endDate) {
         LambdaQueryWrapper<TrainingSession> qw = new LambdaQueryWrapper<>();
-        qw.eq(TrainingSession::getEmpNo, empNo);
+        qw.eq(TrainingSession::getUserId, userId);
         if (startDate != null) qw.ge(TrainingSession::getSessionDate, startDate);
         if (endDate != null) qw.le(TrainingSession::getSessionDate, endDate);
         qw.orderByAsc(TrainingSession::getSessionDate);
@@ -172,12 +172,12 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     }
 
     @Override
-    public List<Map<String, Object>> getContributionWall(String empNo, int year) {
+    public List<Map<String, Object>> getContributionWall(String userId, int year) {
         LocalDate start = LocalDate.of(year, 1, 1);
         LocalDate end = LocalDate.of(year, 12, 31);
 
         LambdaQueryWrapper<TrainingSession> qw = new LambdaQueryWrapper<>();
-        qw.eq(TrainingSession::getEmpNo, empNo)
+        qw.eq(TrainingSession::getUserId, userId)
                 .ge(TrainingSession::getSessionDate, start)
                 .le(TrainingSession::getSessionDate, end);
         List<TrainingSession> sessions = sessionMapper.selectList(qw);
@@ -216,13 +216,13 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
         // 按用户统计训练天数
         Map<String, Set<LocalDate>> userDays = new HashMap<>();
         for (TrainingSession s : sessions) {
-            userDays.computeIfAbsent(s.getEmpNo(), k -> new HashSet<>()).add(s.getSessionDate());
+            userDays.computeIfAbsent(s.getUserId(), k -> new HashSet<>()).add(s.getSessionDate());
         }
 
         List<Map<String, Object>> result = new ArrayList<>();
-        userDays.forEach((empNo, daySet) -> {
+        userDays.forEach((userId, daySet) -> {
             Map<String, Object> item = new HashMap<>();
-            item.put("empNo", empNo);
+            item.put("userId", userId);
             item.put("days", daySet.size());
             result.add(item);
         });
@@ -253,10 +253,10 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
         // 按用户分组，计算前后两个周期的1RM
         Map<String, Map<String, List<TrainingSessionDetail>>> userActionDetails = new HashMap<>();
         for (TrainingSessionDetail d : details) {
-            String empNo = sessionDateMap.get(d.getSessionId()) != null ?
-                    sessions.stream().filter(s -> s.getId().equals(d.getSessionId())).findFirst().map(TrainingSession::getEmpNo).orElse("") : "";
-            if (empNo.isEmpty()) continue;
-            userActionDetails.computeIfAbsent(empNo, k -> new HashMap<>())
+            String userId = sessionDateMap.get(d.getSessionId()) != null ?
+                    sessions.stream().filter(s -> s.getId().equals(d.getSessionId())).findFirst().map(TrainingSession::getUserId).orElse("") : "";
+            if (userId.isEmpty()) continue;
+            userActionDetails.computeIfAbsent(userId, k -> new HashMap<>())
                     .computeIfAbsent(d.getActionId(), k -> new ArrayList<>()).add(d);
         }
 
@@ -266,7 +266,7 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
                 .collect(Collectors.toMap(GymAction::getId, GymAction::getName, (a, b) -> a));
 
         List<Map<String, Object>> result = new ArrayList<>();
-        userActionDetails.forEach((empNo, actionMap) -> {
+        userActionDetails.forEach((userId, actionMap) -> {
             BigDecimal totalBefore = BigDecimal.ZERO;
             BigDecimal totalAfter = BigDecimal.ZERO;
             int count = 0;
@@ -304,7 +304,7 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
                         .multiply(BigDecimal.valueOf(100))
                         .setScale(2, RoundingMode.HALF_UP);
                 Map<String, Object> item = new HashMap<>();
-                item.put("empNo", empNo);
+                item.put("userId", userId);
                 item.put("growthRate", growthRate);
                 item.put("beforeTotal", totalBefore.setScale(2, RoundingMode.HALF_UP));
                 item.put("afterTotal", totalAfter.setScale(2, RoundingMode.HALF_UP));
@@ -321,12 +321,12 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // ═══════════════════════════════════════════════════════════
 
     @Override
-    public List<Map<String, Object>> detectPlateau(String empNo, int weeks) {
+    public List<Map<String, Object>> detectPlateau(String userId, int weeks) {
         LocalDate since = LocalDate.now().minusWeeks(weeks);
 
         // 获取该用户所有训练详情
         LambdaQueryWrapper<TrainingSession> sessionQw = new LambdaQueryWrapper<>();
-        sessionQw.eq(TrainingSession::getEmpNo, empNo)
+        sessionQw.eq(TrainingSession::getUserId, userId)
                 .ge(TrainingSession::getSessionDate, since);
         List<TrainingSession> sessions = sessionMapper.selectList(sessionQw);
         if (sessions.isEmpty()) return Collections.emptyList();
@@ -390,9 +390,9 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // ═══════════════════════════════════════════════════════════
 
     @Override
-    public boolean checkIsPr(String empNo, String actionId, BigDecimal weight, Integer reps) {
+    public boolean checkIsPr(String userId, String actionId, BigDecimal weight, Integer reps) {
         BigDecimal currentOrm = calculateOneRepMax(weight, reps);
-        BigDecimal bestOrm = getBestOneRepMax(empNo, actionId);
+        BigDecimal bestOrm = getBestOneRepMax(userId, actionId);
         // 如果当前1RM大于历史最佳（排除当前记录），则为PR
         // 注意：这里 getBestOneRepMax 会包含当前刚保存的记录，所以需要比较的是"之前的最佳"
         // 简化处理：如果当前1RM >= 历史最佳，就认为是PR
@@ -404,14 +404,14 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // ═══════════════════════════════════════════════════════════
 
     @Override
-    public Map<String, Object> getStrengthComparison(String empNo1, String empNo2) {
+    public Map<String, Object> getStrengthComparison(String userId1, String userId2) {
         Map<String, Object> result = new HashMap<>();
-        result.put("empNo1", empNo1);
-        result.put("empNo2", empNo2);
+        result.put("userId1", userId1);
+        result.put("userId2", userId2);
 
         // 总搬运吨位
-        result.put("totalVolume1", getTotalVolume(empNo1));
-        result.put("totalVolume2", getTotalVolume(empNo2));
+        result.put("totalVolume1", getTotalVolume(userId1));
+        result.put("totalVolume2", getTotalVolume(userId2));
 
         // 三大项最高重量
         Map<String, String> bigThreeActions = findBigThreeActions();
@@ -419,15 +419,15 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
         bigThreeActions.forEach((name, actionId) -> {
             Map<String, Object> item = new HashMap<>();
             item.put("actionName", name);
-            item.put("best1", getBestOneRepMax(empNo1, actionId));
-            item.put("best2", getBestOneRepMax(empNo2, actionId));
+            item.put("best1", getBestOneRepMax(userId1, actionId));
+            item.put("best2", getBestOneRepMax(userId2, actionId));
             comparison.add(item);
         });
         result.put("bigThree", comparison);
 
         // 力量平衡雷达图（胸、背、腿、肩、核心 五个部位的训练总容量比重）
-        result.put("radar1", getStrengthRadar(empNo1));
-        result.put("radar2", getStrengthRadar(empNo2));
+        result.put("radar1", getStrengthRadar(userId1));
+        result.put("radar2", getStrengthRadar(userId2));
 
         return result;
     }
@@ -436,10 +436,10 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     // 私有辅助方法
     // ═══════════════════════════════════════════════════════════
 
-    private List<TrainingSessionDetail> getCompletedDetailsByAction(String empNo, String actionId) {
+    private List<TrainingSessionDetail> getCompletedDetailsByAction(String userId, String actionId) {
         // 先获取该用户所有session
         LambdaQueryWrapper<TrainingSession> sessionQw = new LambdaQueryWrapper<>();
-        sessionQw.eq(TrainingSession::getEmpNo, empNo);
+        sessionQw.eq(TrainingSession::getUserId, userId);
         List<TrainingSession> sessions = sessionMapper.selectList(sessionQw);
         if (sessions.isEmpty()) return Collections.emptyList();
 
@@ -494,9 +494,9 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
         return result;
     }
 
-    private BigDecimal getTotalVolume(String empNo) {
+    private BigDecimal getTotalVolume(String userId) {
         LambdaQueryWrapper<TrainingSession> qw = new LambdaQueryWrapper<>();
-        qw.eq(TrainingSession::getEmpNo, empNo);
+        qw.eq(TrainingSession::getUserId, userId);
         List<TrainingSession> sessions = sessionMapper.selectList(qw);
         return sessions.stream()
                 .map(s -> s.getTotalVolume() != null ? s.getTotalVolume() : BigDecimal.ZERO)
@@ -504,14 +504,14 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
-    private Map<String, BigDecimal> getStrengthRadar(String empNo) {
+    private Map<String, BigDecimal> getStrengthRadar(String userId) {
         String[] groups = {"CHEST", "BACK", "LEG", "SHOULDER", "CORE"};
         String[] groupNames = {"胸", "背", "腿", "肩", "核心"};
         Map<String, BigDecimal> radar = new LinkedHashMap<>();
 
         // 获取所有训练详情
         LambdaQueryWrapper<TrainingSession> sessionQw = new LambdaQueryWrapper<>();
-        sessionQw.eq(TrainingSession::getEmpNo, empNo);
+        sessionQw.eq(TrainingSession::getUserId, userId);
         List<TrainingSession> sessions = sessionMapper.selectList(sessionQw);
         Map<String, LocalDate> sessionDateMap = sessions.stream()
                 .collect(Collectors.toMap(TrainingSession::getId, TrainingSession::getSessionDate, (a, b) -> a));

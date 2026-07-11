@@ -5,7 +5,7 @@ import type { PageData } from './gymEquipment'
 // 身体指标
 export interface BodyMetric {
   id: string
-  empNo: string
+  userId: string
   metricDate: string
   weight: number
   bodyFat: number

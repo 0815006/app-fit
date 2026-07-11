@@ -149,10 +149,8 @@ Page({
     var tabBarPx = Math.round(100 * rpx)
     var scrollHeight = windowInfo.windowHeight - tabBarPx
     this.setData({ scrollHeight: scrollHeight })
-    // 默认加载会议预定数据（无需登录态）
-    this.loadMeetingData()
 
-    // 检查是否需要弹出资料完善弹窗
+    // 检查是否需要弹出资料完善弹窗（基于上次已存储的标记）
     this._checkProfileModal()
   },
 
@@ -164,6 +162,8 @@ Page({
     this.loadMiniProgramStats()
     // 登录完成后重新检查资料完善弹窗（新用户标记在登录时才写入）
     this._checkProfileModal()
+    // 登录完成后加载会议预定数据
+    this.loadMeetingData()
   },
 
   onShow: function () {
@@ -684,6 +684,39 @@ goToProfile: function () {
           roomBoard.slots[s2].isPast = false
         }
       }
+      // Mark non-work-time slots: 0=8:00-8:30, 9=12:30-13:00, 10=13:00-13:30, 19=17:30-18:00
+      if (roomBoard && roomBoard.slots) {
+        var nonWorkSlots = [0, 9, 10, 19]
+        for (var n = 0; n < roomBoard.slots.length; n++) {
+          roomBoard.slots[n].isNonWorkTime = nonWorkSlots.indexOf(roomBoard.slots[n].slot) !== -1
+        }
+      }
+      // Build displayRows: pair every two slots into one row
+      // Layout: left=hour label, right=two half-hour cells side by side (no time in cells)
+      // Insert divider between morning (8:00-11:30) and afternoon (13:00-17:30)
+      if (roomBoard && roomBoard.slots) {
+        var displayRows = []
+        var allSlots = roomBoard.slots
+        var idx = 0
+        while (idx < allSlots.length) {
+          // Build time range label from first slot (e.g. "08:00" → "08:00-09:00")
+          var firstTime = allSlots[idx].timeLabel
+          var endHour = (parseInt(firstTime, 10) + 1) % 24
+          var hourLabel = firstTime + '-' + (endHour < 10 ? '0' : '') + endHour + ':00'
+          // Insert afternoon divider before 13:00
+          if (firstTime === '13:00') {
+            displayRows.push({ key: 'divider', type: 'divider' })
+          }
+          if (idx + 1 < allSlots.length) {
+            displayRows.push({ key: 'd' + idx, hourLabel: hourLabel, slots: [allSlots[idx], allSlots[idx + 1]] })
+            idx += 2
+          } else {
+            displayRows.push({ key: 'd' + idx, hourLabel: hourLabel, slots: [allSlots[idx], null] })
+            idx++
+          }
+        }
+        roomBoard.displayRows = displayRows
+      }
       that.setData({
         meetingBoardData: roomBoard,
         meetingLoading: false,
@@ -794,7 +827,11 @@ goToProfile: function () {
     })
 
     if (slot.type === 'FREE') {
-      this.setData({ meetingBookingMode: 'create', meetingShowBookingModal: true })
+      // 预约前检查用户信息是否已完善
+      var that = this
+      this._checkProfileBeforeBooking(function () {
+        that.setData({ meetingBookingMode: 'create', meetingShowBookingModal: true })
+      })
     } else if (slot.type === 'MY_BOOKING') {
       this.setData({ meetingBookingMode: 'edit-mine', meetingShowBookingModal: true })
     } else if (slot.type === 'BOOKED') {
@@ -835,7 +872,7 @@ goToProfile: function () {
       weeklyWeeks: that.data.meetingFormWeeklyEnabled ? (that.data.meetingFormWeeklyWeeks || 1) : undefined,
     }).then(function () {
       wx.showToast({ title: '预定成功', icon: 'success' })
-      that.setData({ meetingShowBookingModal: false })
+      that.setData({ meetingShowBookingModal: false, meetingSaving: false })
       that._loadMeetingBoard()
     }).catch(function () {
       that.setData({ meetingSaving: false })
@@ -925,6 +962,51 @@ goToProfile: function () {
     if (val < 1) val = 1
     if (val > 8) val = 8
     this.setData({ meetingFormWeeklyWeeks: val })
+  },
+
+  // ── 预约前检查用户信息是否完善 ──
+  _checkProfileBeforeBooking: function (onPassed) {
+    var that = this
+    // 调用后端 /user/current 获取最新用户信息
+    api.get('/user/current').then(function (res) {
+      var user = res.data
+      var empNo = user.empNo || ''
+      var empName = user.empName || ''
+      // 检查工号是否已维护（不得为空或默认的 "0000000"）
+      if (!empNo || empNo === '0000000') {
+        wx.showModal({
+          title: '请完善个人信息',
+          content: '预约会议室前需要维护您的7位工号和员工姓名，请前往个人中心完善资料。',
+          confirmText: '去完善',
+          cancelText: '取消',
+          success: function (modalRes) {
+            if (modalRes.confirm) {
+              wx.navigateTo({ url: '/pages/profile/profile' })
+            }
+          }
+        })
+        return
+      }
+      // 检查员工姓名是否已维护
+      if (!empName || empName.trim() === '') {
+        wx.showModal({
+          title: '请完善个人信息',
+          content: '预约会议室前需要维护您的员工姓名，请前往个人中心完善资料。',
+          confirmText: '去完善',
+          cancelText: '取消',
+          success: function (modalRes) {
+            if (modalRes.confirm) {
+              wx.navigateTo({ url: '/pages/profile/profile' })
+            }
+          }
+        })
+        return
+      }
+      // 检查通过，执行回调
+      onPassed()
+    }).catch(function () {
+      wx.showToast({ title: '获取用户信息失败，请稍后再试', icon: 'none' })
+    })
   },
 
   // Helper: get meeting time label for slot

@@ -59,10 +59,14 @@ public class UserController {
         if (dto.empNo() != null && !"0000000".equals(dto.empNo())) {
             user.setEmpNo(dto.empNo());
         }
+        // 支持维护员工姓名
+        if (dto.empName() != null && !dto.empName().isBlank()) {
+            user.setEmpName(dto.empName().trim());
+        }
         user.setStatus(1);
         userService.updateById(user);
 
-        log.info("用户资料已更新: userId={}, nickname={}, empNo={}", userId, dto.nickname(), dto.empNo());
+        log.info("用户资料已更新: userId={}, nickname={}, empNo={}, empName={}", userId, dto.nickname(), dto.empNo(), dto.empName());
         return Result.success("资料更新成功");
     }
 

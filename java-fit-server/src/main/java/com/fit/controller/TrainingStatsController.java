@@ -1,6 +1,6 @@
 package com.fit.controller;
 
-import com.fit.common.EmpContext;
+import cn.dev33.satoken.stp.StpUtil;
 import com.fit.common.Result;
 import com.fit.service.TrainingStatsService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,11 @@ public class TrainingStatsController {
 
     private final TrainingStatsService statsService;
 
+    /** 从 Sa-Token 获取当前登录用户的 userId */
+    private String currentUserId() {
+        return String.valueOf(StpUtil.getLoginIdAsLong());
+    }
+
     /**
      * 计算1RM
      */
@@ -31,7 +36,7 @@ public class TrainingStatsController {
      */
     @GetMapping("/best-1rm/{actionId}")
     public Result<BigDecimal> getBest1RM(@PathVariable String actionId) {
-        return Result.success(statsService.getBestOneRepMax(EmpContext.getEmpNo(), actionId));
+        return Result.success(statsService.getBestOneRepMax(currentUserId(), actionId));
     }
 
     /**
@@ -39,7 +44,7 @@ public class TrainingStatsController {
      */
     @GetMapping("/last-session/{actionId}")
     public Result<Map<String, Object>> getLastSession(@PathVariable String actionId) {
-        return Result.success(statsService.getLastSessionDetail(EmpContext.getEmpNo(), actionId));
+        return Result.success(statsService.getLastSessionDetail(currentUserId(), actionId));
     }
 
     /**
@@ -47,7 +52,7 @@ public class TrainingStatsController {
      */
     @GetMapping("/fatigue")
     public Result<Map<String, Integer>> getMuscleFatigue() {
-        return Result.success(statsService.calculateMuscleFatigue(EmpContext.getEmpNo()));
+        return Result.success(statsService.calculateMuscleFatigue(currentUserId()));
     }
 
     /**
@@ -60,7 +65,7 @@ public class TrainingStatsController {
             @RequestParam(required = false) String endDate) {
         LocalDate start = startDate != null ? LocalDate.parse(startDate) : null;
         LocalDate end = endDate != null ? LocalDate.parse(endDate) : null;
-        return Result.success(statsService.getVolumeTrend(EmpContext.getEmpNo(), groupBy, start, end));
+        return Result.success(statsService.getVolumeTrend(currentUserId(), groupBy, start, end));
     }
 
     /**
@@ -70,7 +75,7 @@ public class TrainingStatsController {
     public Result<List<Map<String, Object>>> getContributionWall(
             @RequestParam(required = false) Integer year) {
         int y = year != null ? year : LocalDate.now().getYear();
-        return Result.success(statsService.getContributionWall(EmpContext.getEmpNo(), y));
+        return Result.success(statsService.getContributionWall(currentUserId(), y));
     }
 
     /**
@@ -97,7 +102,7 @@ public class TrainingStatsController {
     @GetMapping("/plateau")
     public Result<List<Map<String, Object>>> detectPlateau(
             @RequestParam(defaultValue = "6") int weeks) {
-        return Result.success(statsService.detectPlateau(EmpContext.getEmpNo(), weeks));
+        return Result.success(statsService.detectPlateau(currentUserId(), weeks));
     }
 
     /**
@@ -107,14 +112,14 @@ public class TrainingStatsController {
     public Result<Boolean> checkPr(@RequestParam String actionId,
                                    @RequestParam BigDecimal weight,
                                    @RequestParam Integer reps) {
-        return Result.success(statsService.checkIsPr(EmpContext.getEmpNo(), actionId, weight, reps));
+        return Result.success(statsService.checkIsPr(currentUserId(), actionId, weight, reps));
     }
 
     /**
-     * 力量对比
+     * 力量对比（传入对方 userId）
      */
     @GetMapping("/compare")
-    public Result<Map<String, Object>> compareStrength(@RequestParam String empNo2) {
-        return Result.success(statsService.getStrengthComparison(EmpContext.getEmpNo(), empNo2));
+    public Result<Map<String, Object>> compareStrength(@RequestParam String userId2) {
+        return Result.success(statsService.getStrengthComparison(currentUserId(), userId2));
     }
 }

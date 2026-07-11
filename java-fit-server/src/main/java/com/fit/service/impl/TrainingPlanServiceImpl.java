@@ -19,10 +19,10 @@ public class TrainingPlanServiceImpl implements TrainingPlanService {
     private final TrainingPlanMapper mapper;
 
     @Override
-    public Page<TrainingPlan> queryPage(int page, int size, String empNo, String planName, String muscleGroup) {
+    public Page<TrainingPlan> queryPage(int page, int size, String userId, String planName, String muscleGroup) {
         LambdaQueryWrapper<TrainingPlan> qw = new LambdaQueryWrapper<>();
-        if (empNo != null && !empNo.isBlank()) {
-            qw.eq(TrainingPlan::getEmpNo, empNo);
+        if (userId != null && !userId.isBlank()) {
+            qw.eq(TrainingPlan::getUserId, userId);
         }
         if (planName != null && !planName.isBlank()) {
             qw.like(TrainingPlan::getPlanName, planName);
@@ -36,9 +36,9 @@ public class TrainingPlanServiceImpl implements TrainingPlanService {
     }
 
     @Override
-    public List<TrainingPlan> listByEmpNo(String empNo) {
+    public List<TrainingPlan> listByUserId(String userId) {
         return mapper.selectList(new LambdaQueryWrapper<TrainingPlan>()
-                .eq(TrainingPlan::getEmpNo, empNo)
+                .eq(TrainingPlan::getUserId, userId)
                 .eq(TrainingPlan::getStatus, 1)
                 .orderByAsc(TrainingPlan::getSortNo)
                 .orderByDesc(TrainingPlan::getCreateTime));

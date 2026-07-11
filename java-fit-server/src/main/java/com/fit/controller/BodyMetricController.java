@@ -1,7 +1,7 @@
 package com.fit.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fit.common.EmpContext;
 import com.fit.common.Result;
 import com.fit.entity.BodyMetric;
 import com.fit.service.BodyMetricService;
@@ -19,22 +19,25 @@ public class BodyMetricController {
 
     private final BodyMetricService service;
 
+    /** 从 Sa-Token 获取当前登录用户的 userId */
+    private String currentUserId() {
+        return String.valueOf(StpUtil.getLoginIdAsLong());
+    }
+
     @GetMapping
     public Result<Page<BodyMetric>> queryPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        String empNo = EmpContext.getEmpNo();
-        return Result.success(service.queryPage(page, size, empNo, startDate, endDate));
+        return Result.success(service.queryPage(page, size, currentUserId(), startDate, endDate));
     }
 
     @GetMapping("/list")
     public Result<List<BodyMetric>> listByDateRange(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        String empNo = EmpContext.getEmpNo();
-        return Result.success(service.listByEmpNo(empNo, startDate, endDate));
+        return Result.success(service.listByUserId(currentUserId(), startDate, endDate));
     }
 
     @GetMapping("/{id}")
@@ -45,7 +48,7 @@ public class BodyMetricController {
 
     @PostMapping
     public Result<BodyMetric> create(@RequestBody BodyMetric metric) {
-        metric.setEmpNo(EmpContext.getEmpNo());
+        metric.setUserId(currentUserId());
         return Result.success(service.save(metric));
     }
 

@@ -6,58 +6,77 @@ App({
   },
 
   /**
-   * 静默登录
+   * 静默登录（返回 Promise，支持外部 await）
    * wx.login → POST /api/auth/wx-login → 存储 satoken + userInfo
    */
   silentLogin() {
     var that = this
-    // 防止重复调用：如果正在登录中则跳过
-    if (that._loginPending) return
-    that._loginPending = true
+    // 如果正在登录中，返回同一个 Promise（防止并发重复登录）
+    if (that._loginPromise) return that._loginPromise
 
-    wx.login({
-      success(res) {
-        if (!res.code) {
-          console.error('wx.login 失败：未获取到 code')
-          that._loginPending = false
-          return
-        }
-        console.log('wx.login 成功, code:', res.code)
+    that._loginPromise = new Promise(function (resolve, reject) {
+      wx.login({
+        success(res) {
+          if (!res.code) {
+            console.error('wx.login 失败：未获取到 code')
+            that._loginPromise = null
+            reject(new Error('wx.login 失败'))
+            return
+          }
+          console.log('wx.login 成功, code:', res.code)
 
-        request.post('/auth/wx-login', { code: res.code })
-          .then(function (result) {
-            var data = result.data
-            wx.setStorageSync('satoken', data.token)
-            wx.setStorageSync('isNewUser', data.isNewUser)
-            wx.setStorageSync('userInfo', data.userInfo)
-            console.log('静默登录成功, isNewUser:', data.isNewUser)
+          // 直接用 wx.request 避免循环依赖（request.js 里 401 会调用 silentLogin）
+          var satoken = wx.getStorageSync('satoken') || ''
+          wx.request({
+            url: request._BASE_URL + '/auth/wx-login',
+            method: 'POST',
+            data: { code: res.code },
+            header: {
+              'Content-Type': 'application/json',
+              'satoken': satoken
+            },
+            success: function (wxRes) {
+              var result = wxRes.data
+              if (result && result.data) {
+                var data = result.data
+                wx.setStorageSync('satoken', data.token)
+                wx.setStorageSync('isNewUser', data.isNewUser)
+                wx.setStorageSync('userInfo', data.userInfo)
+                console.log('静默登录成功, isNewUser:', data.isNewUser)
 
-            // 新用户标记资料完善弹窗
-            if (data.isNewUser) {
-              wx.setStorageSync('showProfileModal', true)
-            }
+                if (data.isNewUser) {
+                  wx.setStorageSync('showProfileModal', true)
+                }
 
-            // 通知所有已加载的页面：登录已完成
-            var pages = getCurrentPages()
-            for (var i = 0; i < pages.length; i++) {
-              var page = pages[i]
-              if (typeof page.onLoginReady === 'function') {
-                page.onLoginReady()
+                var pages = getCurrentPages()
+                for (var i = 0; i < pages.length; i++) {
+                  var page = pages[i]
+                  if (typeof page.onLoginReady === 'function') {
+                    page.onLoginReady()
+                  }
+                }
+                that._loginPromise = null
+                resolve()
+              } else {
+                that._loginPromise = null
+                reject(new Error('登录响应异常'))
               }
+            },
+            fail: function (err) {
+              console.error('静默登录请求失败:', err)
+              that._loginPromise = null
+              reject(err)
             }
           })
-          .catch(function (err) {
-            console.error('静默登录失败:', err)
-          })
-          .finally(function () {
-            that._loginPending = false
-          })
-      },
-      fail(err) {
-        console.error('wx.login 调用失败:', err)
-        that._loginPending = false
-      }
+        },
+        fail(err) {
+          console.error('wx.login 调用失败:', err)
+          that._loginPromise = null
+          reject(err)
+        }
+      })
     })
+    return that._loginPromise
   },
 
   /**

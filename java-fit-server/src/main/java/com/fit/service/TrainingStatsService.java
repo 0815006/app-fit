@@ -19,29 +19,29 @@ public interface TrainingStatsService {
     /**
      * 获取指定动作的历史最佳1RM
      */
-    BigDecimal getBestOneRepMax(String empNo, String actionId);
+    BigDecimal getBestOneRepMax(String userId, String actionId);
 
     /**
      * 获取指定动作的最近一次训练数据
      */
-    Map<String, Object> getLastSessionDetail(String empNo, String actionId);
+    Map<String, Object> getLastSessionDetail(String userId, String actionId);
 
     /**
      * 计算各肌群疲劳度
      * @return Map<肌群, 距上次训练小时数>
      */
-    Map<String, Integer> calculateMuscleFatigue(String empNo);
+    Map<String, Integer> calculateMuscleFatigue(String userId);
 
     /**
      * 获取训练总容量趋势（按周/月）
      * @param groupBy "week" 或 "month"
      */
-    List<Map<String, Object>> getVolumeTrend(String empNo, String groupBy, LocalDate startDate, LocalDate endDate);
+    List<Map<String, Object>> getVolumeTrend(String userId, String groupBy, LocalDate startDate, LocalDate endDate);
 
     /**
      * 获取训练贡献墙数据（类似GitHub贡献图）
      */
-    List<Map<String, Object>> getContributionWall(String empNo, int year);
+    List<Map<String, Object>> getContributionWall(String userId, int year);
 
     /**
      * 获取坚持榜数据
@@ -59,15 +59,15 @@ public interface TrainingStatsService {
      * 检测平台期/停滞预警
      * @return 停滞的动作列表
      */
-    List<Map<String, Object>> detectPlateau(String empNo, int weeks);
+    List<Map<String, Object>> detectPlateau(String userId, int weeks);
 
     /**
      * 检查是否破纪录（PR）
      */
-    boolean checkIsPr(String empNo, String actionId, BigDecimal weight, Integer reps);
+    boolean checkIsPr(String userId, String actionId, BigDecimal weight, Integer reps);
 
     /**
      * 获取力量对比数据（用于PK）
      */
-    Map<String, Object> getStrengthComparison(String empNo1, String empNo2);
+    Map<String, Object> getStrengthComparison(String userId1, String userId2);
 }

@@ -20,10 +20,10 @@ public class BodyMetricServiceImpl implements BodyMetricService {
     private final BodyMetricMapper mapper;
 
     @Override
-    public Page<BodyMetric> queryPage(int page, int size, String empNo, LocalDate startDate, LocalDate endDate) {
+    public Page<BodyMetric> queryPage(int page, int size, String userId, LocalDate startDate, LocalDate endDate) {
         LambdaQueryWrapper<BodyMetric> qw = new LambdaQueryWrapper<>();
-        if (empNo != null && !empNo.isBlank()) {
-            qw.eq(BodyMetric::getEmpNo, empNo);
+        if (userId != null && !userId.isBlank()) {
+            qw.eq(BodyMetric::getUserId, userId);
         }
         if (startDate != null) {
             qw.ge(BodyMetric::getMetricDate, startDate);
@@ -36,10 +36,10 @@ public class BodyMetricServiceImpl implements BodyMetricService {
     }
 
     @Override
-    public List<BodyMetric> listByEmpNo(String empNo, LocalDate startDate, LocalDate endDate) {
+    public List<BodyMetric> listByUserId(String userId, LocalDate startDate, LocalDate endDate) {
         LambdaQueryWrapper<BodyMetric> qw = new LambdaQueryWrapper<>();
-        if (empNo != null && !empNo.isBlank()) {
-            qw.eq(BodyMetric::getEmpNo, empNo);
+        if (userId != null && !userId.isBlank()) {
+            qw.eq(BodyMetric::getUserId, userId);
         }
         if (startDate != null) {
             qw.ge(BodyMetric::getMetricDate, startDate);
@@ -59,7 +59,7 @@ public class BodyMetricServiceImpl implements BodyMetricService {
     @Override
     public BodyMetric save(BodyMetric metric) {
         mapper.insert(metric);
-        log.info("Created body metric: id={}, empNo={}, date={}", metric.getId(), metric.getEmpNo(), metric.getMetricDate());
+        log.info("Created body metric: id={}, userId={}, date={}", metric.getId(), metric.getUserId(), metric.getMetricDate());
         return metric;
     }
 

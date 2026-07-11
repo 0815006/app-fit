@@ -44,4 +44,14 @@ public class LoginRecordServiceImpl implements LoginRecordService {
     public long countAll() {
         return loginRecordMapper.countAll();
     }
+
+    @Override
+    public long countByUserId(String userId) {
+        return loginRecordMapper.countByUserId(userId);
+    }
+
+    @Override
+    public java.time.LocalDateTime getLatestLoginTimeByUserId(String userId) {
+        return loginRecordMapper.getLatestLoginTimeByUserId(userId);
+    }
 }

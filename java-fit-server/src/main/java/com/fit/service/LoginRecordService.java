@@ -2,6 +2,8 @@ package com.fit.service;
 
 import com.fit.entity.LoginRecord;
 
+import java.time.LocalDateTime;
+
 public interface LoginRecordService {
 
     /**
@@ -45,4 +47,20 @@ public interface LoginRecordService {
      * @return total count
      */
     long countAll();
+
+    /**
+     * Get total login count for a given user ID (all types).
+     *
+     * @param userId user表主键ID
+     * @return total login count for this user
+     */
+    long countByUserId(String userId);
+
+    /**
+     * Get the latest login time for a given user ID.
+     *
+     * @param userId user表主键ID
+     * @return latest login time, or null if never logged in
+     */
+    LocalDateTime getLatestLoginTimeByUserId(String userId);
 }

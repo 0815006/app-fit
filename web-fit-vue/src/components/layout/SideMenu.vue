@@ -18,10 +18,10 @@ const menuItems: MenuItem[] = [
   { path: '/health', title: '健康数据', icon: TrendCharts },
   // { path: '/workout', title: '运动记录', icon: Trophy },
   { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
-  { path: '/gym-library', title: '健身动作库', icon: Tools },
+  { path: '/gym-library', title: '健身维护', icon: Tools },
   // { path: '/trip-check', title: '出行清单', icon: Suitcase },
   { path: '/tech-stack', title: '技术选型', icon: Cpu },
-  { path: '/meeting-room', title: '会议室预定', icon: Calendar },
+  { path: '/meeting-room', title: '会议预定', icon: Calendar },
 ]
 
 const activeMenu = ref<string>(route.path)

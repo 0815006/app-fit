@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { ApiResult } from '@/typings'
+import type { ApiResult, UserWithStatsDTO } from '@/typings'
 
 // ========== 类型定义 ==========
 
@@ -49,4 +49,8 @@ export function uploadAvatar(file: File): Promise<ApiResult<{ url: string }>> {
   return request.post('/upload/avatar', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
+}
+
+export function fetchUserListWithStats(): Promise<ApiResult<UserWithStatsDTO[]>> {
+  return request.get('/user/list-with-stats')
 }

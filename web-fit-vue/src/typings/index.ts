@@ -19,3 +19,18 @@ export interface WebStatsDTO {
   totalMiniProgramCount: number
   totalAllCount: number
 }
+
+export interface UserWithStatsDTO {
+  id: string
+  username: string
+  wxOpenid: string
+  empNo: string
+  empName: string
+  nickname: string
+  avatarUrl: string
+  status: number
+  loginCount: number
+  lastLoginTime: string | null
+  createTime: string
+  updateTime: string
+}

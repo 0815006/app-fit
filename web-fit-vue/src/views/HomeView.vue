@@ -14,7 +14,7 @@ const greeting = computed(() => {
 const quickLinks = [
   { path: '/health', title: '健康数据', desc: '体重、BMI 等体征指标记录', icon: '📊', color: '#409eff' },
   { path: '/canteen-menu', title: '食堂菜单', desc: '查看各食堂每日菜品', icon: '🍽️', color: '#67c23a' },
-  { path: '/gym-library', title: '健身动作库', desc: '动作、器械、肌群数据管理', icon: '💪', color: '#f56c6c' },
+  { path: '/gym-library', title: '健身维护', desc: '动作、器械、肌群数据管理', icon: '💪', color: '#f56c6c' },
   { path: '/tech-stack', title: '技术选型', desc: '登录统计与技术栈一览', icon: '🛠️', color: '#909399' },
 ]
 </script>

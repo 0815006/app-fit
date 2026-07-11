@@ -4,13 +4,18 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.fit.common.Result;
 import com.fit.dto.ChangePasswordDTO;
 import com.fit.dto.UpdateProfileDTO;
+import com.fit.dto.UserWithStatsDTO;
 import com.fit.entity.User;
+import com.fit.service.LoginRecordService;
 import com.fit.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户信息 Controller
@@ -24,6 +29,7 @@ public class UserController {
     private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
 
     private final UserService userService;
+    private final LoginRecordService loginRecordService;
 
     /**
      * 获取当前登录用户完整信息
@@ -92,5 +98,37 @@ public class UserController {
 
         log.info("密码修改成功: userId={}", userId);
         return Result.success("密码修改成功");
+    }
+
+    /**
+     * 获取所有用户列表（含登录次数 + 最近登录时间）
+     */
+    @GetMapping("/list-with-stats")
+    public Result<List<UserWithStatsDTO>> listWithStats() {
+        List<User> users = userService.list();
+        List<UserWithStatsDTO> result = new ArrayList<>();
+
+        for (User user : users) {
+            String uid = user.getId();
+            long loginCount = loginRecordService.countByUserId(uid);
+            java.time.LocalDateTime lastLogin = loginRecordService.getLatestLoginTimeByUserId(uid);
+
+            result.add(new UserWithStatsDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getWxOpenid(),
+                    user.getEmpNo(),
+                    user.getEmpName(),
+                    user.getNickname(),
+                    user.getAvatarUrl(),
+                    user.getStatus(),
+                    loginCount,
+                    lastLogin,
+                    user.getCreateTime(),
+                    user.getUpdateTime()
+            ));
+        }
+
+        return Result.success(result);
     }
 }

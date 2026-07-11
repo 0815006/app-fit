@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
+
 @Mapper
 public interface LoginRecordMapper extends BaseMapper<LoginRecord> {
 
@@ -20,4 +22,10 @@ public interface LoginRecordMapper extends BaseMapper<LoginRecord> {
 
     @Select("SELECT COUNT(*) FROM login_record")
     long countAll();
+
+    @Select("SELECT COUNT(*) FROM login_record WHERE user_id = #{userId}")
+    long countByUserId(@Param("userId") String userId);
+
+    @Select("SELECT MAX(create_time) FROM login_record WHERE user_id = #{userId}")
+    LocalDateTime getLatestLoginTimeByUserId(@Param("userId") String userId);
 }

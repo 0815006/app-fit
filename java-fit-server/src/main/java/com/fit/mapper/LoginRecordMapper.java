@@ -14,4 +14,10 @@ public interface LoginRecordMapper extends BaseMapper<LoginRecord> {
 
     @Select("SELECT COUNT(*) FROM login_record WHERE login_type = #{loginType}")
     long countByLoginType(@Param("loginType") String loginType);
+
+    @Select("SELECT COUNT(*) FROM login_record WHERE user_id = #{userId} AND login_type = #{loginType}")
+    long countByUserIdAndLoginType(@Param("userId") String userId, @Param("loginType") String loginType);
+
+    @Select("SELECT COUNT(*) FROM login_record")
+    long countAll();
 }

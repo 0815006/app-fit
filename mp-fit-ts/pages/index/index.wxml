@@ -485,7 +485,7 @@
     </block>
   </view>
 
-  <!-- ========== 技术选型 ========== -->
+  <!-- ========== 个人信息 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'tech' }}">
     <!-- 当前用户信息卡片（点击进入个人信息页） -->
     <view class="user-info-card" wx:if="{{ currentUser }}" bindtap="goToProfile">
@@ -520,7 +520,7 @@
 
     <view class="card">
       <view class="card-header card-header-collapse" bindtap="toggleTechCollapse">
-        <text class="card-title">🛠️ 技术选型</text>
+        <text class="card-title">👤 个人信息</text>
         <text class="collapse-arrow {{ techCollapsed ? '' : 'collapse-arrow-open' }}">▾</text>
       </view>
       <view class="tech-list" wx:if="{{ !techCollapsed }}">

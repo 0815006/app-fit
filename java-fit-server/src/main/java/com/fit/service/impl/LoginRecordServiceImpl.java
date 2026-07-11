@@ -1,6 +1,5 @@
 package com.fit.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fit.entity.LoginRecord;
 import com.fit.mapper.LoginRecordMapper;
 import com.fit.service.LoginRecordService;
@@ -16,12 +15,13 @@ public class LoginRecordServiceImpl implements LoginRecordService {
     private final LoginRecordMapper loginRecordMapper;
 
     @Override
-    public LoginRecord record(String empNo, String loginType) {
+    public LoginRecord record(String userId, String empNo, String loginType) {
         LoginRecord record = new LoginRecord();
+        record.setUserId(userId);
         record.setEmpNo(empNo);
         record.setLoginType(loginType);
         loginRecordMapper.insert(record);
-        log.info("Login recorded: empNo={}, type={}, id={}", empNo, loginType, record.getId());
+        log.info("Login recorded: userId={}, empNo={}, type={}, id={}", userId, empNo, loginType, record.getId());
         return record;
     }
 
@@ -33,5 +33,15 @@ public class LoginRecordServiceImpl implements LoginRecordService {
     @Override
     public long countByLoginType(String loginType) {
         return loginRecordMapper.countByLoginType(loginType);
+    }
+
+    @Override
+    public long countByUserIdAndLoginType(String userId, String loginType) {
+        return loginRecordMapper.countByUserIdAndLoginType(userId, loginType);
+    }
+
+    @Override
+    public long countAll() {
+        return loginRecordMapper.countAll();
     }
 }

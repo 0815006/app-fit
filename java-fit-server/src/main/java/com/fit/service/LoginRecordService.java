@@ -5,16 +5,17 @@ import com.fit.entity.LoginRecord;
 public interface LoginRecordService {
 
     /**
-     * Record a login event and return the created record.
+     * Record a login event with userId and return the created record.
      *
+     * @param userId    user表主键ID
      * @param empNo     employee number
      * @param loginType WEB or MINI_PROGRAM
      * @return the saved login record
      */
-    LoginRecord record(String empNo, String loginType);
+    LoginRecord record(String userId, String empNo, String loginType);
 
     /**
-     * Get total login count for a given employee.
+     * Get total login count for a given employee (by empNo).
      *
      * @param empNo employee number
      * @return login count
@@ -28,4 +29,20 @@ public interface LoginRecordService {
      * @return total count for this login type
      */
     long countByLoginType(String loginType);
+
+    /**
+     * Get login count for a given user ID and login type.
+     *
+     * @param userId    user表主键ID
+     * @param loginType WEB or MINI_PROGRAM
+     * @return login count for this user + type
+     */
+    long countByUserIdAndLoginType(String userId, String loginType);
+
+    /**
+     * Get total count of all login records.
+     *
+     * @return total count
+     */
+    long countAll();
 }

@@ -56,7 +56,7 @@ Page({
       { key: 'meeting', label: '会议预定', icon: '📅' },
       { key: 'menu', label: '今日菜单', icon: '🍽️' },
       { key: 'fitness', label: '健身动作', icon: '🏋️' },
-      { key: 'tech', label: '技术选型', icon: '🛠️' },
+      { key: 'tech', label: '个人信息', icon: '👤' },
     ],
     techStack: [
       { category: '后端框架', name: 'Spring Boot', version: '3.4+' },

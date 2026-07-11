@@ -15,6 +15,11 @@ public class LoginRecord {
     private String id;
 
     /**
+     * user表主键ID
+     */
+    private String userId;
+
+    /**
      * 员工工号 (7 digits)
      */
     private String empNo;

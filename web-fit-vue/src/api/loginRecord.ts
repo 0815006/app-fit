@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { LoginRecord } from '@/typings'
+import type { LoginRecord, WebStatsDTO } from '@/typings'
 
 export interface ApiResult<T> {
   code: number
@@ -13,4 +13,8 @@ export function createLoginRecord(loginType: string): Promise<ApiResult<LoginRec
 
 export function getLoginCount(empNo: string): Promise<ApiResult<number>> {
   return request.get(`/login-record/count/${empNo}`)
+}
+
+export function getWebStats(): Promise<ApiResult<WebStatsDTO>> {
+  return request.get('/login-record/web-stats')
 }

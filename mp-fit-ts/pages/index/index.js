@@ -46,9 +46,11 @@ function makeDateDisplay(dateStr) {
 Page({
   data: {
     showProfileModal: false,
-    empNo: '0000000',
-    loginCount: null,
-    loading: false,
+    myLoginCount: null,
+    totalLoginCount: null,
+    statsLoading: false,
+    techCollapsed: true,
+    currentUser: null,
     activeTab: 'meeting',
     tabBars: [
       { key: 'meeting', label: '会议预定', icon: '📅' },
@@ -142,30 +144,34 @@ Page({
   },
 
   onLoad: function () {
-    var empNo = wx.getStorageSync('empNo') || '0000000'
-    var sys = wx.getSystemInfoSync()
-    var rpx = sys.windowWidth / 750
+    var windowInfo = wx.getWindowInfo()
+    var rpx = windowInfo.windowWidth / 750
     var tabBarPx = Math.round(100 * rpx)
-    var scrollHeight = sys.windowHeight - tabBarPx
-    this.setData({ empNo: empNo, scrollHeight: scrollHeight })
-    this.loadLoginData()
-    // 默认加载会议预定数据
+    var scrollHeight = windowInfo.windowHeight - tabBarPx
+    this.setData({ scrollHeight: scrollHeight })
+    // 默认加载会议预定数据（无需登录态）
     this.loadMeetingData()
 
     // 检查是否需要弹出资料完善弹窗
     this._checkProfileModal()
-    // 监听 storage 变化（静默登录完成后触发）
-    var that = this
-    wx.onStorageChange(function (res) {
-      if (res.key === 'showProfileModal' && res.newValue === true) {
-        that.setData({ showProfileModal: true })
-      }
-    })
+  },
+
+  /**
+   * 供 app.js 在静默登录成功后回调
+   */
+  onLoginReady: function () {
+    this._loginReady = true
+    this.loadMiniProgramStats()
+    // 登录完成后重新检查资料完善弹窗（新用户标记在登录时才写入）
+    this._checkProfileModal()
   },
 
   onShow: function () {
-    this.loadLoginData()
-    // 每次回到前台也检查一次
+    // 仅当静默登录已完成后才加载统计数据
+    if (this._loginReady) {
+      this.loadMiniProgramStats()
+    }
+    // 每次回到前台也检查一次资料完善弹窗
     this._checkProfileModal()
   },
 
@@ -185,26 +191,42 @@ Page({
       }
     }
   },
+// ── Tech Stack Collapse ──
+toggleTechCollapse: function () {
+  this.setData({ techCollapsed: !this.data.techCollapsed })
+},
 
-  // ── Login stats ──
-  loadLoginData: function () {
+// ── 跳转个人信息页 ──
+goToProfile: function () {
+  wx.navigateTo({
+    url: '/pages/profile/profile',
+  })
+},
+
+
+  // ── Mini Program Login Stats + Current User ──
+  loadMiniProgramStats: function () {
     var that = this
-    var empNo = wx.getStorageSync('empNo') || '0000000'
-    that.setData({ loading: true, empNo: empNo })
+    that.setData({ statsLoading: true })
 
-    api
-      .post('/login-record', { loginType: 'MINI_PROGRAM' })
-      .then(function () {
-        return api.get('/login-record/count/' + empNo)
-      })
-      .then(function (result) {
-        that.setData({ loginCount: result.data })
+    var pStats = api.get('/login-record/mini-program-stats')
+    var pUser  = api.get('/user/current')
+
+    Promise.all([pStats, pUser])
+      .then(function (results) {
+        var statsData = results[0].data
+        var userData  = results[1].data
+        that.setData({
+          myLoginCount: statsData.myCount,
+          totalLoginCount: statsData.totalCount,
+          currentUser: userData,
+        })
       })
       .catch(function () {
-        that.setData({ loginCount: null })
+        that.setData({ myLoginCount: null, totalLoginCount: null, currentUser: null })
       })
       .finally(function () {
-        that.setData({ loading: false })
+        that.setData({ statsLoading: false })
       })
   },
 
@@ -593,8 +615,8 @@ Page({
 
   onProfileSuccess: function () {
     this.setData({ showProfileModal: false })
-    // 刷新登录数据以显示新的 empNo
-    this.loadLoginData()
+    // 刷新小程序统计数据
+    this.loadMiniProgramStats()
   },
 
   // ── Share ──

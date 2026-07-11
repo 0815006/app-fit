@@ -41,7 +41,7 @@ public class UserController {
     }
 
     /**
-     * 完善用户资料（nickname + avatarUrl），status 0 → 1
+     * 完善/更新用户资料（nickname + avatarUrl + empNo）
      */
     @PostMapping("/update-profile")
     public Result<String> updateProfile(@Valid @RequestBody UpdateProfileDTO dto) {
@@ -55,11 +55,15 @@ public class UserController {
         if (dto.avatarUrl() != null && !dto.avatarUrl().isBlank()) {
             user.setAvatarUrl(dto.avatarUrl());
         }
+        // 支持维护工号：不传或传 "0000000" 表示未维护
+        if (dto.empNo() != null && !"0000000".equals(dto.empNo())) {
+            user.setEmpNo(dto.empNo());
+        }
         user.setStatus(1);
         userService.updateById(user);
 
-        log.info("用户资料已完善: userId={}, nickname={}", userId, dto.nickname());
-        return Result.success("资料完善成功");
+        log.info("用户资料已更新: userId={}, nickname={}, empNo={}", userId, dto.nickname(), dto.empNo());
+        return Result.success("资料更新成功");
     }
 
     /**

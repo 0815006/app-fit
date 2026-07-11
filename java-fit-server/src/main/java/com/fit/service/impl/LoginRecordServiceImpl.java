@@ -29,4 +29,9 @@ public class LoginRecordServiceImpl implements LoginRecordService {
     public long count(String empNo) {
         return loginRecordMapper.countByEmpNo(empNo);
     }
+
+    @Override
+    public long countByLoginType(String loginType) {
+        return loginRecordMapper.countByLoginType(loginType);
+    }
 }

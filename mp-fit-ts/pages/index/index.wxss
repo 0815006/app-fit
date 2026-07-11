@@ -53,6 +53,24 @@ page {
   color: #303133;
 }
 
+/* 可折叠标题 */
+.card-header-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.collapse-arrow {
+  font-size: 22rpx;
+  color: #909399;
+  transition: transform 0.25s ease;
+}
+
+.collapse-arrow-open {
+  transform: rotate(180deg);
+}
+
 /* 信息行 */
 .info-row {
   display: flex;
@@ -1571,4 +1589,124 @@ page {
   font-size: 26rpx;
   font-weight: 500;
   color: #f56c6c;
+}
+
+/* ===== 当前用户信息卡片 ===== */
+
+.user-info-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.user-info-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-right: 18rpx;
+  background: linear-gradient(135deg, #e8eaed, #dcdfe6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.user-avatar-placeholder {
+  font-size: 40rpx;
+}
+
+.user-info-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-info-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.3;
+}
+
+.user-info-hint {
+  font-size: 22rpx;
+  color: #909399;
+  margin-top: 4rpx;
+}
+
+.user-info-arrow {
+  flex-shrink: 0;
+  font-size: 32rpx;
+  color: #c0c4cc;
+  margin-left: 12rpx;
+  font-weight: 700;
+}
+
+/* ===== 登录统计卡片 ===== */
+
+.stats-card {
+  background: linear-gradient(135deg, #409eff, #337ecc);
+  border-radius: 16rpx;
+  padding: 28rpx 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(64, 158, 255, 0.30);
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.stats-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stats-value {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.stats-value-total {
+  font-size: 56rpx;
+}
+
+.stats-label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 6rpx;
+  font-weight: 500;
+}
+
+.stats-divider {
+  width: 2rpx;
+  height: 64rpx;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.stats-hint {
+  text-align: center;
+  margin-top: 12rpx;
+}
+
+.stats-hint text {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.6);
 }

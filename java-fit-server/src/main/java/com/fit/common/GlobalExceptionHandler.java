@@ -1,5 +1,6 @@
 package com.fit.common;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +16,13 @@ public class GlobalExceptionHandler {
     public Result<Void> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("Bad request: {}", e.getMessage());
         return Result.error(400, e.getMessage());
+    }
+
+    @ExceptionHandler(NotLoginException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result<Void> handleNotLogin(NotLoginException e) {
+        log.debug("未登录请求: {}", e.getMessage());
+        return Result.error(401, "请先登录");
     }
 
     @ExceptionHandler(Exception.class)

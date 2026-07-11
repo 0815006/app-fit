@@ -20,4 +20,12 @@ public interface LoginRecordService {
      * @return login count
      */
     long count(String empNo);
+
+    /**
+     * Get total login count for a given login type (e.g. MINI_PROGRAM).
+     *
+     * @param loginType login type
+     * @return total count for this login type
+     */
+    long countByLoginType(String loginType);
 }

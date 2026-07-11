@@ -1,7 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/action-detail/action-detail"
+    "pages/action-detail/action-detail",
+    "pages/profile/profile"
   ],
   "window": {
     "navigationBarTitleText": "Fit 全栈稳健版",

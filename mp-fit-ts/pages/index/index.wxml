@@ -468,11 +468,43 @@
 
   <!-- ========== 技术选型 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'tech' }}">
-    <view class="card">
-      <view class="card-header">
-        <text class="card-title">🛠️ 技术选型</text>
+    <!-- 当前用户信息卡片（点击进入个人信息页） -->
+    <view class="user-info-card" wx:if="{{ currentUser }}" bindtap="goToProfile">
+      <view class="user-info-avatar">
+        <image wx:if="{{ currentUser.avatarUrl }}" class="user-avatar-img" src="{{ currentUser.avatarUrl }}" mode="aspectFill" />
+        <text wx:else class="user-avatar-placeholder">👤</text>
       </view>
-      <view class="tech-list">
+      <view class="user-info-body">
+        <text class="user-info-name">{{ currentUser.nickname || '未设置昵称' }}</text>
+        <text class="user-info-hint">点击查看/编辑个人信息 →</text>
+      </view>
+      <view class="user-info-arrow">></view>
+    </view>
+
+    <!-- 登录统计卡片 -->
+    <view class="stats-card">
+      <view class="stats-row">
+        <view class="stats-item">
+          <text class="stats-value">{{ myLoginCount !== null ? myLoginCount : '--' }}</text>
+          <text class="stats-label">我的登录次数</text>
+        </view>
+        <view class="stats-divider"></view>
+        <view class="stats-item">
+          <text class="stats-value stats-value-total">{{ totalLoginCount !== null ? totalLoginCount : '--' }}</text>
+          <text class="stats-label">小程序总登录次数</text>
+        </view>
+      </view>
+      <view class="stats-hint" wx:if="{{ statsLoading }}">
+        <text>加载中...</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-header card-header-collapse" bindtap="toggleTechCollapse">
+        <text class="card-title">🛠️ 技术选型</text>
+        <text class="collapse-arrow {{ techCollapsed ? '' : 'collapse-arrow-open' }}">▾</text>
+      </view>
+      <view class="tech-list" wx:if="{{ !techCollapsed }}">
         <view class="tech-row" wx:for="{{ techStack }}" wx:key="name">
           <view class="tech-left">
             <text class="tech-category">{{ item.category }}</text>

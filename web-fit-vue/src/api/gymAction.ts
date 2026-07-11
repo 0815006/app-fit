@@ -32,6 +32,11 @@ export function listAllGymAction(): Promise<ApiResult<GymAction[]>> {
   return request.get('/gym-action/all')
 }
 
+/** GET /api/gym-action/by-muscle-group/{muscleGroup} */
+export function listByMuscleGroup(muscleGroup: string): Promise<ApiResult<GymAction[]>> {
+  return request.get(`/gym-action/by-muscle-group/${encodeURIComponent(muscleGroup)}`)
+}
+
 export function getGymAction(id: string): Promise<ApiResult<GymAction>> {
   return request.get(`/gym-action/${id}`)
 }

@@ -16,4 +16,7 @@ public class GymMuscle {
     private String muscleName;
     private String muscleGroup;
     private Integer sortNo;
+
+    /** 基础恢复小时数（大肌群72/48，小肌群24） */
+    private Integer baseRecoveryHours;
 }

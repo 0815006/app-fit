@@ -38,6 +38,11 @@ public class GymActionController {
         return a != null ? Result.success(a) : Result.error("动作不存在");
     }
 
+    @GetMapping("/by-muscle-group/{muscleGroup}")
+    public Result<List<GymAction>> listByMuscleGroup(@PathVariable String muscleGroup) {
+        return Result.success(service.listByMuscleGroup(muscleGroup));
+    }
+
     @PostMapping
     public Result<GymAction> create(@RequestBody GymAction action) {
         return Result.success(service.save(action));

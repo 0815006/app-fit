@@ -3,7 +3,11 @@ package com.fit.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fit.entity.GymAction;
+import com.fit.entity.GymActionMuscleRel;
+import com.fit.entity.GymMuscle;
 import com.fit.mapper.GymActionMapper;
+import com.fit.mapper.GymActionMuscleRelMapper;
+import com.fit.mapper.GymMuscleMapper;
 import com.fit.service.GymActionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,8 @@ import java.util.List;
 public class GymActionServiceImpl implements GymActionService {
 
     private final GymActionMapper mapper;
+    private final GymMuscleMapper muscleMapper;
+    private final GymActionMuscleRelMapper actionMuscleRelMapper;
 
     @Override
     public Page<GymAction> queryPage(int page, int size, String name, String actionType, String movementPattern, Integer difficultyLevel) {
@@ -68,5 +74,38 @@ public class GymActionServiceImpl implements GymActionService {
     public void delete(String id) {
         mapper.deleteById(id);
         log.info("Deleted gym action: id={}", id);
+    }
+
+    @Override
+    public List<GymAction> listByMuscleGroup(String muscleGroup) {
+        // 1. 查出该肌群大类下所有具体肌肉的 muscleId
+        List<GymMuscle> muscles = muscleMapper.selectList(
+                new LambdaQueryWrapper<GymMuscle>()
+                        .select(GymMuscle::getId)
+                        .eq(GymMuscle::getMuscleGroup, muscleGroup));
+        List<String> muscleIds = muscles.stream().map(GymMuscle::getId).toList();
+        if (muscleIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 2. 查出关联的动作 ID（去重）
+        List<GymActionMuscleRel> rels = actionMuscleRelMapper.selectList(
+                new LambdaQueryWrapper<GymActionMuscleRel>()
+                        .select(GymActionMuscleRel::getActionId)
+                        .in(GymActionMuscleRel::getMuscleId, muscleIds));
+        List<String> actionIds = rels.stream()
+                .map(GymActionMuscleRel::getActionId)
+                .distinct()
+                .toList();
+        if (actionIds.isEmpty()) {
+            return List.of();
+        }
+
+        // 3. 查出动作实体
+        return mapper.selectList(
+                new LambdaQueryWrapper<GymAction>()
+                        .in(GymAction::getId, actionIds)
+                        .eq(GymAction::getStatus, 1)
+                        .orderByAsc(GymAction::getName));
     }
 }

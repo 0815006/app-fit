@@ -105,18 +105,19 @@
 
 在一期开发中，你需要在原有的元数据表（动作、肌群、器械）基础上，至少追加以下两张业务表：
 
-### 1. 训练记录总表 (`workout_record`)
+### 1. 训练记录总表 (`gym_workout_record`)
 
 用于记录每一次动作训练的生命周期。
 
 | **字段名**     | **类型** | **说明**                                            |
 | -------------------- | -------------- | --------------------------------------------------------- |
-| `id`               | BigInt (PK)    | 主键 ID                                                   |
-| `action_id`        | Int            | 关联的动作 ID                                             |
-| `muscle_group`     | Varchar        | 冗余字段：所属肌群（方便首页直接 Group By 查询）          |
+| `id`               | VARCHAR(32) (PK)    | 主键 ID（雪花ID）                                                   |
+| `user_id`          | VARCHAR(32)    | 所属用户ID（关联 `user.id`）                                             |
+| `action_id`        | VARCHAR(32)            | 关联的动作 ID                                             |
+| `muscle_group`     | Varchar        | 冗余字段：所属肌群大类编码（方便首页直接 Group By 查询）          |
 | `start_time`       | DateTime       | 点击开始训练的时间戳                                      |
 | `end_time`         | DateTime       | 点击结束（或经超时修正后）的时间戳                        |
-| `exhaustion_score` | Float          | 用户滑动的力竭度系数（0.5 ~ 1.2）                         |
+| `exhaustion_score` | DECIMAL(3,2)          | 用户滑动的力竭度系数（0.5 ~ 1.2）                         |
 | `status`           | TinyInt        | 状态：`0: 训练中`, `1: 正常结束`, `2: 超时修正结束` |
 
 ### 2. 肌肉基础配置表 (`muscle_group_config`)
@@ -144,11 +145,12 @@
 - `muscle_name` (如 '胸肌')
 - 👉 **`base_recovery_hours` (Int)**：基础恢复小时数（大肌群配 72/48，小肌群配 24）
 
-### 2. 训练记录表（新增的唯一业务表 `workout_record`）
+### 2. 训练记录表（新增的唯一业务表 `gym_workout_record`）
 
 记录每次动作的打卡流水：
 
-- `id`
+- `id`（雪花ID）
+- `user_id`（关联 `user.id`，标识哪位用户）
 - `action_id`（关联动作）
 - `muscle_group_code`（关联肌肉群，用来直接找肌肉表里的基础恢复时间）
 - `start_time`（开始时间戳）
@@ -158,12 +160,12 @@
 
 ### 💡 这样设计后，首页看板的查询逻辑（SQL思路）
 
-当用户进入首页时，后端只需要查出**每个肌群最后一次（`max(end_time)`）的训练记录**，然后和肌肉表里的 `base_recovery_hours` 算一下就行了。
+当用户进入首页时，后端只需要查出**该用户每个肌群最后一次（`max(end_time)`）的训练记录**，然后和肌肉表里的 `base_recovery_hours` 算一下就行了。
 
 伪代码逻辑大概是：
 
-1. **查出本周打卡次数**：`SELECT count(1) FROM workout_record WHERE muscle_group_code = 'chest' AND start_time >= 本周一0点`。
-2. **查出最后一次训练算恢复**：`SELECT end_time, exhaustion_score FROM workout_record WHERE muscle_group_code = 'chest' ORDER BY start_time DESC LIMIT 1`。
-3. 用这条最新记录的 `end_time + (base_recovery_hours * exhaustion_score)`，跟 `当前时间` 对比，直接就能在首页给“胸肌”挂上 `🟢已恢复` 还是 `🟡恢复中（倒计时）` 的标签。
+1. **查出本周打卡次数**：`SELECT count(1) FROM gym_workout_record WHERE user_id = ? AND muscle_group_code = 'chest' AND start_time >= 本周一0点`。
+2. **查出最后一次训练算恢复**：`SELECT end_time, exhaustion_score FROM gym_workout_record WHERE user_id = ? AND muscle_group_code = 'chest' ORDER BY start_time DESC LIMIT 1`。
+3. 用这条最新记录的 `end_time + (base_recovery_hours * exhaustion_score)`，跟 `当前时间` 对比，直接就能在首页给"胸肌"挂上 `🟢已恢复` 还是 `🟡恢复中（倒计时）` 的标签。
 
 表结构这样合并后非常干净！你现在后端和数据表思路已经全通了，打算先去写后端的这几个核心接口（开始训练、结束训练、首页看板），还是开始搭微信小程序的前端页面？

@@ -12,4 +12,11 @@ public interface GymActionService {
     GymAction save(GymAction action);
     GymAction update(GymAction action);
     void delete(String id);
+
+    /**
+     * 按肌群大类编码查询该肌群下所有动作
+     * @param muscleGroup 肌群大类编码（CHEST/BACK/SHOULDER/ARM/LEG/GLUTE/CORE/FULL_BODY）
+     * @return 动作列表
+     */
+    List<GymAction> listByMuscleGroup(String muscleGroup);
 }

@@ -53,6 +53,27 @@ public class GymActionMuscleRelServiceImpl implements GymActionMuscleRelService 
     }
 
     @Override
+    public List<GymActionMuscleRel> listByMuscleGroup(String muscleGroup) {
+        // 1. 查出该肌群大类下所有 muscleId
+        List<GymMuscle> muscles = muscleMapper.selectList(
+                new LambdaQueryWrapper<GymMuscle>()
+                        .eq(GymMuscle::getMuscleGroup, muscleGroup)
+                        .select(GymMuscle::getId));
+        if (muscles.isEmpty()) {
+            return List.of();
+        }
+        List<String> muscleIds = muscles.stream().map(GymMuscle::getId).toList();
+
+        // 2. 用 muscleId IN (...) 查出所有 rel
+        LambdaQueryWrapper<GymActionMuscleRel> qw = new LambdaQueryWrapper<>();
+        qw.in(GymActionMuscleRel::getMuscleId, muscleIds)
+          .orderByDesc(GymActionMuscleRel::getIsPrimary);
+        List<GymActionMuscleRel> list = mapper.selectList(qw);
+        enrichNames(list);
+        return list;
+    }
+
+    @Override
     public GymActionMuscleRel save(GymActionMuscleRel rel) {
         mapper.insert(rel);
         log.info("Created action-muscle rel: id={}, action={}, muscle={}", rel.getId(), rel.getActionId(), rel.getMuscleId());

@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +42,7 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
         GROUP_NAME_MAP.put("LEG", "腿部");
         GROUP_NAME_MAP.put("GLUTE", "臀部");
         GROUP_NAME_MAP.put("CORE", "核心");
+        GROUP_NAME_MAP.put("CARDIO", "有氧");
         GROUP_NAME_MAP.put("FULL_BODY", "全身");
     }
 
@@ -191,12 +193,17 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
                 readyNames.add(groupName);
             }
 
+            // 4. 统计二级肌肉本周训练痕迹
+            List<MuscleGroupStatusVO.SubMuscleStatus> subMuscles = buildSubMuscleStatuses(
+                    userId, groupCode, weekStart);
+
             groupStatuses.add(MuscleGroupStatusVO.builder()
                     .muscleGroup(groupCode)
                     .muscleGroupName(groupName)
                     .weeklyCount(weeklyCount)
                     .status(status)
                     .remainingSeconds(remainingSeconds)
+                    .subMuscles(subMuscles)
                     .build());
         }
 
@@ -208,6 +215,64 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
                 .muscleGroups(groupStatuses)
                 .timeoutRecord(timeoutRecord)
                 .build();
+    }
+
+    /**
+     * 构建某个肌群大类下所有二级肌肉的本周训练痕迹
+     */
+    private List<MuscleGroupStatusVO.SubMuscleStatus> buildSubMuscleStatuses(
+            String userId, String muscleGroup, LocalDateTime weekStart) {
+        // 查该肌群大类下所有二级肌肉
+        List<GymMuscle> subMuscles = muscleMapper.selectList(
+                new LambdaQueryWrapper<GymMuscle>()
+                        .eq(GymMuscle::getMuscleGroup, muscleGroup)
+                        .orderByAsc(GymMuscle::getSortNo));
+
+        if (subMuscles.isEmpty()) {
+            return List.of();
+        }
+
+        // 收集所有肌肉ID
+        List<String> muscleIds = subMuscles.stream()
+                .map(GymMuscle::getId)
+                .toList();
+
+        // 批量查这些肌肉关联的所有 actionId
+        List<GymActionMuscleRel> allRels = actionMuscleRelMapper.selectList(
+                new LambdaQueryWrapper<GymActionMuscleRel>()
+                        .in(GymActionMuscleRel::getMuscleId, muscleIds)
+                        .select(GymActionMuscleRel::getActionId, GymActionMuscleRel::getMuscleId));
+
+        // muscleId → 关联的 actionId 集合
+        Map<String, Set<String>> muscleActionMap = new HashMap<>();
+        for (GymActionMuscleRel rel : allRels) {
+            muscleActionMap.computeIfAbsent(rel.getMuscleId(), k -> new HashSet<>())
+                    .add(rel.getActionId());
+        }
+
+        // 批量查本周有训练记录的 actionId（该肌群下全部）
+        Set<String> trainedActionIds = recordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getActionId)
+                        .eq(GymWorkoutRecord::getUserId, userId)
+                        .eq(GymWorkoutRecord::getMuscleGroup, muscleGroup)
+                        .ge(GymWorkoutRecord::getStartTime, weekStart))
+                .stream()
+                .map(GymWorkoutRecord::getActionId)
+                .collect(Collectors.toSet());
+
+        // 组装结果
+        List<MuscleGroupStatusVO.SubMuscleStatus> result = new ArrayList<>();
+        for (GymMuscle sub : subMuscles) {
+            Set<String> actionIds = muscleActionMap.getOrDefault(sub.getId(), Set.of());
+            boolean trained = actionIds.stream().anyMatch(trainedActionIds::contains);
+            result.add(MuscleGroupStatusVO.SubMuscleStatus.builder()
+                    .muscleCode(sub.getMuscleCode())
+                    .muscleName(sub.getMuscleName())
+                    .trainedThisWeek(trained)
+                    .build());
+        }
+        return result;
     }
 
     @Override

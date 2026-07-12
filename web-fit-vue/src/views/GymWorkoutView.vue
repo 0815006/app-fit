@@ -10,7 +10,6 @@ import {
   type TimeoutRecordVO,
   type WeeklyWorkoutVO,
 } from '@/api/gymWorkout'
-import { listAllGymMuscle, type GymMuscle } from '@/api/gymMuscle'
 import MuscleDashboard from '@/components/workout/MuscleDashboard.vue'
 import ActionSelectDialog from '@/components/workout/ActionSelectDialog.vue'
 import TrainingTimerDialog from '@/components/workout/TrainingTimerDialog.vue'
@@ -23,9 +22,6 @@ import WeeklySummary from '@/components/workout/WeeklySummary.vue'
 const loading = ref(false)
 const dashboard = ref<DashboardVO | null>(null)
 
-/** 所有肌肉数据，用于双层展示的第二层 */
-const allMuscles = ref<GymMuscle[]>([])
-
 /** 本周训练摘要 */
 const weeklyRecords = ref<WeeklyWorkoutVO[]>([])
 const weeklyLoading = ref(false)
@@ -33,8 +29,10 @@ const weeklyLoading = ref(false)
 // 弹窗控制
 const actionSelectVisible = ref(false)
 const selectedMuscleGroup = ref('')
-/** 当前选中的具体肌肉名称，用于弹窗标题上下文 */
-const selectedMuscleName = ref('')
+/** 高亮的二级肌肉编码（如 CHEST_MAJOR），用于 ActionSelectDialog 置顶 */
+const highlightMuscleCode = ref('')
+/** 高亮的二级肌肉中文名（如 胸大肌），用于 ActionSelectDialog 标题 */
+const highlightMuscleName = ref('')
 
 const timerVisible = ref(false)
 const currentActionId = ref('')
@@ -76,15 +74,6 @@ async function loadDashboard(): Promise<void> {
   }
 }
 
-async function loadMuscles(): Promise<void> {
-  try {
-    const res = await listAllGymMuscle()
-    allMuscles.value = res.data || []
-  } catch {
-    // 静默失败，肌肉列表为空时不影响第一层展示
-  }
-}
-
 /** 加载本周训练摘要 */
 async function loadWeeklySummary(): Promise<void> {
   weeklyLoading.value = true
@@ -98,17 +87,11 @@ async function loadWeeklySummary(): Promise<void> {
   }
 }
 
-// ---- 大肌群入口（第一层快捷按钮）----
-function handleMuscleSelect(group: string): void {
-  selectedMuscleGroup.value = group
-  selectedMuscleName.value = ''
-  actionSelectVisible.value = true
-}
-
-// ---- 具体肌肉入口（第二层）----
-function handleMuscleSelectDetail(muscle: GymMuscle): void {
-  selectedMuscleGroup.value = muscle.muscleGroup
-  selectedMuscleName.value = muscle.muscleName
+// ---- 二级肌肉入口（点击卡片内二级肌肉行）----
+function handleMuscleSelectDetail(payload: { muscleGroup: string; muscleCode: string; muscleName: string }): void {
+  selectedMuscleGroup.value = payload.muscleGroup
+  highlightMuscleCode.value = payload.muscleCode
+  highlightMuscleName.value = payload.muscleName
   actionSelectVisible.value = true
 }
 
@@ -161,7 +144,6 @@ async function handleMakeupCompleted(): Promise<void> {
 
 onMounted(() => {
   loadDashboard()
-  loadMuscles()
   loadWeeklySummary()
 })
 </script>
@@ -184,12 +166,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 肌群看板（双层入口） -->
+    <!-- 肌群看板（新布局：大卡片 + 二级肌肉平铺） -->
     <MuscleDashboard
       :muscle-groups="dashboard?.muscleGroups || []"
-      :muscles="allMuscles"
       :loading="loading"
-      @select="handleMuscleSelect"
       @select-muscle="handleMuscleSelectDetail"
     />
 
@@ -199,17 +179,19 @@ onMounted(() => {
       :loading="weeklyLoading"
     />
 
-    <!-- 动作选择弹窗 -->
+    <!-- 动作选择弹窗（方案B：整群平铺 + 二级置顶高亮） -->
     <ActionSelectDialog
       v-model:visible="actionSelectVisible"
       :muscle-group="selectedMuscleGroup"
-      :muscle-name="selectedMuscleName"
+      :highlight-muscle-code="highlightMuscleCode"
+      :highlight-muscle-name="highlightMuscleName"
       @start="handleActionStart"
     />
 
     <!-- 训练计时弹窗 -->
     <TrainingTimerDialog
       v-model:visible="timerVisible"
+      :action-id="currentActionId"
       :action-name="currentActionName"
       @end="handleTimerEnd"
       @cancel="handleTimerCancel"

@@ -30,6 +30,11 @@ public class GymActionMuscleRelController {
         return Result.success(service.listByActionId(actionId));
     }
 
+    @GetMapping("/by-muscle-group/{muscleGroup}")
+    public Result<List<GymActionMuscleRel>> listByMuscleGroup(@PathVariable String muscleGroup) {
+        return Result.success(service.listByMuscleGroup(muscleGroup));
+    }
+
     @PostMapping
     public Result<GymActionMuscleRel> create(@RequestBody GymActionMuscleRel rel) {
         return Result.success(service.save(rel));

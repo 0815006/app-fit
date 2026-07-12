@@ -11,12 +11,19 @@ export interface DashboardVO {
   timeoutRecord: TimeoutRecordVO | null
 }
 
+export interface SubMuscleStatus {
+  muscleCode: string
+  muscleName: string
+  trainedThisWeek: boolean
+}
+
 export interface MuscleGroupStatusVO {
   muscleGroup: string
   muscleGroupName: string
   weeklyCount: number
   status: 'READY' | 'RECOVERING'
   remainingSeconds: number
+  subMuscles: SubMuscleStatus[]
 }
 
 export interface TimeoutRecordVO {

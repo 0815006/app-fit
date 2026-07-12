@@ -1,54 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { MuscleGroupStatusVO } from '@/api/gymWorkout'
-import type { GymMuscle } from '@/api/gymMuscle'
+import type { MuscleGroupStatusVO, SubMuscleStatus } from '@/api/gymWorkout'
 
-const props = defineProps<{
+defineProps<{
   muscleGroups: MuscleGroupStatusVO[]
   loading: boolean
-  /** 所有肌肉数据，按 muscleGroup 分组后用于第二层展示 */
-  muscles?: GymMuscle[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'select', group: string): void
-  /** 从具体肌肉入口进入 */
-  (e: 'selectMuscle', muscle: GymMuscle): void
+  /** 从具体肌肉入口进入，携带 muscleGroup / muscleCode / muscleName */
+  (e: 'selectMuscle', payload: { muscleGroup: string; muscleCode: string; muscleName: string }): void
 }>()
-
-/** 当前展开的大肌群 code 集合 */
-const expandedGroups = ref<Set<string>>(new Set())
-
-function toggleExpand(groupCode: string): void {
-  const next = new Set(expandedGroups.value)
-  if (next.has(groupCode)) {
-    next.delete(groupCode)
-  } else {
-    next.add(groupCode)
-  }
-  expandedGroups.value = next
-}
-
-function isExpanded(groupCode: string): boolean {
-  return expandedGroups.value.has(groupCode)
-}
-
-/** 获取某个大肌群下的所有肌肉 */
-function getMusclesForGroup(groupCode: string): GymMuscle[] {
-  return (props.muscles || []).filter(m => m.muscleGroup === groupCode)
-}
 
 /** 恢复中剩余时间的格式化展示 */
 function formatRemaining(seconds: number): string {
   if (seconds <= 0) return ''
   const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
   if (h >= 24) {
     const d = Math.floor(h / 24)
-    return `还剩 ${d} 天`
+    return `⏳ ${d}天`
   }
-  if (h > 0) return `还剩 ${h} 小时`
-  return `还剩 ${m} 分钟`
+  if (h > 0) return `⏳ ${h}h`
+  const m = Math.floor((seconds % 3600) / 60)
+  return `⏳ ${m}m`
 }
 
 const GROUP_ICONS: Record<string, string> = {
@@ -59,7 +32,29 @@ const GROUP_ICONS: Record<string, string> = {
   LEG: '🦵',
   GLUTE: '🍑',
   CORE: '🧘',
+  CARDIO: '🏃',
   FULL_BODY: '🏃',
+}
+
+/** 肌群左侧色条颜色 */
+const GROUP_COLORS: Record<string, string> = {
+  CHEST: '#f56c6c',
+  BACK: '#e6a23c',
+  SHOULDER: '#409eff',
+  ARM: '#67c23a',
+  LEG: '#b37feb',
+  GLUTE: '#ff85c0',
+  CORE: '#36cfc9',
+  CARDIO: '#f39c12',
+  FULL_BODY: '#909399',
+}
+
+function handleSubMuscleClick(groupCode: string, sub: SubMuscleStatus): void {
+  emit('selectMuscle', {
+    muscleGroup: groupCode,
+    muscleCode: sub.muscleCode,
+    muscleName: sub.muscleName,
+  })
 }
 </script>
 
@@ -74,78 +69,63 @@ const GROUP_ICONS: Record<string, string> = {
         :md="8"
         :lg="6"
       >
-        <!-- ============ 第一层：大肌群卡片 ============ -->
+        <!-- ============ 肌群卡片（新布局） ============ -->
         <el-card
           class="muscle-card"
           :class="{ 'card-recovering': group.status === 'RECOVERING' }"
+          :style="{ borderLeft: `4px solid ${GROUP_COLORS[group.muscleGroup] || '#dcdfe6'}` }"
           shadow="hover"
         >
-          <!-- 大肌群头部（可点击展开/收起） -->
-          <div class="card-header" @click.stop="toggleExpand(group.muscleGroup)">
+          <!-- 卡片头部：左肌群名 + 右恢复状态 -->
+          <div class="card-header">
             <div class="card-left">
-              <span class="expand-icon">{{ isExpanded(group.muscleGroup) ? '▼' : '▶' }}</span>
               <span class="muscle-icon">{{ GROUP_ICONS[group.muscleGroup] || '🏋️' }}</span>
-              <div class="muscle-info">
-                <span class="muscle-name">{{ group.muscleGroupName }}</span>
-                <span class="weekly-count" v-if="group.weeklyCount > 0">
-                  🔥 × {{ group.weeklyCount }}
-                </span>
-              </div>
+              <span class="muscle-name">{{ group.muscleGroupName }}</span>
+              <span v-if="group.weeklyCount > 0" class="weekly-badge">
+                🔥×{{ group.weeklyCount }}
+              </span>
             </div>
             <div class="card-right">
               <el-tag
-                :type="group.status === 'READY' ? 'success' : 'warning'"
+                v-if="group.status === 'READY'"
+                type="success"
                 size="small"
                 effect="plain"
+                class="status-tag"
               >
-                {{ group.status === 'READY' ? '🟢 已恢复' : '🟡 恢复中' }}
+                🟢 可练
               </el-tag>
-              <span v-if="group.status === 'RECOVERING'" class="remaining-time">
-                {{ formatRemaining(group.remainingSeconds) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- 大肌群快捷入口按钮 -->
-          <div class="group-quick-entry">
-            <el-button
-              size="small"
-              type="primary"
-              plain
-              @click.stop="emit('select', group.muscleGroup)"
-            >
-              从 {{ group.muscleGroupName }} 入口
-            </el-button>
-          </div>
-
-          <!-- ============ 第二层：具体肌肉展开区 ============ -->
-          <el-collapse-transition>
-            <div v-show="isExpanded(group.muscleGroup)" class="muscle-sub-list">
-              <div class="sub-divider" />
-              <div
-                v-for="muscle in getMusclesForGroup(group.muscleGroup)"
-                :key="muscle.id"
-                class="muscle-sub-item"
-                @click.stop="emit('selectMuscle', muscle)"
+              <el-tag
+                v-else
+                type="warning"
+                size="small"
+                effect="plain"
+                class="status-tag"
               >
-                <span class="sub-muscle-dot">•</span>
-                <span class="sub-muscle-name">{{ muscle.muscleName }}</span>
-                <el-button
-                  size="small"
-                  type="primary"
-                  link
-                  class="sub-muscle-btn"
-                >
-                  进入训练
-                </el-button>
-              </div>
-              <el-empty
-                v-if="getMusclesForGroup(group.muscleGroup).length === 0"
-                description="暂无具体肌肉数据"
-                :image-size="40"
-              />
+                {{ formatRemaining(group.remainingSeconds) }}
+              </el-tag>
             </div>
-          </el-collapse-transition>
+          </div>
+
+          <!-- 分割线 -->
+          <div class="card-divider" />
+
+          <!-- 二级肌肉列表（始终展开） -->
+          <div class="sub-muscle-list">
+            <div
+              v-for="sub in group.subMuscles"
+              :key="sub.muscleCode"
+              class="sub-muscle-row"
+              @click="handleSubMuscleClick(group.muscleGroup, sub)"
+            >
+              <span class="sub-muscle-dot" />
+              <span class="sub-muscle-name">{{ sub.muscleName }}</span>
+              <span v-if="sub.trainedThisWeek" class="sub-muscle-fire" title="本周已训练">🔥</span>
+            </div>
+            <div v-if="group.subMuscles.length === 0" class="sub-muscle-empty">
+              暂无细分肌肉数据
+            </div>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -159,9 +139,11 @@ const GROUP_ICONS: Record<string, string> = {
   padding: 4px;
 }
 
+/* ========= 卡片整体 ========= */
 .muscle-card {
   transition: all 0.3s;
   margin-bottom: 12px;
+  border-radius: 10px;
 }
 
 .muscle-card:hover {
@@ -169,18 +151,20 @@ const GROUP_ICONS: Record<string, string> = {
 }
 
 .card-recovering {
-  opacity: 0.65;
+  opacity: 0.6;
   background-color: #f5f5f5;
 }
 
-/* ========= 大肌群头部 ========= */
+.card-recovering:hover {
+  opacity: 0.75;
+}
+
+/* ========= 卡片头部 ========= */
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
-  user-select: none;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
 }
 
 .card-left {
@@ -188,86 +172,72 @@ const GROUP_ICONS: Record<string, string> = {
   align-items: center;
   gap: 8px;
   flex: 1;
-}
-
-.expand-icon {
-  font-size: 12px;
-  color: #909399;
-  width: 14px;
-  text-align: center;
-  flex-shrink: 0;
+  min-width: 0;
 }
 
 .muscle-icon {
-  font-size: 28px;
+  font-size: 24px;
+  flex-shrink: 0;
 }
 
-.muscle-info {
+.muscle-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #303133;
+  flex-shrink: 0;
+}
+
+.weekly-badge {
+  font-size: 12px;
+  color: #e6a23c;
+  font-weight: 600;
+  background: rgba(230, 162, 60, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.card-right {
+  flex-shrink: 0;
+}
+
+.status-tag {
+  font-size: 12px;
+}
+
+/* ========= 分割线 ========= */
+.card-divider {
+  border-top: 1px solid #ebeef5;
+  margin: 8px 0 4px;
+}
+
+/* ========= 二级肌肉列表 ========= */
+.sub-muscle-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.muscle-name {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.weekly-count {
-  font-size: 13px;
-  color: #e6a23c;
-}
-
-.card-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.remaining-time {
-  font-size: 12px;
-  color: #909399;
-}
-
-/* ========= 大肌群快捷入口 ========= */
-.group-quick-entry {
-  margin-top: 8px;
-  padding-top: 4px;
-}
-
-.group-quick-entry .el-button {
-  width: 100%;
-}
-
-/* ========= 第二层：具体肌肉 ========= */
-.muscle-sub-list {
-  margin-top: 4px;
-}
-
-.sub-divider {
-  border-top: 1px dashed #e4e7ed;
-  margin: 6px 0 8px;
-}
-
-.muscle-sub-item {
+.sub-muscle-row {
   display: flex;
   align-items: center;
-  padding: 6px 8px;
+  padding: 7px 10px;
   cursor: pointer;
   border-radius: 6px;
   transition: background 0.2s;
 }
 
-.muscle-sub-item:hover {
-  background: rgba(64, 158, 255, 0.08);
+.sub-muscle-row:hover {
+  background: rgba(64, 158, 255, 0.06);
 }
 
 .sub-muscle-dot {
-  color: #409eff;
-  margin-right: 6px;
-  font-weight: 700;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c0c4cc;
+  margin-right: 10px;
+  flex-shrink: 0;
 }
 
 .sub-muscle-name {
@@ -277,7 +247,16 @@ const GROUP_ICONS: Record<string, string> = {
   font-weight: 500;
 }
 
-.sub-muscle-btn {
-  font-size: 13px;
+.sub-muscle-fire {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.sub-muscle-empty {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #c0c4cc;
+  text-align: center;
 }
 </style>

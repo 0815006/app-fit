@@ -8,6 +8,8 @@ import java.util.List;
 public interface GymActionMuscleRelService {
     Page<GymActionMuscleRel> queryPage(int page, int size, String actionId, String muscleId);
     List<GymActionMuscleRel> listByActionId(String actionId);
+    /** 按肌群大类批量获取所有动作-肌肉关联关系 */
+    List<GymActionMuscleRel> listByMuscleGroup(String muscleGroup);
     GymActionMuscleRel save(GymActionMuscleRel rel);
     void delete(String id);
     void deleteByActionId(String actionId);

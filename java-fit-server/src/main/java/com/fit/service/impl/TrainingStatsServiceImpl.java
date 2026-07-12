@@ -77,7 +77,7 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     @Override
     public Map<String, Integer> calculateMuscleFatigue(String userId) {
         // 标准肌群列表
-        String[] muscleGroups = {"CHEST", "BACK", "SHOULDER", "ARM", "LEG", "GLUTE", "CORE"};
+        String[] muscleGroups = {"CHEST", "BACK", "SHOULDER", "ARM", "LEG", "GLUTE", "CORE", "CARDIO"};
         Map<String, Integer> fatigue = new LinkedHashMap<>();
 
         // 获取所有训练记录（按日期倒序）

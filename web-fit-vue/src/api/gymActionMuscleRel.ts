@@ -21,6 +21,10 @@ export function listByActionId(actionId: string): Promise<ApiResult<GymActionMus
   return request.get(`/gym-action-muscle-rel/by-action/${actionId}`)
 }
 
+export function listRelByMuscleGroup(muscleGroup: string): Promise<ApiResult<GymActionMuscleRel[]>> {
+  return request.get(`/gym-action-muscle-rel/by-muscle-group/${encodeURIComponent(muscleGroup)}`)
+}
+
 export function createGymActionMuscleRel(data: Partial<GymActionMuscleRel>): Promise<ApiResult<GymActionMuscleRel>> {
   return request.post('/gym-action-muscle-rel', data)
 }

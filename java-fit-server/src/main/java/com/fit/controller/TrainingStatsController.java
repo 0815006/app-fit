@@ -3,6 +3,7 @@ package com.fit.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.fit.common.Result;
 import com.fit.service.TrainingStatsService;
+import com.fit.vo.RankingItemVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,6 +95,64 @@ public class TrainingStatsController {
     public Result<List<Map<String, Object>>> getProgressRanking(
             @RequestParam(defaultValue = "30") int days) {
         return Result.success(statsService.getProgressRanking(days));
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // V2 榜单（基于 gym_workout_record，返回 RankingItemVO）
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * 坚持榜 V2：周期内累计打卡天数排名
+     */
+    @GetMapping("/ranking/consistency-v2")
+    public Result<List<RankingItemVO>> getConsistencyRankingV2(
+            @RequestParam(defaultValue = "30") int days) {
+        return Result.success(statsService.getConsistencyRankingV2(days));
+    }
+
+    /**
+     * 容量榜：周期内训练总容量排名
+     */
+    @GetMapping("/ranking/volume")
+    public Result<List<RankingItemVO>> getVolumeRanking(
+            @RequestParam(defaultValue = "30") int days) {
+        return Result.success(statsService.getVolumeRanking(days));
+    }
+
+    /**
+     * 容量榜：单次最大容量排行（深蹲/卧推/硬拉/三大项之和）
+     * @param days 统计天数（默认30）
+     * @param lift 三大项：bench / squat / deadlift / all（默认bench卧推）
+     */
+    @GetMapping("/ranking/max-single-volume")
+    public Result<List<RankingItemVO>> getMaxSingleVolumeRanking(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "bench") String lift) {
+        return Result.success(statsService.getMaxSingleVolumeRanking(days, lift));
+    }
+
+    /**
+     * 1RM巅峰榜：单次最大 1RM 排行（深蹲/卧推/硬拉/三大项之和）
+     * @param days 统计天数（默认30）
+     * @param lift 三大项：bench / squat / deadlift / all（默认bench卧推）
+     */
+    @GetMapping("/ranking/peak-1rm")
+    public Result<List<RankingItemVO>> getPeak1RMRanking(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "bench") String lift) {
+        return Result.success(statsService.getPeak1RMRanking(days, lift));
+    }
+
+    /**
+     * 进步榜 V2：单次最大 1RM 增长率排名（深蹲/卧推/硬拉/三大项之和）
+     * @param days 统计天数（默认30）
+     * @param lift 三大项：bench / squat / deadlift / all（默认bench卧推）
+     */
+    @GetMapping("/ranking/progress-v2")
+    public Result<List<RankingItemVO>> getProgressRankingV2(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "bench") String lift) {
+        return Result.success(statsService.getProgressRankingV2(days, lift));
     }
 
     /**

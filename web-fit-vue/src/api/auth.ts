@@ -8,6 +8,7 @@ export interface UserInfo {
   username: string | null
   wxOpenid: string | null
   empNo: string
+  empName: string | null
   nickname: string | null
   avatarUrl: string | null
   status: number

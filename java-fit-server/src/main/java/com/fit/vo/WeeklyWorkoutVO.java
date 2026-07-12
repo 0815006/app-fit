@@ -25,6 +25,21 @@ public class WeeklyWorkoutVO {
     /** 开始时间 */
     private LocalDateTime startTime;
 
+    /** 重量(kg)，可为 null */
+    private BigDecimal weight;
+
+    /** 次数，可为 null */
+    private Integer reps;
+
+    /** 组数，可为 null */
+    private Integer setCount;
+
+    /** 1RM估值(kg)，可为 null */
+    private BigDecimal rmEstimate;
+
+    /** 是否破个人纪录 */
+    private Boolean isPr;
+
     /** 力竭度系数 */
     private BigDecimal exhaustionScore;
 

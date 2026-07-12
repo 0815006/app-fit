@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -89,16 +90,53 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
     }
 
     @Override
-    public void endWorkout(String recordId, BigDecimal exhaustionScore) {
+    public void endWorkout(String recordId, BigDecimal weight, Integer reps, Integer setCount, BigDecimal exhaustionScore) {
         GymWorkoutRecord record = getRecordOrThrow(recordId);
         if (record.getStatus() != 0) {
             throw new IllegalStateException("该训练记录已结束，不可重复操作");
         }
+
+        // 1. 写入训练数据（允许全部为 null）
+        record.setWeight(weight);
+        record.setReps(reps);
+        record.setSetCount(setCount);
+
+        // 2. 仅当 weight 和 reps 均非 null 时才计算 1RM 和 PR
+        if (weight != null && reps != null && weight.compareTo(BigDecimal.ZERO) > 0 && reps > 0) {
+            // Epley 公式：1RM = W × (1 + R/30)
+            BigDecimal rm = weight.multiply(BigDecimal.ONE.add(
+                BigDecimal.valueOf(reps).divide(BigDecimal.valueOf(30), 4, RoundingMode.HALF_UP)))
+                .setScale(2, RoundingMode.HALF_UP);
+            record.setRmEstimate(rm);
+
+            // 查该用户该动作历史最佳 1RM，判断是否 PR
+            BigDecimal bestRm = findBestRmEstimate(record.getUserId(), record.getActionId(), recordId);
+            record.setIsPr(bestRm != null && rm.compareTo(bestRm) > 0 ? 1 : 0);
+        }
+        // 如果 weight/reps 任一为 null，rmEstimate 保持 null，isPr 保持 0
+
+        // 3. 写入 endTime + exhaustionScore + status=1
         record.setEndTime(LocalDateTime.now());
         record.setExhaustionScore(exhaustionScore);
         record.setStatus(1);
         recordMapper.updateById(record);
-        log.info("结束训练：recordId={}, exhaustionScore={}", recordId, exhaustionScore);
+        log.info("结束训练：recordId={}, weight={}, reps={}, setCount={}, exhaustionScore={}, rmEstimate={}, isPr={}",
+                recordId, weight, reps, setCount, exhaustionScore, record.getRmEstimate(), record.getIsPr());
+    }
+
+    /**
+     * 查找该用户该动作的历史最佳 rmEstimate（排除当前记录自身）
+     */
+    private BigDecimal findBestRmEstimate(String userId, String actionId, String excludeRecordId) {
+        LambdaQueryWrapper<GymWorkoutRecord> qw = new LambdaQueryWrapper<>();
+        qw.eq(GymWorkoutRecord::getUserId, userId)
+          .eq(GymWorkoutRecord::getActionId, actionId)
+          .ne(GymWorkoutRecord::getId, excludeRecordId)
+          .isNotNull(GymWorkoutRecord::getRmEstimate)
+          .orderByDesc(GymWorkoutRecord::getRmEstimate)
+          .last("LIMIT 1");
+        GymWorkoutRecord best = recordMapper.selectOne(qw);
+        return best != null ? best.getRmEstimate() : null;
     }
 
     @Override
@@ -393,6 +431,11 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
                     .muscleGroup(r.getMuscleGroup())
                     .muscleGroupName(groupName)
                     .startTime(r.getStartTime())
+                    .weight(r.getWeight())
+                    .reps(r.getReps())
+                    .setCount(r.getSetCount())
+                    .rmEstimate(r.getRmEstimate())
+                    .isPr(r.getIsPr() != null && r.getIsPr() == 1)
                     .exhaustionScore(r.getExhaustionScore())
                     .dayOfWeek(r.getStartTime().getDayOfWeek().getValue())
                     .build();

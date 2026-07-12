@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { currentEmpNo } from '@/utils/currentUser'
+import { computed, onMounted } from 'vue'
+import { useAuth } from '@/stores/auth'
+
+const { currentUser, initFromStorage } = useAuth()
+
+onMounted(() => {
+  if (!currentUser.value) {
+    initFromStorage()
+  }
+})
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -12,10 +20,12 @@ const greeting = computed(() => {
 })
 
 const quickLinks = [
-  { path: '/health', title: '健康数据', desc: '体重、BMI 等体征指标记录', icon: '📊', color: '#409eff' },
+  { path: '/gym-workout', title: '健身打卡', desc: '开始训练，记录组数，追踪肌肉恢复', icon: '⏱️', color: '#e6a23c' },
+  { path: '/health', title: '健身榜单', desc: '坚持榜 · 容量榜 · 1RM巅峰榜 · 进步榜', icon: '🏆', color: '#409eff' },
+  { path: '/gym-library', title: '健身维护', desc: '动作库、器械、肌群数据维护', icon: '💪', color: '#f56c6c' },
   { path: '/canteen-menu', title: '食堂菜单', desc: '查看各食堂每日菜品', icon: '🍽️', color: '#67c23a' },
-  { path: '/gym-library', title: '健身维护', desc: '动作、器械、肌群数据管理', icon: '💪', color: '#f56c6c' },
-  { path: '/tech-stack', title: '技术选型', desc: '登录统计与技术栈一览', icon: '🛠️', color: '#909399' },
+  { path: '/meeting-room', title: '会议预定', desc: '会议室在线预定与管理', icon: '📅', color: '#9b59b6' },
+  { path: '/tech-stack', title: '登录统计', desc: '登录次数统计 · 用户列表 · 技术栈', icon: '📊', color: '#909399' },
 ]
 </script>
 
@@ -26,10 +36,20 @@ const quickLinks = [
         <span class="avatar-emoji">🏋️</span>
       </div>
       <h1 class="hero-title">{{ greeting }}，欢迎回来</h1>
-      <p class="hero-subtitle">
-        当前工号：
-        <el-tag type="primary" size="large">{{ currentEmpNo }}</el-tag>
-      </p>
+      <div class="user-info-col">
+        <div class="user-info-item">
+          <span class="user-info-label">用户名</span>
+          <span class="user-info-value">{{ currentUser?.username || '-' }}</span>
+        </div>
+        <div class="user-info-item">
+          <span class="user-info-label">姓名</span>
+          <span class="user-info-value">{{ currentUser?.empName || '-' }}</span>
+        </div>
+        <div class="user-info-item">
+          <span class="user-info-label">工号</span>
+          <span class="user-info-value">{{ currentUser?.empNo || '-' }}</span>
+        </div>
+      </div>
     </div>
 
     <el-divider />
@@ -101,10 +121,31 @@ const quickLinks = [
   margin: 0 0 12px;
 }
 
-.hero-subtitle {
-  font-size: 15px;
+.user-info-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.user-info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-info-label {
+  font-size: 13px;
   color: #909399;
-  margin: 0;
+  min-width: 48px;
+  text-align: right;
+}
+
+.user-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
 }
 
 .section-title {

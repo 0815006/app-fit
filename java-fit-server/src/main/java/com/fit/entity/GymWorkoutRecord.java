@@ -36,6 +36,21 @@ public class GymWorkoutRecord {
     /** 状态：0=训练中, 1=正常结束, 2=超时修正结束 */
     private Integer status;
 
+    /** 本次动作使用重量(kg)，NULL表示无负重或不适用 */
+    private BigDecimal weight;
+
+    /** 本次动作训练次数，NULL表示未填写或不适用 */
+    private Integer reps;
+
+    /** 本次训练组数，NULL表示未填写或不适用 */
+    private Integer setCount;
+
+    /** 自动计算的1RM估值(kg)，仅当weight+reps均非NULL时计算 */
+    private BigDecimal rmEstimate;
+
+    /** 是否破个人纪录：0=否, 1=是 */
+    private Integer isPr;
+
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }

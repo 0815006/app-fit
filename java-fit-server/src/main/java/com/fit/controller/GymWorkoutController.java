@@ -46,7 +46,7 @@ public class GymWorkoutController {
      */
     @PutMapping("/{id}/end")
     public Result<Void> endWorkout(@PathVariable String id, @Valid @RequestBody EndWorkoutDTO dto) {
-        workoutService.endWorkout(id, dto.getExhaustionScore());
+        workoutService.endWorkout(id, dto.getWeight(), dto.getReps(), dto.getSetCount(), dto.getExhaustionScore());
         return Result.success();
     }
 

@@ -14,6 +14,7 @@ import MuscleDashboard from '@/components/workout/MuscleDashboard.vue'
 import ActionSelectDialog from '@/components/workout/ActionSelectDialog.vue'
 import TrainingTimerDialog from '@/components/workout/TrainingTimerDialog.vue'
 import ExhaustionDialog from '@/components/workout/ExhaustionDialog.vue'
+import type { EndWorkoutParams } from '@/api/gymWorkout'
 import TimeoutCorrectDialog from '@/components/workout/TimeoutCorrectDialog.vue'
 import MakeupDialog from '@/components/workout/MakeupDialog.vue'
 import WeeklySummary from '@/components/workout/WeeklySummary.vue'
@@ -95,29 +96,47 @@ function handleMuscleSelectDetail(payload: { muscleGroup: string; muscleCode: st
   actionSelectVisible.value = true
 }
 
+// ---- 暂存的训练数据（计时结束后先存这里，力竭度确认后一起提交）----
+const pendingWorkoutData = ref<{ weight?: number; reps?: number; setCount?: number }>({})
+
 // ---- 动作选择 -> 开始训练 ----
-async function handleActionStart(actionId: string, actionName: string): Promise<void> {
+async function handleActionStart(actionId: string, actionName: string, actionType?: string): Promise<void> {
   try {
     const res = await startWorkout(actionId)
     currentRecordId.value = res.data
     currentActionId.value = actionId
     currentActionName.value = actionName
+    currentActionType.value = actionType || ''
     timerVisible.value = true
   } catch {
     ElMessage.error('开始训练失败')
   }
 }
 
-// ---- 计时结束 -> 弹出力竭度 ----
-function handleTimerEnd(_elapsedSeconds: number): void {
+// ---- 暂存当前动作类型，传给 TrainingTimerDialog ----
+const currentActionType = ref('')
+
+// ---- 计时结束 -> 暂存训练数据 -> 弹出力竭度 ----
+function handleTimerEnd(payload: { elapsedSeconds: number; weight?: number; reps?: number; setCount?: number }): void {
+  pendingWorkoutData.value = {
+    weight: payload.weight ?? undefined,
+    reps: payload.reps ?? undefined,
+    setCount: payload.setCount ?? undefined,
+  }
   exhaustionVisible.value = true
 }
 
 // ---- 力竭度提交 ----
 async function handleExhaustionSubmit(score: number): Promise<void> {
   try {
-    await endWorkout(currentRecordId.value, score)
+    await endWorkout(currentRecordId.value, {
+      weight: pendingWorkoutData.value.weight ?? null,
+      reps: pendingWorkoutData.value.reps ?? null,
+      setCount: pendingWorkoutData.value.setCount ?? null,
+      exhaustionScore: score,
+    })
     ElMessage.success('训练记录已保存')
+    pendingWorkoutData.value = {}
     await loadDashboard()
     await loadWeeklySummary()
   } catch {
@@ -193,6 +212,7 @@ onMounted(() => {
       v-model:visible="timerVisible"
       :action-id="currentActionId"
       :action-name="currentActionName"
+      :action-type="currentActionType"
       @end="handleTimerEnd"
       @cancel="handleTimerCancel"
     />

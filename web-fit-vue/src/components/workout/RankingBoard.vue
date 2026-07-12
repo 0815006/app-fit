@@ -1,25 +1,39 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getConsistencyRanking, getProgressRanking } from '@/api/trainingStats'
+import {
+  getConsistencyRankingV2,
+  getVolumeRanking,
+  getPeak1RMRanking,
+  getProgressRankingV2,
+  type RankingItemVO
+} from '@/api/trainingStats'
 
 const loading = ref(false)
 const activeTab = ref('consistency')
 const days = ref(30)
 
-const consistencyData = ref<Array<{ userId: string; days: number }>>([])
-const progressData = ref<Array<{ userId: string; growthRate: number; beforeTotal: number; afterTotal: number }>>([])
+const consistencyData = ref<RankingItemVO[]>([])
+const volumeData = ref<RankingItemVO[]>([])
+const peak1rmData = ref<RankingItemVO[]>([])
+const progressData = ref<RankingItemVO[]>([])
 
 async function loadData() {
   loading.value = true
   try {
-    const [cRes, pRes] = await Promise.all([
-      getConsistencyRanking(days.value),
-      getProgressRanking(days.value)
+    const [cRes, vRes, pRes, pgRes] = await Promise.all([
+      getConsistencyRankingV2(days.value),
+      getVolumeRanking(days.value),
+      getPeak1RMRanking(days.value),
+      getProgressRankingV2(days.value)
     ])
-    consistencyData.value = (cRes.data || []) as Array<{ userId: string; days: number }>
-    progressData.value = (pRes.data || []) as Array<{ userId: string; growthRate: number; beforeTotal: number; afterTotal: number }>
+    consistencyData.value = cRes.data || []
+    volumeData.value = vRes.data || []
+    peak1rmData.value = pRes.data || []
+    progressData.value = pgRes.data || []
   } catch {
     consistencyData.value = []
+    volumeData.value = []
+    peak1rmData.value = []
     progressData.value = []
   } finally {
     loading.value = false
@@ -33,48 +47,111 @@ function getMedal(index: number): string {
   return `${index + 1}`
 }
 
+function getRankClass(index: number): string {
+  if (index === 0) return 'rank-gold'
+  if (index === 1) return 'rank-silver'
+  if (index === 2) return 'rank-bronze'
+  return ''
+}
+
+function getUserLabel(row: RankingItemVO): string {
+  return row.empName || row.empNo || row.userId
+}
+
 onMounted(loadData)
 </script>
 
 <template>
   <div v-loading="loading" class="ranking-board">
     <div class="ranking-header">
-      <span class="ranking-title">🏆 在线榜单</span>
+      <span class="ranking-title">🏆 健身榜单</span>
       <el-radio-group v-model="days" size="small" @change="loadData">
         <el-radio-button :value="7">近7天</el-radio-button>
         <el-radio-button :value="30">近30天</el-radio-button>
         <el-radio-button :value="90">近90天</el-radio-button>
       </el-radio-group>
     </div>
+
     <el-tabs v-model="activeTab" type="border-card">
-      <el-tab-pane label="坚持榜" name="consistency">
-        <el-table :data="consistencyData" stripe size="small" max-height="300">
-          <el-table-column label="排名" width="60" align="center">
-            <template #default="{ $index }">{{ getMedal($index) }}</template>
-          </el-table-column>
-          <el-table-column prop="userId" label="用户ID" />
-          <el-table-column prop="days" label="训练天数" align="center">
-            <template #default="{ row }">
-              <el-tag type="success">{{ row.days }} 天</el-tag>
+      <!-- 坚持榜 -->
+      <el-tab-pane label="🔥 坚持榜" name="consistency">
+        <el-table :data="consistencyData" stripe size="small" max-height="360">
+          <el-table-column label="排名" width="70" align="center">
+            <template #default="{ $index }">
+              <span :class="getRankClass($index)">{{ getMedal($index) }}</span>
             </template>
           </el-table-column>
+          <el-table-column label="用户" min-width="120">
+            <template #default="{ row }">{{ getUserLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="打卡天数" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag type="success">{{ row.value }} 天</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="趋势" width="70" align="center" prop="trend" />
         </el-table>
       </el-tab-pane>
-      <el-tab-pane label="进步榜" name="progress">
-        <el-table :data="progressData" stripe size="small" max-height="300">
-          <el-table-column label="排名" width="60" align="center">
-            <template #default="{ $index }">{{ getMedal($index) }}</template>
+
+      <!-- 容量榜 -->
+      <el-tab-pane label="💪 容量榜" name="volume">
+        <el-table :data="volumeData" stripe size="small" max-height="360">
+          <el-table-column label="排名" width="70" align="center">
+            <template #default="{ $index }">
+              <span :class="getRankClass($index)">{{ getMedal($index) }}</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="userId" label="用户ID" />
-          <el-table-column prop="growthRate" label="增长率" align="center">
+          <el-table-column label="用户" min-width="120">
+            <template #default="{ row }">{{ getUserLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="总容量" width="110" align="center">
             <template #default="{ row }">
-              <el-tag :type="row.growthRate > 0 ? 'success' : 'danger'">
-                {{ row.growthRate > 0 ? '+' : '' }}{{ row.growthRate }}%
+              <el-tag>{{ row.value }} kg</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="趋势" width="70" align="center" prop="trend" />
+        </el-table>
+      </el-tab-pane>
+
+      <!-- 1RM 巅峰榜 -->
+      <el-tab-pane label="🏋️ 1RM巅峰榜" name="peak-1rm">
+        <el-table :data="peak1rmData" stripe size="small" max-height="360">
+          <el-table-column label="排名" width="70" align="center">
+            <template #default="{ $index }">
+              <span :class="getRankClass($index)">{{ getMedal($index) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="用户" min-width="120">
+            <template #default="{ row }">{{ getUserLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="三大项1RM" width="120" align="center">
+            <template #default="{ row }">
+              <el-tag type="warning">{{ row.value }} kg</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="趋势" width="70" align="center" prop="trend" />
+        </el-table>
+      </el-tab-pane>
+
+      <!-- 进步榜 -->
+      <el-tab-pane label="📈 进步榜" name="progress">
+        <el-table :data="progressData" stripe size="small" max-height="360">
+          <el-table-column label="排名" width="70" align="center">
+            <template #default="{ $index }">
+              <span :class="getRankClass($index)">{{ getMedal($index) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="用户" min-width="120">
+            <template #default="{ row }">{{ getUserLabel(row) }}</template>
+          </el-table-column>
+          <el-table-column label="增长率" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag :type="row.value > 0 ? 'success' : 'danger'">
+                {{ row.value > 0 ? '+' : '' }}{{ row.value }}%
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="beforeTotal" label="前期1RM" align="center" />
-          <el-table-column prop="afterTotal" label="后期1RM" align="center" />
+          <el-table-column label="趋势" width="70" align="center" prop="trend" />
         </el-table>
       </el-tab-pane>
     </el-tabs>
@@ -82,7 +159,11 @@ onMounted(loadData)
 </template>
 
 <style scoped>
-.ranking-board { padding: 16px; background: #fafafa; border-radius: 8px; }
+.ranking-board { padding: 16px; background: var(--el-bg-color-page); border-radius: 8px; }
 .ranking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.ranking-title { font-size: 16px; font-weight: 600; }
+.ranking-title { font-size: 18px; font-weight: 700; }
+
+.rank-gold   { font-weight: 700; color: #f0ad4e; }
+.rank-silver { font-weight: 700; color: #999; }
+.rank-bronze { font-weight: 700; color: #d9534f; }
 </style>

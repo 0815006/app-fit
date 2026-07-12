@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:visible', val: boolean): void
-  (e: 'start', actionId: string, actionName: string): void
+  (e: 'start', actionId: string, actionName: string, actionType?: string): void
 }>()
 
 const loading = ref(false)
@@ -117,9 +117,9 @@ watch(() => props.visible, async (val) => {
   }
 })
 
-function handleStart(actionId: string, actionName: string): void {
+function handleStart(actionId: string, actionName: string, actionType?: string): void {
   emit('update:visible', false)
-  emit('start', actionId, actionName)
+  emit('start', actionId, actionName, actionType)
 }
 
 function formatRec(recs: GymActionRecommendation[]): string {
@@ -159,7 +159,7 @@ function formatRec(recs: GymActionRecommendation[]): string {
                   {{ action.actionType }}
                 </el-tag>
               </div>
-              <el-button type="primary" size="small" @click="handleStart(action.id, action.name)">
+              <el-button type="primary" size="small" @click="handleStart(action.id, action.name, action.actionType)">
                 开始训练
               </el-button>
             </div>
@@ -194,7 +194,7 @@ function formatRec(recs: GymActionRecommendation[]): string {
               {{ action.actionType }}
             </el-tag>
           </div>
-          <el-button type="primary" size="small" @click="handleStart(action.id, action.name)">
+          <el-button type="primary" size="small" @click="handleStart(action.id, action.name, action.actionType)">
             开始训练
           </el-button>
         </div>

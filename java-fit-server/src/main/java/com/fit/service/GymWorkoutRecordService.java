@@ -19,9 +19,12 @@ public interface GymWorkoutRecordService {
     String startWorkout(String userId, String actionId);
 
     /**
-     * 结束训练：写入 end_time=now + 力竭度，status→1
+     * 结束训练：写入训练数据 + end_time=now + 力竭度，status→1
+     * @param weight 重量(kg)，可为null
+     * @param reps 次数，可为null
+     * @param setCount 组数，可为null
      */
-    void endWorkout(String recordId, BigDecimal exhaustionScore);
+    void endWorkout(String recordId, BigDecimal weight, Integer reps, Integer setCount, BigDecimal exhaustionScore);
 
     /**
      * 超时修正：end_time = start_time + actualMinutes，status→2

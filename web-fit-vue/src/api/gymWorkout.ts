@@ -39,6 +39,11 @@ export interface WeeklyWorkoutVO {
   muscleGroup: string
   muscleGroupName: string
   startTime: string
+  weight: number | null
+  reps: number | null
+  setCount: number | null
+  rmEstimate: number | null
+  isPr: boolean
   exhaustionScore: number
   dayOfWeek: number
 }
@@ -48,9 +53,17 @@ export function startWorkout(actionId: string): Promise<ApiResult<string>> {
   return request.post('/gym-workout/start', { actionId })
 }
 
+/** 结束训练请求参数 */
+export interface EndWorkoutParams {
+  weight?: number | null
+  reps?: number | null
+  setCount?: number | null
+  exhaustionScore: number
+}
+
 /** PUT /api/gym-workout/{id}/end */
-export function endWorkout(recordId: string, exhaustionScore: number): Promise<ApiResult<null>> {
-  return request.put(`/gym-workout/${recordId}/end`, { exhaustionScore })
+export function endWorkout(recordId: string, params: EndWorkoutParams): Promise<ApiResult<null>> {
+  return request.put(`/gym-workout/${recordId}/end`, params)
 }
 
 /** PUT /api/gym-workout/{id}/correct */

@@ -1,5 +1,7 @@
 package com.fit.service;
 
+import com.fit.vo.RankingItemVO;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -44,16 +46,53 @@ public interface TrainingStatsService {
     List<Map<String, Object>> getContributionWall(String userId, int year);
 
     /**
-     * 获取坚持榜数据
+     * 获取坚持榜数据（旧版，基于 training_session）
      * @param days 统计天数（默认30天）
      */
     List<Map<String, Object>> getConsistencyRanking(int days);
 
     /**
-     * 获取进步榜数据（基于1RM增长率）
+     * 获取进步榜数据（旧版，基于 training_session_detail）
      * @param days 统计天数（默认30天）
      */
     List<Map<String, Object>> getProgressRanking(int days);
+
+    // ═══════════════════════════════════════════════
+    // V2 榜单（基于 gym_workout_record，返回 RankingItemVO）
+    // ═══════════════════════════════════════════════
+
+    /**
+     * 坚持榜 V2：周期内累计打卡天数排名（基于 gym_workout_record）
+     * @param days 统计天数
+     */
+    List<RankingItemVO> getConsistencyRankingV2(int days);
+
+    /**
+     * 容量榜：周期内训练总容量（weight × reps × setCount）排名
+     * @param days 统计天数
+     */
+    List<RankingItemVO> getVolumeRanking(int days);
+
+    /**
+     * 容量榜：单次最大容量排行（深蹲/卧推/硬拉/三大项之和）
+     * @param days 统计天数
+     * @param liftType 三大项类型：bench / squat / deadlift / all
+     */
+    List<RankingItemVO> getMaxSingleVolumeRanking(int days, String liftType);
+
+    /**
+     * 1RM巅峰榜：单次最大 1RM 排行
+     * @param days 统计天数
+     * @param lift 三大项类型：bench / squat / deadlift / all
+     */
+    List<RankingItemVO> getPeak1RMRanking(int days, String lift);
+
+    /**
+     * 进步榜 V2：相比上个周期 1RM 增长百分比排名
+     * @param days 统计天数
+     * @param lift 三大项类型：bench / squat / deadlift / all
+     */
+    List<RankingItemVO> getProgressRankingV2(int days, String lift);
 
     /**
      * 检测平台期/停滞预警

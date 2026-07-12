@@ -163,7 +163,7 @@ onMounted(() => {
           <template #header>
             <span class="card-header-title">🛠️ 技术选型</span>
           </template>
-          <el-table :data="techStack" stripe size="small" max-height="400">
+          <el-table :data="techStack" stripe size="small" max-height="540">
             <el-table-column prop="category" label="分类" width="110" />
             <el-table-column prop="name" label="技术" width="150" />
             <el-table-column prop="version" label="版本" />

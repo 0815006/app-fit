@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fit.entity.*;
 import com.fit.mapper.*;
 import com.fit.service.TrainingStatsService;
+import com.fit.vo.RankingItemVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
     private final GymActionMapper actionMapper;
     private final GymActionMuscleRelMapper actionMuscleRelMapper;
     private final GymMuscleMapper muscleMapper;
+    private final GymWorkoutRecordMapper workoutRecordMapper;
+    private final UserMapper userMapper;
 
     // ═══════════════════════════════════════════════════════════
     // 1RM 计算
@@ -314,6 +317,339 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
 
         result.sort((a, b) -> ((BigDecimal) b.get("growthRate")).compareTo((BigDecimal) a.get("growthRate")));
         return result;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // V2 榜单（基于 gym_workout_record 新字段）
+    // ═══════════════════════════════════════════════════════════
+
+    @Override
+    public List<RankingItemVO> getConsistencyRankingV2(int days) {
+        // 坚持榜：周期内累计打卡天数排名，所有动作类型都计入
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+
+        List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getUserId, GymWorkoutRecord::getStartTime)
+                        .in(GymWorkoutRecord::getStatus, 1, 2)
+                        .ge(GymWorkoutRecord::getStartTime, since));
+
+        // 按用户统计去重的训练天数
+        Map<String, Set<LocalDate>> userDays = new HashMap<>();
+        for (GymWorkoutRecord r : records) {
+            userDays.computeIfAbsent(r.getUserId(), k -> new HashSet<>())
+                    .add(r.getStartTime().toLocalDate());
+        }
+
+        // 批量加载用户信息
+        Map<String, User> userMap = loadUserMap(userDays.keySet());
+
+        List<RankingItemVO> result = new ArrayList<>();
+        int[] rank = {0};
+        userDays.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()))
+                .forEach(entry -> {
+                    rank[0]++;
+                    String userId = entry.getKey();
+                    User user = userMap.get(userId);
+                    result.add(RankingItemVO.builder()
+                            .rank(rank[0])
+                            .userId(userId)
+                            .empName(user != null ? user.getEmpName() : userId)
+                            .empNo(user != null ? user.getEmpNo() : "")
+                            .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                            .value(BigDecimal.valueOf(entry.getValue().size()))
+                            .build());
+                });
+        return result;
+    }
+
+    @Override
+    public List<RankingItemVO> getVolumeRanking(int days) {
+        // 容量榜：SUM(weight * reps * set_count)
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+
+        List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getUserId,
+                                GymWorkoutRecord::getWeight,
+                                GymWorkoutRecord::getReps,
+                                GymWorkoutRecord::getSetCount)
+                        .in(GymWorkoutRecord::getStatus, 1, 2)
+                        .ge(GymWorkoutRecord::getStartTime, since)
+                        .isNotNull(GymWorkoutRecord::getWeight)
+                        .isNotNull(GymWorkoutRecord::getReps)
+                        .isNotNull(GymWorkoutRecord::getSetCount));
+
+        // 按用户聚合总容量
+        Map<String, BigDecimal> userVolume = new HashMap<>();
+        for (GymWorkoutRecord r : records) {
+            if (r.getWeight().compareTo(BigDecimal.ZERO) <= 0
+                    || r.getReps() <= 0 || r.getSetCount() <= 0) continue;
+            BigDecimal vol = r.getWeight()
+                    .multiply(BigDecimal.valueOf(r.getReps()))
+                    .multiply(BigDecimal.valueOf(r.getSetCount()));
+            userVolume.merge(r.getUserId(), vol, BigDecimal::add);
+        }
+
+        Map<String, User> userMap = loadUserMap(userVolume.keySet());
+
+        List<RankingItemVO> result = new ArrayList<>();
+        int[] rank = {0};
+        userVolume.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .forEach(entry -> {
+                    rank[0]++;
+                    String userId = entry.getKey();
+                    User user = userMap.get(userId);
+                    result.add(RankingItemVO.builder()
+                            .rank(rank[0])
+                            .userId(userId)
+                            .empName(user != null ? user.getEmpName() : userId)
+                            .empNo(user != null ? user.getEmpNo() : "")
+                            .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                            .value(entry.getValue().setScale(2, RoundingMode.HALF_UP))
+                            .build());
+                });
+        return result;
+    }
+
+    @Override
+    public List<RankingItemVO> getPeak1RMRanking(int days, String lift) {
+        // 1RM巅峰榜：单次最大 1RM 排行（深蹲/卧推/硬拉/三大项之和）
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+
+        List<String> targetActionIds = resolveLiftActionIds(lift);
+
+        List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getUserId,
+                                GymWorkoutRecord::getActionId,
+                                GymWorkoutRecord::getRmEstimate)
+                        .in(GymWorkoutRecord::getStatus, 1, 2)
+                        .ge(GymWorkoutRecord::getStartTime, since)
+                        .in(GymWorkoutRecord::getActionId, targetActionIds)
+                        .isNotNull(GymWorkoutRecord::getRmEstimate));
+
+        // 每用户每动作取单次最大 rmEstimate
+        Map<String, Map<String, BigDecimal>> userActionMax = new HashMap<>();
+        for (GymWorkoutRecord r : records) {
+            userActionMax.computeIfAbsent(r.getUserId(), k -> new HashMap<>())
+                    .merge(r.getActionId(), r.getRmEstimate(),
+                            (old, val) -> val.compareTo(old) > 0 ? val : old);
+        }
+
+        // 汇总：单动作取对应值，all 取三动作之和
+        Map<String, BigDecimal> userTotal = new HashMap<>();
+        for (Map.Entry<String, Map<String, BigDecimal>> entry : userActionMax.entrySet()) {
+            if ("all".equals(lift)) {
+                BigDecimal sum = entry.getValue().values().stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                userTotal.put(entry.getKey(), sum);
+            } else {
+                BigDecimal singleMax = entry.getValue().values().stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::max);
+                userTotal.put(entry.getKey(), singleMax);
+            }
+        }
+
+        Map<String, User> userMap = loadUserMap(userTotal.keySet());
+
+        List<RankingItemVO> result = new ArrayList<>();
+        int[] rank = {0};
+        userTotal.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .forEach(entry -> {
+                    rank[0]++;
+                    String userId = entry.getKey();
+                    User user = userMap.get(userId);
+                    result.add(RankingItemVO.builder()
+                            .rank(rank[0])
+                            .userId(userId)
+                            .empName(user != null ? user.getEmpName() : userId)
+                            .empNo(user != null ? user.getEmpNo() : "")
+                            .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                            .value(entry.getValue().setScale(2, RoundingMode.HALF_UP))
+                            .build());
+                });
+        return result;
+    }
+
+    @Override
+    public List<RankingItemVO> getProgressRankingV2(int days, String lift) {
+        // 进步榜：前后两个周期单次最大 1RM 对比（深蹲/卧推/硬拉/三大项之和）
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime currentStart = now.minusDays(days);
+        LocalDateTime previousStart = now.minusDays((long) days * 2);
+
+        List<String> targetActionIds = resolveLiftActionIds(lift);
+
+        // 查限定动作的 rmEstimate 记录（两个周期内）
+        List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getUserId,
+                                GymWorkoutRecord::getActionId,
+                                GymWorkoutRecord::getRmEstimate,
+                                GymWorkoutRecord::getStartTime)
+                        .in(GymWorkoutRecord::getStatus, 1, 2)
+                        .ge(GymWorkoutRecord::getStartTime, previousStart)
+                        .in(GymWorkoutRecord::getActionId, targetActionIds)
+                        .isNotNull(GymWorkoutRecord::getRmEstimate));
+
+        // 分前后周期聚合每用户每动作的单次最大 rmEstimate
+        Map<String, Map<String, BigDecimal>> prevBest = new HashMap<>();
+        Map<String, Map<String, BigDecimal>> currBest = new HashMap<>();
+
+        for (GymWorkoutRecord r : records) {
+            boolean isCurrent = !r.getStartTime().isBefore(currentStart);
+            Map<String, Map<String, BigDecimal>> target = isCurrent ? currBest : prevBest;
+            target.computeIfAbsent(r.getUserId(), k -> new HashMap<>())
+                    .merge(r.getActionId(), r.getRmEstimate(),
+                            (old, val) -> val.compareTo(old) > 0 ? val : old);
+        }
+
+        // 计算增长率：单动作取最大值，all 取三动作之和对比
+        Map<String, BigDecimal> userGrowthRate = new HashMap<>();
+        for (String userId : currBest.keySet()) {
+            Map<String, BigDecimal> prev = prevBest.get(userId);
+            if (prev == null || prev.isEmpty()) continue;
+            BigDecimal prevVal = "all".equals(lift)
+                    ? prev.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                    : prev.values().stream().reduce(BigDecimal.ZERO, BigDecimal::max);
+            if (prevVal.compareTo(BigDecimal.ZERO) <= 0) continue;
+            BigDecimal currVal = "all".equals(lift)
+                    ? currBest.get(userId).values().stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                    : currBest.get(userId).values().stream().reduce(BigDecimal.ZERO, BigDecimal::max);
+            BigDecimal rate = currVal.subtract(prevVal)
+                    .divide(prevVal, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(2, RoundingMode.HALF_UP);
+            userGrowthRate.put(userId, rate);
+        }
+
+        Map<String, User> userMap = loadUserMap(userGrowthRate.keySet());
+
+        List<RankingItemVO> result = new ArrayList<>();
+        int[] rank = {0};
+        userGrowthRate.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .forEach(entry -> {
+                    rank[0]++;
+                    String userId = entry.getKey();
+                    User user = userMap.get(userId);
+                    result.add(RankingItemVO.builder()
+                            .rank(rank[0])
+                            .userId(userId)
+                            .empName(user != null ? user.getEmpName() : userId)
+                            .empNo(user != null ? user.getEmpNo() : "")
+                            .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                            .value(entry.getValue())
+                            .trend(entry.getValue().compareTo(BigDecimal.ZERO) > 0 ? "↑" : "↓")
+                            .build());
+                });
+        return result;
+    }
+
+    @Override
+    public List<RankingItemVO> getMaxSingleVolumeRanking(int days, String liftType) {
+        // 容量榜：单次最大容量（深蹲/卧推/硬拉/三大项之和）
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+
+        List<String> targetActionIds = resolveLiftActionIds(liftType);
+
+        List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+                new LambdaQueryWrapper<GymWorkoutRecord>()
+                        .select(GymWorkoutRecord::getUserId,
+                                GymWorkoutRecord::getActionId,
+                                GymWorkoutRecord::getWeight,
+                                GymWorkoutRecord::getReps,
+                                GymWorkoutRecord::getSetCount)
+                        .in(GymWorkoutRecord::getActionId, targetActionIds)
+                        .in(GymWorkoutRecord::getStatus, 1, 2)
+                        .ge(GymWorkoutRecord::getStartTime, since)
+                        .isNotNull(GymWorkoutRecord::getWeight)
+                        .isNotNull(GymWorkoutRecord::getReps)
+                        .isNotNull(GymWorkoutRecord::getSetCount));
+
+        // 每用户每动作取单次最大容量
+        Map<String, Map<String, BigDecimal>> userActionMax = new HashMap<>();
+        for (GymWorkoutRecord r : records) {
+            if (r.getWeight().compareTo(BigDecimal.ZERO) <= 0
+                    || r.getReps() <= 0 || r.getSetCount() <= 0) continue;
+            BigDecimal vol = r.getWeight()
+                    .multiply(BigDecimal.valueOf(r.getReps()))
+                    .multiply(BigDecimal.valueOf(r.getSetCount()));
+            userActionMax.computeIfAbsent(r.getUserId(), k -> new HashMap<>())
+                    .merge(r.getActionId(), vol,
+                            (old, val) -> val.compareTo(old) > 0 ? val : old);
+        }
+
+        // 汇总：单动作取对应值，all 取三动作之和
+        Map<String, BigDecimal> userVolume = new HashMap<>();
+        for (Map.Entry<String, Map<String, BigDecimal>> entry : userActionMax.entrySet()) {
+            if ("all".equals(liftType)) {
+                BigDecimal sum = entry.getValue().values().stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                userVolume.put(entry.getKey(), sum);
+            } else {
+                BigDecimal singleMax = entry.getValue().values().stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::max);
+                userVolume.put(entry.getKey(), singleMax);
+            }
+        }
+
+        Map<String, User> userMap = loadUserMap(userVolume.keySet());
+
+        List<RankingItemVO> result = new ArrayList<>();
+        int[] rank = {0};
+        userVolume.entrySet().stream()
+                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+                .forEach(entry -> {
+                    rank[0]++;
+                    String userId = entry.getKey();
+                    User user = userMap.get(userId);
+                    result.add(RankingItemVO.builder()
+                            .rank(rank[0])
+                            .userId(userId)
+                            .empName(user != null ? user.getEmpName() : userId)
+                            .empNo(user != null ? user.getEmpNo() : "")
+                            .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                            .value(entry.getValue().setScale(2, RoundingMode.HALF_UP))
+                            .build());
+                });
+        return result;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // V2 榜单辅助
+    // ═══════════════════════════════════════════════════════════
+
+    /** 三大项 actionId 常量映射 */
+    private static final String BIG3_BENCH = "ACT1007";
+    private static final String BIG3_SQUAT = "ACT3001";
+    private static final String BIG3_DEADLIFT = "ACT2013";
+    private static final List<String> ALL_BIG3_IDS = List.of(BIG3_BENCH, BIG3_SQUAT, BIG3_DEADLIFT);
+
+    /**
+     * 根据 lift 参数解析目标动作 ID 列表
+     */
+    private List<String> resolveLiftActionIds(String lift) {
+        return switch (lift) {
+            case "squat" -> List.of(BIG3_SQUAT);
+            case "deadlift" -> List.of(BIG3_DEADLIFT);
+            case "all" -> ALL_BIG3_IDS;
+            default -> List.of(BIG3_BENCH); // bench
+        };
+    }
+
+    /**
+     * 根据 userId 集合批量加载 User，返回 userId → User 映射
+     */
+    private Map<String, User> loadUserMap(Collection<String> userIds) {
+        if (userIds.isEmpty()) return Map.of();
+        List<User> users = userMapper.selectList(
+                new LambdaQueryWrapper<User>().in(User::getId, userIds));
+        return users.stream().collect(Collectors.toMap(User::getId, u -> u, (a, b) -> a));
     }
 
     // ═══════════════════════════════════════════════════════════

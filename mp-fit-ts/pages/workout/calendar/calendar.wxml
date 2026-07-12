@@ -75,9 +75,10 @@
       <text class="share-arrow">›</text>
     </view>
 
-    <!-- 隐藏 Canvas 用于绘制分享图 -->
+    <!-- 隐藏 Canvas 用于绘制分享图（Canvas 2D API） -->
     <canvas
-      canvas-id="shareCanvas"
+      type="2d"
+      id="shareCanvas"
       class="share-canvas"
       style="width:{{ canvasWidth }}px;height:{{ canvasHeight }}px;"
     ></canvas>

@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "action-picker": "/components/workout/action-picker/action-picker",
+    "exhaustion-picker": "/components/workout/exhaustion-picker/exhaustion-picker"
+  }
+}

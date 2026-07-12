@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "本周健身记录",
+  "usingComponents": {
+    "weekly-summary": "/components/workout/weekly-summary/weekly-summary"
+  }
+}

@@ -1,0 +1,85 @@
+<view class="calendar-page">
+  <!-- 加载态 -->
+  <view class="loading-wrap" wx:if="{{ loading }}">
+    <view class="spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <block wx:else>
+    <!-- 总览条 -->
+    <view class="summary-bar">
+      <text class="summary-today">{{ todayStr }}</text>
+      <view class="summary-dot {{ todayChecked ? 'dot-checked' : 'dot-empty' }}"></view>
+      <text class="summary-text">累计打卡 <text class="highlight">{{ totalDays }}</text> 天</text>
+    </view>
+
+    <!-- 月份网格（一行2个月，可滚动） -->
+    <scroll-view
+      class="month-scroll"
+      scroll-y="true"
+      scroll-top="{{ scrollTop }}"
+      bindscrolltoupper="handleScrollUpper"
+      upper-threshold="80"
+    >
+      <view wx:if="{{ loadingMore }}" class="load-more-hint">加载更多...</view>
+      <view class="month-grid">
+        <view
+          class="month-block"
+          wx:for="{{ monthBlocks }}"
+          wx:key="label"
+        >
+          <view class="month-label">{{ item.label }}</view>
+          <view class="week-header">
+            <text class="wh-day">日</text>
+            <text class="wh-day">一</text>
+            <text class="wh-day">二</text>
+            <text class="wh-day">三</text>
+            <text class="wh-day">四</text>
+            <text class="wh-day">五</text>
+            <text class="wh-day">六</text>
+          </view>
+          <view class="day-grid">
+            <view
+              class="day-cell {{ cell.empty ? 'cell-empty' : '' }}"
+              wx:for="{{ item.days }}"
+              wx:for-item="cell"
+              wx:key="date"
+            >
+              <view
+                wx:if="{{ !cell.empty }}"
+                class="day-dot {{ cell.checked ? 'dot-checked' : 'dot-unchecked' }}"
+              >
+                <text class="day-num">{{ cell.day }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 图例 -->
+    <view class="legend">
+      <view class="dot-checked legend-dot"></view>
+      <text>已打卡</text>
+      <view class="dot-unchecked legend-dot"></view>
+      <text>未打卡</text>
+    </view>
+
+    <!-- 分享卡片 -->
+    <view class="share-card" bindtap="handleShare">
+      <text class="share-icon">📤</text>
+      <view class="share-text">
+        <text class="share-title">分享我的打卡记录</text>
+        <text class="share-desc">生成日历截图，分享给好友</text>
+      </view>
+      <text class="share-arrow">›</text>
+    </view>
+
+    <!-- 隐藏 Canvas 用于绘制分享图 -->
+    <canvas
+      canvas-id="shareCanvas"
+      class="share-canvas"
+      style="width:{{ canvasWidth }}px;height:{{ canvasHeight }}px;"
+    ></canvas>
+  </block>
+</view>

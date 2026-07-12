@@ -1,0 +1,155 @@
+/* ===== 力竭度评价底部弹窗 ===== */
+
+.exh-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 400;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.exh-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  overflow: hidden;
+  animation: exhSlideUp 0.25s ease-out;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+}
+
+@keyframes exhSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* ── 标题栏 ── */
+.exh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx 18rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.exh-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+.exh-close {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5f6f8;
+}
+
+.exh-close:active {
+  background: #e8eaed;
+}
+
+.exh-close text {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+/* ── 主体 ── */
+.exh-body {
+  padding: 32rpx 44rpx 24rpx;
+}
+
+.exh-hint {
+  text-align: center;
+  font-size: 28rpx;
+  color: #303133;
+  margin-bottom: 32rpx;
+  display: block;
+}
+
+.exh-slider-wrapper {
+  margin-bottom: 24rpx;
+}
+
+.exh-marks {
+  display: flex;
+  justify-content: space-between;
+  padding: 6rpx 2rpx 0;
+}
+
+.exh-mark {
+  font-size: 18rpx;
+  color: #909399;
+}
+
+.exh-mark-left {
+  text-align: left;
+}
+
+.exh-mark-right {
+  text-align: right;
+}
+
+.exh-score-display {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  margin-top: 8rpx;
+}
+
+.exh-score-label {
+  font-size: 26rpx;
+  color: #606266;
+}
+
+.exh-score-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #e6a23c;
+  background: rgba(230, 162, 60, 0.12);
+  padding: 6rpx 20rpx;
+  border-radius: 10rpx;
+}
+
+/* ── 底部按钮 ── */
+.exh-footer {
+  display: flex;
+  gap: 16rpx;
+  padding: 8rpx 44rpx 24rpx;
+}
+
+.exh-btn {
+  flex: 1;
+  padding: 22rpx 0;
+  border-radius: 12rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.exh-btn-cancel {
+  background: #f5f6f8;
+  color: #606266;
+}
+
+.exh-btn-cancel:active {
+  background: #e8eaed;
+}
+
+.exh-btn-confirm {
+  background: linear-gradient(135deg, #e6a23c, #cf9236);
+  color: #fff;
+}
+
+.exh-btn-confirm:active {
+  opacity: 0.85;
+}

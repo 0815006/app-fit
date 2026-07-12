@@ -80,13 +80,26 @@ export function getDashboard(): Promise<ApiResult<DashboardVO>> {
   return request.get('/gym-workout/dashboard')
 }
 
+/** 补打卡请求参数 */
+export interface MakeupWorkoutParams {
+  actionId: string
+  startTime: string
+  exhaustionScore: number
+  weight?: number | null
+  reps?: number | null
+  setCount?: number | null
+}
+
 /** POST /api/gym-workout/makeup */
 export function makeupWorkout(
   actionId: string,
   startTime: string,
-  exhaustionScore: number
+  exhaustionScore: number,
+  weight?: number | null,
+  reps?: number | null,
+  setCount?: number | null
 ): Promise<ApiResult<null>> {
-  return request.post('/gym-workout/makeup', { actionId, startTime, exhaustionScore })
+  return request.post('/gym-workout/makeup', { actionId, startTime, exhaustionScore, weight, reps, setCount })
 }
 
 /** GET /api/gym-workout/timeout-check */
@@ -97,4 +110,9 @@ export function checkTimeout(): Promise<ApiResult<TimeoutRecordVO | null>> {
 /** GET /api/gym-workout/weekly-summary */
 export function getWeeklySummary(): Promise<ApiResult<WeeklyWorkoutVO[]>> {
   return request.get('/gym-workout/weekly-summary')
+}
+
+/** GET /api/gym-workout/checkin-dates — 半年打卡日期列表 YYYY-MM-DD */
+export function getCheckinDates(): Promise<ApiResult<string[]>> {
+  return request.get('/gym-workout/checkin-dates')
 }

@@ -314,7 +314,8 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
     }
 
     @Override
-    public void makeupWorkout(String userId, String actionId, LocalDateTime startTime, BigDecimal exhaustionScore) {
+    public void makeupWorkout(String userId, String actionId, LocalDateTime startTime,
+                              BigDecimal weight, Integer reps, Integer setCount, BigDecimal exhaustionScore) {
         // 推导 muscleGroup
         LambdaQueryWrapper<GymActionMuscleRel> relQw = new LambdaQueryWrapper<>();
         relQw.eq(GymActionMuscleRel::getActionId, actionId)
@@ -343,11 +344,31 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
         record.setMuscleGroup(muscleGroup);
         record.setStartTime(startTime);
         record.setEndTime(startTime); // 瞬间打卡
+        record.setWeight(weight);
+        record.setReps(reps);
+        record.setSetCount(setCount);
         record.setExhaustionScore(exhaustionScore);
         record.setStatus(1);
 
         recordMapper.insert(record);
-        log.info("自由补打卡：recordId={}, userId={}, actionId={}, startTime={}", record.getId(), userId, actionId, startTime);
+
+        // 计算 1RM 和 PR（与 endWorkout 逻辑一致）
+        if (weight != null && reps != null && weight.compareTo(BigDecimal.ZERO) > 0 && reps > 0) {
+            // Epley 公式：1RM = W × (1 + R/30)
+            BigDecimal rm = weight.multiply(BigDecimal.ONE.add(
+                BigDecimal.valueOf(reps).divide(BigDecimal.valueOf(30), 4, RoundingMode.HALF_UP)))
+                .setScale(2, RoundingMode.HALF_UP);
+            record.setRmEstimate(rm);
+
+            // 查该用户该动作历史最佳 1RM，判断是否 PR
+            BigDecimal bestRm = findBestRmEstimate(userId, actionId, record.getId());
+            record.setIsPr(bestRm != null && rm.compareTo(bestRm) > 0 ? 1 : 0);
+
+            recordMapper.updateById(record);
+        }
+
+        log.info("自由补打卡：recordId={}, userId={}, actionId={}, startTime={}, weight={}, reps={}, setCount={}, rmEstimate={}, isPr={}",
+                record.getId(), userId, actionId, startTime, weight, reps, setCount, record.getRmEstimate(), record.getIsPr());
     }
 
     @Override
@@ -440,5 +461,22 @@ public class GymWorkoutRecordServiceImpl implements GymWorkoutRecordService {
                     .dayOfWeek(r.getStartTime().getDayOfWeek().getValue())
                     .build();
         }).toList();
+    }
+
+    @Override
+    public List<String> getCheckinDates(String userId) {
+        LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
+
+        LambdaQueryWrapper<GymWorkoutRecord> qw = new LambdaQueryWrapper<>();
+        qw.select(GymWorkoutRecord::getStartTime)
+          .eq(GymWorkoutRecord::getUserId, userId)
+          .in(GymWorkoutRecord::getStatus, 1, 2)
+          .ge(GymWorkoutRecord::getStartTime, sixMonthsAgo)
+          .orderByAsc(GymWorkoutRecord::getStartTime);
+
+        return recordMapper.selectList(qw).stream()
+                .map(r -> r.getStartTime().toLocalDate().toString())
+                .distinct()
+                .toList();
     }
 }

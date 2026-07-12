@@ -38,13 +38,22 @@ public interface GymWorkoutRecordService {
 
     /**
      * 自由补打卡：end_time = startTime（瞬间打卡），status=1
+     * @param weight 重量(kg)，可为null
+     * @param reps 次数，可为null
+     * @param setCount 组数，可为null
      */
-    void makeupWorkout(String userId, String actionId, LocalDateTime startTime, BigDecimal exhaustionScore);
+    void makeupWorkout(String userId, String actionId, LocalDateTime startTime,
+                       BigDecimal weight, Integer reps, Integer setCount, BigDecimal exhaustionScore);
 
     /**
      * 检查超时：status=0 且 now - start_time > 2小时 的记录
      */
     TimeoutRecordVO checkTimeout(String userId);
+
+    /**
+     * 获取当前用户半年内所有打卡日期（YYYY-MM-DD，去重）
+     */
+    List<String> getCheckinDates(String userId);
 
     /**
      * 本周训练摘要：返回本周一至周日所有已结束的训练记录，含动作名和肌群中文名

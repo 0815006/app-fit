@@ -1,8 +1,12 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/action-detail/action-detail",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/workout/ranking/ranking",
+    "pages/workout/checkin/checkin",
+    "pages/workout/makeup/makeup",
+    "pages/workout/weekly/weekly",
+    "pages/workout/calendar/calendar"
   ],
   "window": {
     "navigationBarTitleText": "Fit 全栈稳健版",

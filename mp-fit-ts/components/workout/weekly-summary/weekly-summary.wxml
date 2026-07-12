@@ -1,0 +1,69 @@
+<!-- 本周健身记录组件 -->
+<view class="weekly-summary">
+  <!-- 加载中 -->
+  <view class="weekly-loading" wx:if="{{ loading }}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="weekly-content" wx:elif="{{ groupedRecords.length > 0 }}">
+    <!-- 按天分组 -->
+    <view
+      wx:for="{{ groupedRecords }}"
+      wx:key="dayOfWeek"
+      wx:for-item="group"
+      class="weekly-day-group"
+    >
+      <!-- 日期标题 -->
+      <view class="weekly-day-header">
+        <text class="weekly-day-label">📅 {{ group.label }}</text>
+        <text class="weekly-day-count">{{ group.items.length }} 个动作</text>
+      </view>
+
+      <!-- 训练记录卡片 -->
+      <view
+        wx:for="{{ group.items }}"
+        wx:key="startTime"
+        wx:for-item="record"
+        class="weekly-record-card"
+      >
+        <view class="weekly-record-left">
+          <text class="weekly-record-action">{{ record.actionName }}</text>
+          <view class="weekly-record-meta">
+            <text class="weekly-record-muscle">💪 {{ record.muscleGroupName || record.muscleGroup }}</text>
+            <text class="weekly-record-info" wx:if="{{ record.weight || record.reps || record.setCount }}">
+              {{ record.weight ? record.weight + 'kg' : '' }}
+              {{ record.reps ? '×' + record.reps : '' }}
+              {{ record.setCount ? record.setCount + '组' : '' }}
+            </text>
+          </view>
+        </view>
+        <view class="weekly-record-right">
+          <text wx:if="{{ record.isPr }}" class="weekly-record-pr">🏆PR</text>
+          <text wx:elif="{{ record.exhaustionScore >= 1.1 }}" class="weekly-record-burst">💥</text>
+          <text wx:elif="{{ record.exhaustionScore >= 0.9 }}" class="weekly-record-hot">🔥</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="weekly-empty" wx:elif="{{ !loading }}">
+    <text class="weekly-empty-ico">📊</text>
+    <text class="weekly-empty-msg">本周暂无训练记录</text>
+    <text class="weekly-empty-hint">快去打卡吧！</text>
+  </view>
+
+  <!-- 底部统计 -->
+  <view class="weekly-stats-bar" wx:if="{{ !loading && totalDays > 0 }}">
+    <view class="weekly-stat-item">
+      <text class="weekly-stat-value">{{ totalDays }}</text>
+      <text class="weekly-stat-label">训练天数</text>
+    </view>
+    <view class="weekly-stat-divider"></view>
+    <view class="weekly-stat-item">
+      <text class="weekly-stat-value">{{ totalActions }}</text>
+      <text class="weekly-stat-label">动作总数</text>
+    </view>
+  </view>
+</view>

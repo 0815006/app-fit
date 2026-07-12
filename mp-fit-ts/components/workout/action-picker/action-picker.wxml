@@ -1,0 +1,99 @@
+<!-- 底部弹出面板 -->
+<view class="picker-mask" wx:if="{{ visible }}" bindtap="handleClose">
+  <view class="picker-panel" catchtap="noop">
+    <!-- 标题栏 -->
+    <view class="picker-header">
+      <text class="picker-title">
+        选择训练动作
+        <text wx:if="{{ highlightMuscleName }}"> — {{ highlightMuscleName }}</text>
+      </text>
+      <view class="picker-close" bindtap="handleClose">
+        <text>✕</text>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="picker-loading" wx:if="{{ loading }}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 动作列表 -->
+    <scroll-view scroll-y class="picker-list" wx:else>
+      <!-- 高亮推荐区域 -->
+      <view class="picker-highlight-section" wx:if="{{ highlightedActions.length > 0 }}">
+        <view class="picker-highlight-header">
+          <text>🌟 推荐 — {{ highlightMuscleName || highlightMuscleCode }}</text>
+        </view>
+        <view
+          wx:for="{{ highlightedActions }}"
+          wx:key="id"
+          wx:for-item="action"
+          class="picker-action-card picker-action-highlighted"
+          data-id="{{ action.id }}"
+          data-name="{{ action.name }}"
+          data-action-type="{{ action.actionType }}"
+          bindtap="handleSelect"
+        >
+          <view class="picker-action-left">
+            <text class="picker-action-name">{{ action.name }}</text>
+            <text class="picker-action-alias" wx:if="{{ action.alias }}">{{ action.alias }}</text>
+            <view class="picker-action-tags" wx:if="{{ actionEquipmentTypeMap[action.id] && actionEquipmentTypeMap[action.id].length > 0 }}">
+              <text
+                wx:for="{{ actionEquipmentTypeMap[action.id] }}"
+                wx:key="*this"
+                wx:for-item="et"
+                class="picker-action-equip-tag"
+              >🔩 {{ et }}</text>
+            </view>
+          </view>
+          <view class="picker-action-btn">
+            <text>选择</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 未指定肌群提示 -->
+      <view class="picker-hint" wx:if="{{ !muscleGroup && normalActions.length === 0 && highlightedActions.length === 0 }}">
+        <text>请先从肌群看板选择要训练的部位</text>
+      </view>
+
+      <!-- 普通动作区域 -->
+      <view class="picker-normal-section" wx:if="{{ normalActions.length > 0 }}">
+        <view class="picker-normal-header" wx:if="{{ highlightedActions.length > 0 }}">
+          <text>—— 其他动作 ——</text>
+        </view>
+        <view
+          wx:for="{{ normalActions }}"
+          wx:key="id"
+          wx:for-item="action"
+          class="picker-action-card"
+          data-id="{{ action.id }}"
+          data-name="{{ action.name }}"
+          data-action-type="{{ action.actionType }}"
+          bindtap="handleSelect"
+        >
+          <view class="picker-action-left">
+            <text class="picker-action-name">{{ action.name }}</text>
+            <text class="picker-action-alias" wx:if="{{ action.alias }}">{{ action.alias }}</text>
+            <view class="picker-action-tags" wx:if="{{ actionEquipmentTypeMap[action.id] && actionEquipmentTypeMap[action.id].length > 0 }}">
+              <text
+                wx:for="{{ actionEquipmentTypeMap[action.id] }}"
+                wx:key="*this"
+                wx:for-item="et"
+                class="picker-action-equip-tag"
+              >🔩 {{ et }}</text>
+            </view>
+          </view>
+          <view class="picker-action-btn">
+            <text>选择</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="picker-empty" wx:if="{{ highlightedActions.length === 0 && normalActions.length === 0 && !loading }}">
+        <text>没有找到匹配的动作</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

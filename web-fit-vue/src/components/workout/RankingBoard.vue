@@ -12,6 +12,9 @@ const loading = ref(false)
 const activeTab = ref('consistency')
 const days = ref(30)
 
+/** 坚持榜子模式：cumulative 累计打卡 / streak 连续打卡 */
+const consistencyMode = ref<string>('cumulative')
+
 const consistencyData = ref<RankingItemVO[]>([])
 const volumeData = ref<RankingItemVO[]>([])
 const peak1rmData = ref<RankingItemVO[]>([])
@@ -21,7 +24,7 @@ async function loadData() {
   loading.value = true
   try {
     const [cRes, vRes, pRes, pgRes] = await Promise.all([
-      getConsistencyRankingV2(days.value),
+      getConsistencyRankingV2(days.value, consistencyMode.value),
       getVolumeRanking(days.value),
       getPeak1RMRanking(days.value),
       getProgressRankingV2(days.value)
@@ -35,6 +38,24 @@ async function loadData() {
     volumeData.value = []
     peak1rmData.value = []
     progressData.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+function switchConsistencyMode(mode: string) {
+  if (consistencyMode.value === mode) return
+  consistencyMode.value = mode
+  loadConsistency()
+}
+
+async function loadConsistency() {
+  loading.value = true
+  try {
+    const cRes = await getConsistencyRankingV2(days.value, consistencyMode.value)
+    consistencyData.value = cRes.data || []
+  } catch {
+    consistencyData.value = []
   } finally {
     loading.value = false
   }
@@ -75,6 +96,12 @@ onMounted(loadData)
     <el-tabs v-model="activeTab" type="border-card">
       <!-- 坚持榜 -->
       <el-tab-pane label="🔥 坚持榜" name="consistency">
+        <div class="consistency-mode-bar">
+          <el-radio-group v-model="consistencyMode" size="small" @change="loadConsistency">
+            <el-radio-button value="cumulative">累计打卡</el-radio-button>
+            <el-radio-button value="streak">连续打卡</el-radio-button>
+          </el-radio-group>
+        </div>
         <el-table :data="consistencyData" stripe size="small" max-height="360">
           <el-table-column label="排名" width="70" align="center">
             <template #default="{ $index }">
@@ -84,9 +111,9 @@ onMounted(loadData)
           <el-table-column label="用户" min-width="120">
             <template #default="{ row }">{{ getUserLabel(row) }}</template>
           </el-table-column>
-          <el-table-column label="打卡天数" width="100" align="center">
+          <el-table-column :label="consistencyMode === 'streak' ? '连续天数' : '累计天数'" width="100" align="center">
             <template #default="{ row }">
-              <el-tag type="success">{{ row.value }} 天</el-tag>
+              <el-tag :type="consistencyMode === 'streak' ? 'warning' : 'success'">{{ row.value }} 天</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="趋势" width="70" align="center" prop="trend" />
@@ -162,6 +189,8 @@ onMounted(loadData)
 .ranking-board { padding: 16px; background: var(--el-bg-color-page); border-radius: 8px; }
 .ranking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .ranking-title { font-size: 18px; font-weight: 700; }
+
+.consistency-mode-bar { margin-bottom: 12px; }
 
 .rank-gold   { font-weight: 700; color: #f0ad4e; }
 .rank-silver { font-weight: 700; color: #999; }

@@ -18,6 +18,7 @@ import type { EndWorkoutParams } from '@/api/gymWorkout'
 import TimeoutCorrectDialog from '@/components/workout/TimeoutCorrectDialog.vue'
 import MakeupDialog from '@/components/workout/MakeupDialog.vue'
 import WeeklySummary from '@/components/workout/WeeklySummary.vue'
+import CalendarHeatmap from '@/components/workout/CalendarHeatmap.vue'
 
 // ---- 状态 ----
 const loading = ref(false)
@@ -185,18 +186,26 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 肌群看板（新布局：大卡片 + 二级肌肉平铺） -->
-    <MuscleDashboard
-      :muscle-groups="dashboard?.muscleGroups || []"
-      :loading="loading"
-      @select-muscle="handleMuscleSelectDetail"
-    />
+    <div class="gym-content-row">
+      <!-- 左侧：肌群看板 + 本周训练概览 -->
+      <div class="gym-content-left">
+        <MuscleDashboard
+          :muscle-groups="dashboard?.muscleGroups || []"
+          :loading="loading"
+          @select-muscle="handleMuscleSelectDetail"
+        />
 
-    <!-- 本周训练摘要 -->
-    <WeeklySummary
-      :records="weeklyRecords"
-      :loading="weeklyLoading"
-    />
+        <WeeklySummary
+          :records="weeklyRecords"
+          :loading="weeklyLoading"
+        />
+      </div>
+
+      <!-- 右侧：半年打卡日历 -->
+      <div class="gym-content-right">
+        <CalendarHeatmap />
+      </div>
+    </div>
 
     <!-- 动作选择弹窗（方案B：整群平铺 + 二级置顶高亮） -->
     <ActionSelectDialog
@@ -242,11 +251,14 @@ onMounted(() => {
 .gym-workout-view {
   padding: 16px 20px;
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .top-bar {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .top-bar-inner {
@@ -257,5 +269,30 @@ onMounted(() => {
 
 .top-tip {
   flex: 1;
+}
+
+.gym-content-row {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.gym-content-left {
+  flex: 2;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.gym-content-right {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid #ebeef5;
+  padding: 12px 14px;
 }
 </style>

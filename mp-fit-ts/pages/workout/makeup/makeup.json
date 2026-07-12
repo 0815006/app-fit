@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "补记录",
+  "usingComponents": {
+    "makeup-form": "/components/workout/makeup-form/makeup-form"
+  }
+}

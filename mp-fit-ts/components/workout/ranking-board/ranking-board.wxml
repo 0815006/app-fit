@@ -1,0 +1,105 @@
+<!-- 健身榜单组件 -->
+<view class="ranking-board">
+  <!-- Tab 切换栏（横向滚动） -->
+  <scroll-view scroll-x class="ranking-tabs" wx:if="{{ tabs.length > 0 }}">
+    <view class="ranking-tabs-inner">
+      <view
+        wx:for="{{ tabs }}"
+        wx:key="key"
+        class="ranking-tab {{ activeTab === item.key ? 'ranking-tab-active' : '' }}"
+        data-tab="{{ item.key }}"
+        bindtap="handleTabChange"
+      >
+        <text class="ranking-tab-icon">{{ item.icon }}</text>
+        <text class="ranking-tab-label">{{ item.label }}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 坚持榜子模式切换（累计 / 连续） -->
+  <view class="ranking-lift-row" wx:if="{{ activeTab === 'consistency' }}">
+    <text class="ranking-lift-label">打卡模式</text>
+    <view class="ranking-lift-options">
+      <view
+        class="ranking-lift-item {{ consistencyMode === 'cumulative' ? 'ranking-lift-active' : '' }}"
+        data-mode="cumulative"
+        bindtap="handleConsistencyModeChange"
+      >
+        <text>累计</text>
+      </view>
+      <view
+        class="ranking-lift-item {{ consistencyMode === 'streak' ? 'ranking-lift-active' : '' }}"
+        data-mode="streak"
+        bindtap="handleConsistencyModeChange"
+      >
+        <text>连续</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 动作选择器（仅后3榜显示） -->
+  <view class="ranking-lift-row" wx:if="{{ activeTab !== 'consistency' }}">
+    <text class="ranking-lift-label">衡量动作</text>
+    <view class="ranking-lift-options">
+      <view
+        wx:for="{{ liftOptions }}"
+        wx:key="key"
+        class="ranking-lift-item {{ selectedLift === item.key ? 'ranking-lift-active' : '' }}"
+        data-lift="{{ item.key }}"
+        bindtap="handleLiftChange"
+      >
+        <text>{{ item.label }}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="ranking-loading" wx:if="{{ loading }}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 榜单列表 -->
+  <view class="ranking-list" wx:elif="{{ rankingData.length > 0 }}">
+    <view
+      wx:for="{{ rankingData }}"
+      wx:key="rank"
+      wx:for-item="item"
+      wx:for-index="idx"
+      class="ranking-row {{ idx < 3 ? 'ranking-row-top-' + (idx + 1) : '' }}"
+    >
+      <!-- 排名 -->
+      <view class="ranking-rank-col">
+        <text class="ranking-medal">{{ item.rank === 1 ? '🥇' : (item.rank === 2 ? '🥈' : (item.rank === 3 ? '🥉' : item.rank)) }}</text>
+      </view>
+
+      <!-- 用户信息 -->
+      <view class="ranking-user-col">
+        <view class="ranking-user-avatar">
+          <image wx:if="{{ item.avatarUrl }}" class="ranking-avatar-img" src="{{ item.avatarUrl }}" mode="aspectFill" />
+          <text wx:else class="ranking-avatar-placeholder">👤</text>
+        </view>
+        <view class="ranking-user-info">
+          <text class="ranking-user-name">{{ item.empName || item.nickname || item.empNo }}</text>
+          <text class="ranking-user-empno" wx:if="{{ item.empNo }}">{{ item.empNo }}</text>
+        </view>
+      </view>
+
+      <!-- 数值 -->
+      <view class="ranking-value-col">
+        <text class="ranking-value">{{ item.value }}</text>
+        <text class="ranking-value-unit" wx:if="{{ activeTab === 'consistency' }}">{{ consistencyMode === 'streak' ? '连续' : '累计' }}</text>
+        <text class="ranking-aux-value" wx:if="{{ item.auxiliaryValue != null }}">{{ item.auxiliaryValue }}</text>
+        <text class="ranking-trend" wx:if="{{ item.trend }}">
+          {{ item.trend === 'up' ? '📈' : (item.trend === 'down' ? '📉' : '🆕') }}
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="ranking-empty" wx:elif="{{ !loading }}">
+    <text class="ranking-empty-ico">📭</text>
+    <text class="ranking-empty-msg">暂无榜单数据</text>
+    <text class="ranking-empty-hint">快去训练，登上榜单吧！</text>
+  </view>
+</view>

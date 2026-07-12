@@ -1,0 +1,351 @@
+/* ===== 补记录表单组件 ===== */
+
+.makeup-form {
+  padding: 0;
+}
+
+/* ── 成功提示 ── */
+.makeup-saved-tip {
+  text-align: center;
+  padding: 16rpx 24rpx;
+  background: #f0f9eb;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #c2e7b0;
+}
+
+.makeup-saved-tip text {
+  font-size: 24rpx;
+  color: #67c23a;
+  font-weight: 600;
+}
+
+/* ── 区块 ── */
+.makeup-section {
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.makeup-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.makeup-section-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+/* ── 添加按钮 ── */
+.makeup-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 8rpx 18rpx;
+  background: linear-gradient(135deg, #409eff, #337ecc);
+  border-radius: 8rpx;
+}
+
+.makeup-add-btn:active {
+  background: linear-gradient(135deg, #337ecc, #2b6cb0);
+}
+
+.makeup-add-ico {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.makeup-add-label {
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ── 日期选择 ── */
+.makeup-date-row {
+  margin-top: 14rpx;
+}
+
+.makeup-date-picker {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  background: #f5f6f8;
+  border-radius: 12rpx;
+  border: 2rpx solid #e4e7ed;
+}
+
+.makeup-date-ico {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.makeup-date-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #303133;
+  font-weight: 500;
+}
+
+.makeup-date-arrow {
+  font-size: 20rpx;
+  color: #c0c4cc;
+}
+
+/* ── 记录卡片 ── */
+.makeup-record-card {
+  background: #fafbfc;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+  margin-bottom: 14rpx;
+  border: 1rpx solid #ebeef5;
+}
+
+.makeup-record-card:last-child {
+  margin-bottom: 0;
+}
+
+.makeup-record-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.makeup-record-no {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #909399;
+}
+
+.makeup-record-del {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef0f0;
+  border-radius: 50%;
+}
+
+.makeup-record-del:active {
+  background: #fde2e2;
+}
+
+.makeup-record-del text {
+  font-size: 20rpx;
+  color: #f56c6c;
+}
+
+/* ── 动作选择 ── */
+.makeup-action-pick {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  background: #fff;
+  border: 2rpx dashed #dcdfe6;
+  border-radius: 10rpx;
+  margin-bottom: 14rpx;
+}
+
+.makeup-action-pick:active {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+.makeup-action-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #303133;
+}
+
+.makeup-action-placeholder {
+  font-size: 24rpx;
+  color: #c0c4cc;
+}
+
+.makeup-action-arrow {
+  font-size: 20rpx;
+  color: #c0c4cc;
+}
+
+/* ── 参数输入行 ── */
+.makeup-params-row {
+  display: flex;
+  gap: 14rpx;
+  margin-bottom: 12rpx;
+}
+
+.makeup-param {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.makeup-param-label {
+  font-size: 20rpx;
+  color: #909399;
+  font-weight: 500;
+}
+
+.makeup-param-input {
+  width: 100%;
+  height: 68rpx;
+  background: #fff;
+  border: 2rpx solid #e4e7ed;
+  border-radius: 10rpx;
+  padding: 0 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #303133;
+  box-sizing: border-box;
+}
+
+/* ── 组数步进器 ── */
+.makeup-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.makeup-set-label {
+  font-size: 22rpx;
+  color: #909399;
+  font-weight: 500;
+}
+
+.makeup-set-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.makeup-set-btn {
+  width: 56rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2f5;
+  border: 2rpx solid #dcdfe6;
+}
+
+.makeup-set-btn:first-child {
+  border-radius: 10rpx 0 0 10rpx;
+}
+
+.makeup-set-btn:last-child {
+  border-radius: 0 10rpx 10rpx 0;
+}
+
+.makeup-set-btn:active {
+  background: #e8eaed;
+}
+
+.makeup-set-btn-disabled {
+  opacity: 0.35;
+}
+
+.makeup-set-btn text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #606266;
+  line-height: 1;
+}
+
+.makeup-set-value {
+  width: 64rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #303133;
+  border-top: 2rpx solid #dcdfe6;
+  border-bottom: 2rpx solid #dcdfe6;
+  height: 52rpx;
+  line-height: 52rpx;
+  background: #fff;
+}
+
+/* ── 力竭度行 ── */
+.makeup-exhaustion-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 16rpx;
+  background: #fff;
+  border: 2rpx solid #e4e7ed;
+  border-radius: 10rpx;
+}
+
+.makeup-exhaustion-row:active {
+  border-color: #e6a23c;
+  background: #fdf6ec;
+}
+
+.makeup-exhaustion-label {
+  font-size: 22rpx;
+  color: #909399;
+  font-weight: 500;
+}
+
+.makeup-exhaustion-value {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.makeup-exhaustion-tag {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #e6a23c;
+  background: #fef0e6;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.makeup-exhaustion-desc {
+  font-size: 24rpx;
+  color: #e6a23c;
+  font-weight: 600;
+}
+
+/* ── 提交按钮 ── */
+.makeup-submit-wrap {
+  padding: 0 4rpx;
+  margin-top: 30rpx;
+}
+
+.makeup-submit-btn {
+  width: 100%;
+  padding: 26rpx 0;
+  background: linear-gradient(135deg, #409eff, #337ecc);
+  border-radius: 16rpx;
+  text-align: center;
+  box-shadow: 0 6rpx 24rpx rgba(64, 158, 255, 0.35);
+}
+
+.makeup-submit-btn:active {
+  background: linear-gradient(135deg, #337ecc, #2b6cb0);
+}
+
+.makeup-submit-loading {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.makeup-submit-btn text {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}

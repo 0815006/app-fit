@@ -1,0 +1,52 @@
+<!-- 力竭度评价底部弹窗 -->
+<view class="exh-mask" wx:if="{{ visible }}" bindtap="handleClose">
+  <view class="exh-panel" catchtap="noop">
+    <!-- 标题栏 -->
+    <view class="exh-header">
+      <text class="exh-title">评价本次训练</text>
+      <view class="exh-close" bindtap="handleClose">
+        <text>✕</text>
+      </view>
+    </view>
+
+    <!-- 主体 -->
+    <view class="exh-body">
+      <text class="exh-hint">滑动评价本次训练的力竭程度</text>
+
+      <view class="exh-slider-wrapper">
+        <slider
+          min="50"
+          max="120"
+          step="1"
+          value="{{ score }}"
+          show-value
+          block-size="24"
+          activeColor="#e6a23c"
+          backgroundColor="#ebeef5"
+          bindchange="handleSliderChange"
+        />
+        <view class="exh-marks">
+          <text class="exh-mark exh-mark-left">浅练</text>
+          <text class="exh-mark">适中</text>
+          <text class="exh-mark">力竭</text>
+          <text class="exh-mark exh-mark-right">超负荷</text>
+        </view>
+      </view>
+
+      <view class="exh-score-display">
+        <text class="exh-score-label">力竭度系数：</text>
+        <text class="exh-score-value">{{ scoreDisplay }}</text>
+      </view>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="exh-footer">
+      <view class="exh-btn exh-btn-cancel" bindtap="handleClose">
+        <text>取消</text>
+      </view>
+      <view class="exh-btn exh-btn-confirm" bindtap="handleConfirm">
+        <text>确认提交</text>
+      </view>
+    </view>
+  </view>
+</view>

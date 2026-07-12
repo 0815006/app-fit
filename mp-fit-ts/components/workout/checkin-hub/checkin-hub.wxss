@@ -1,0 +1,508 @@
+/* ===== 今日打卡中枢组件 ===== */
+
+.checkin-hub {
+  padding: 0;
+}
+
+/* ── 加载 ── */
+.hub-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.hub-loading text {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+/* ============================================================ */
+/* 训练进行中横幅 */
+/* ============================================================ */
+
+.hub-active-banner {
+  background: linear-gradient(135deg, #67c23a, #529b2e);
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 6rpx 24rpx rgba(103, 194, 58, 0.3);
+}
+
+.banner-top {
+  margin-bottom: 0;
+}
+
+.banner-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+
+.banner-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.banner-muscle {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-timer {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  font-family: 'Menlo', 'Consolas', monospace;
+  margin-bottom: 20rpx;
+  letter-spacing: 4rpx;
+}
+
+/* ── 训练数据输入区 ── */
+.hub-data-section {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12rpx;
+  padding: 20rpx 22rpx;
+  margin-bottom: 16rpx;
+}
+
+.hub-data-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 14rpx;
+  display: block;
+}
+
+.hub-data-form {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+}
+
+.hub-form-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex: 1;
+  min-width: 160rpx;
+}
+
+.hub-form-label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  min-width: 80rpx;
+  text-align: right;
+  font-weight: 500;
+}
+
+.hub-form-input {
+  flex: 1;
+  min-width: 0;
+  height: 56rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8rpx;
+  padding: 0 14rpx;
+  font-size: 24rpx;
+  color: #303133;
+}
+
+.hub-data-hint {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  padding: 8rpx 0;
+}
+
+.hub-calc-result {
+  margin-top: 14rpx;
+  padding: 10rpx 16rpx;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.hub-calc-strong {
+  font-weight: 700;
+  font-size: 26rpx;
+}
+
+.hub-calc-sep {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── 训练参考信息区（可折叠） ── */
+.hub-ref-section {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+}
+
+.hub-ref-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 22rpx;
+}
+
+.hub-ref-header:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hub-ref-title {
+  font-size: 23rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hub-ref-arrow {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hub-ref-body {
+  padding: 0 22rpx 18rpx;
+}
+
+.hub-ref-loading {
+  text-align: center;
+  padding: 16rpx 0;
+}
+
+.hub-ref-loading text {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hub-ref-block {
+  margin-bottom: 14rpx;
+}
+
+.hub-ref-label {
+  font-size: 21rpx;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.hub-ref-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.hub-ref-tag {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 4rpx 12rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6rpx;
+  font-size: 19rpx;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.hub-ref-tag-equip {
+  background: rgba(84, 112, 198, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hub-primary-badge {
+  display: inline-block;
+  background: #e6a23c;
+  color: #fff;
+  font-size: 16rpx;
+  border-radius: 3rpx;
+  padding: 1rpx 5rpx;
+  line-height: 1.2;
+}
+
+/* ── 训练建议行 ── */
+.hub-rec-row {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8rpx;
+  padding: 12rpx 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.hub-rec-goal {
+  margin-bottom: 6rpx;
+}
+
+.hub-rec-goal text {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #f7d572;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2rpx 12rpx;
+  border-radius: 20rpx;
+}
+
+.hub-rec-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+
+.hub-rec-part {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hub-rec-tips {
+  font-size: 19rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 6rpx;
+  line-height: 1.4;
+  display: block;
+}
+
+.hub-ref-empty {
+  text-align: center;
+  padding: 12rpx 0;
+}
+
+.hub-ref-empty text {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── 底部操作按钮 ── */
+.banner-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.banner-btn {
+  flex: 1;
+  padding: 16rpx 0;
+  border-radius: 10rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.banner-btn-cancel {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.banner-btn-cancel:active {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.banner-btn-end {
+  background: #fff;
+  color: #67c23a;
+}
+
+.banner-btn-end:active {
+  background: #f0f7eb;
+}
+
+/* ── 适合训练提示条 ── */
+.hub-ready-bar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #ecf5ff, #d9ecff);
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.ready-label {
+  font-size: 22rpx;
+  color: #409eff;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 8rpx;
+}
+
+.ready-names {
+  font-size: 22rpx;
+  color: #303133;
+  font-weight: 500;
+}
+
+/* ── 肌群卡片网格（两列） ── */
+.hub-muscle-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.hub-muscle-card {
+  width: calc(50% - 8rpx);
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 18rpx 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid #ebeef5;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+
+.hub-muscle-card:active {
+  transform: scale(0.975);
+}
+
+.hub-card-recovering {
+  opacity: 0.58;
+  background: #f8f8f8;
+}
+
+/* ── 卡片头部 ── */
+.hub-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8rpx;
+}
+
+.hub-card-left {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hub-muscle-icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.hub-muscle-name {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #303133;
+  flex-shrink: 0;
+}
+
+.hub-weekly-badge {
+  flex-shrink: 0;
+}
+
+.hub-weekly-badge text {
+  font-size: 18rpx;
+  color: #e6a23c;
+  font-weight: 600;
+  background: rgba(230, 162, 60, 0.1);
+  padding: 2rpx 8rpx;
+  border-radius: 10rpx;
+}
+
+.hub-card-right {
+  flex-shrink: 0;
+}
+
+.hub-status-tag {
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 18rpx;
+  font-weight: 600;
+}
+
+.hub-status-ready {
+  background: rgba(103, 194, 58, 0.1);
+  color: #67c23a;
+}
+
+.hub-status-recovering {
+  background: rgba(230, 162, 60, 0.1);
+  color: #e6a23c;
+}
+
+/* ── 分割线 ── */
+.hub-card-divider {
+  border-top: 1rpx solid #ebeef5;
+  margin: 8rpx 0 4rpx;
+}
+
+/* ── 二级肌肉列表 ── */
+.hub-sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.hub-sub-row {
+  display: flex;
+  align-items: center;
+  padding: 7rpx 4rpx;
+  border-radius: 6rpx;
+}
+
+.hub-sub-row:active {
+  background: rgba(64, 158, 255, 0.06);
+}
+
+.hub-sub-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #c0c4cc;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.hub-sub-name {
+  flex: 1;
+  font-size: 22rpx;
+  color: #303133;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hub-sub-fire {
+  font-size: 20rpx;
+  flex-shrink: 0;
+  margin-left: 4rpx;
+}
+
+.hub-sub-empty {
+  padding: 8rpx 4rpx;
+  text-align: center;
+}
+
+.hub-sub-empty text {
+  font-size: 20rpx;
+  color: #c0c4cc;
+}
+
+/* ── 空状态 ── */
+.hub-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+}
+
+.hub-empty-ico {
+  font-size: 80rpx;
+  display: block;
+  opacity: 0.5;
+  margin-bottom: 22rpx;
+}
+
+.hub-empty-msg {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #909399;
+}

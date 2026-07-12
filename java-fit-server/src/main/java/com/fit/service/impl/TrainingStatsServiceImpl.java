@@ -361,9 +361,73 @@ public class TrainingStatsServiceImpl implements TrainingStatsService {
                             .avatarUrl(user != null ? user.getAvatarUrl() : "")
                             .value(BigDecimal.valueOf(entry.getValue().size()))
                             .build());
-                });
-        return result;
+            });
+    return result;
+}
+
+@Override
+public List<RankingItemVO> getConsistencyStreakRanking(int days) {
+    // 连续打卡榜：计算每个用户在当前周期内的最长连续打卡天数
+    LocalDate today = LocalDate.now();
+    LocalDate since = today.minusDays(days - 1);
+
+    List<GymWorkoutRecord> records = workoutRecordMapper.selectList(
+            new LambdaQueryWrapper<GymWorkoutRecord>()
+                    .select(GymWorkoutRecord::getUserId, GymWorkoutRecord::getStartTime)
+                    .in(GymWorkoutRecord::getStatus, 1, 2)
+                    .ge(GymWorkoutRecord::getStartTime, since.atStartOfDay()));
+
+    // 按用户收集去重训练日期
+    Map<String, Set<LocalDate>> userDays = new HashMap<>();
+    for (GymWorkoutRecord r : records) {
+        userDays.computeIfAbsent(r.getUserId(), k -> new TreeSet<>())
+                .add(r.getStartTime().toLocalDate());
     }
+
+    // 计算每个用户的最长连续天数
+    Map<String, Integer> userStreak = new HashMap<>();
+    for (Map.Entry<String, Set<LocalDate>> entry : userDays.entrySet()) {
+        int maxStreak = 0;
+        int currentStreak = 0;
+        LocalDate prev = null;
+        for (LocalDate d : entry.getValue()) {
+            if (prev == null) {
+                currentStreak = 1;
+            } else if (d.equals(prev.plusDays(1))) {
+                currentStreak++;
+            } else {
+                currentStreak = 1;
+            }
+            if (currentStreak > maxStreak) {
+                maxStreak = currentStreak;
+            }
+            prev = d;
+        }
+        userStreak.put(entry.getKey(), maxStreak);
+    }
+
+    Map<String, User> userMap = loadUserMap(userStreak.keySet());
+
+    List<RankingItemVO> result = new ArrayList<>();
+    int[] rank = {0};
+    userStreak.entrySet().stream()
+            .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+            .forEach(entry -> {
+                rank[0]++;
+                String userId = entry.getKey();
+                User user = userMap.get(userId);
+                result.add(RankingItemVO.builder()
+                        .rank(rank[0])
+                        .userId(userId)
+                        .empName(user != null ? user.getEmpName() : userId)
+                        .nickname(user != null ? user.getNickname() : "")
+                        .empNo(user != null ? user.getEmpNo() : "")
+                        .avatarUrl(user != null ? user.getAvatarUrl() : "")
+                        .value(BigDecimal.valueOf(entry.getValue()))
+                        .build());
+            });
+    return result;
+}
 
     @Override
     public List<RankingItemVO> getVolumeRanking(int days) {

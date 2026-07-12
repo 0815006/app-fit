@@ -51,11 +51,16 @@ Page({
     statsLoading: false,
     techCollapsed: true,
     currentUser: null,
-    activeTab: 'meeting',
+    activeTab: 'fitness',
+
+    // 坚持榜双卡片数据
+    streakData: [],
+    cumulativeData: [],
+
     tabBars: [
-      { key: 'meeting', label: '会议预定', icon: '📅' },
+      { key: 'fitness', label: '健身打卡', icon: '🏋️' },
       { key: 'menu', label: '今日菜单', icon: '🍽️' },
-      { key: 'fitness', label: '健身动作', icon: '🏋️' },
+      { key: 'meeting', label: '会议预定', icon: '📅' },
       { key: 'tech', label: '个人信息', icon: '👤' },
     ],
     techStack: [
@@ -93,32 +98,6 @@ Page({
       { label: '晚餐', icon: '🍲', value: '晚餐', key: 'dinner' },
       { label: '夜宵', icon: '🌙', value: '夜宵', key: 'supper' },
     ],
-
-    // ── Fitness Actions ──
-    fitnessActions: [],
-    fitnessFilteredActions: [],
-    fitnessAllMuscles: [],
-    fitnessAllEquipment: [],
-    // actionId → primary muscle group (from the first primary muscle)
-    fitnessActionMuscleGroupMap: {},
-    // actionId → [equipmentTypes]
-    fitnessActionEquipmentTypeMap: {},
-    // Unique values for filter UI
-    fitnessMuscleGroups: [],
-    fitnessEquipmentTypes: [],
-    fitnessMovementPatterns: [],
-    fitnessDifficultyLevels: [
-      { label: '初学者', value: 1 },
-      { label: '中级', value: 2 },
-      { label: '进阶', value: 3 },
-    ],
-    // Active filters (empty string means "全部")
-    fitnessActiveMuscleGroup: '',
-    fitnessActiveEquipmentType: '',
-    fitnessActiveMovementPattern: '',
-    fitnessActiveDifficultyLevel: 0,
-    fitnessLoading: false,
-    fitnessDataReady: false,
 
     // ── Meeting Booking ──
     meetingDataReady: false,
@@ -162,8 +141,8 @@ Page({
     this.loadMiniProgramStats()
     // 登录完成后重新检查资料完善弹窗（新用户标记在登录时才写入）
     this._checkProfileModal()
-    // 登录完成后加载会议预定数据
-    this.loadMeetingData()
+    // 默认Tab为健身打卡，加载坚持榜数据
+    this.loadRankings()
   },
 
   onShow: function () {
@@ -186,15 +165,33 @@ Page({
     } else if (key === 'menu') {
       this.loadTodayMenu()
     } else if (key === 'fitness') {
-      if (!this.data.fitnessDataReady) {
-        this.loadFitnessData()
-      }
+      this.loadRankings()
     }
   },
-// ── Tech Stack Collapse ──
-toggleTechCollapse: function () {
-  this.setData({ techCollapsed: !this.data.techCollapsed })
-},
+
+  // ── 加载坚持榜双卡片 ──
+  loadRankings: function () {
+    var that = this
+    // 连续打卡 Top 5
+    api.get('/training-stats/ranking/consistency-v2', { days: 30, mode: 'streak' }).then(function (res) {
+      var list = res.data || []
+      that.setData({ streakData: list.slice(0, 5) })
+    }).catch(function () {
+      that.setData({ streakData: [] })
+    })
+    // 累计打卡 Top 5
+    api.get('/training-stats/ranking/consistency-v2', { days: 30, mode: 'cumulative' }).then(function (res) {
+      var list = res.data || []
+      that.setData({ cumulativeData: list.slice(0, 5) })
+    }).catch(function () {
+      that.setData({ cumulativeData: [] })
+    })
+  },
+
+  // ── Tech Stack Collapse ──
+  toggleTechCollapse: function () {
+    this.setData({ techCollapsed: !this.data.techCollapsed })
+  },
 
 // ── 跳转个人信息页 ──
 goToProfile: function () {
@@ -344,259 +341,27 @@ goToProfile: function () {
   },
 
   // ═══════════════════════════════════════════════
-  // ── Fitness Actions Logic ──
+  // ── 健身打卡入口导航 ──
   // ═══════════════════════════════════════════════
 
-  loadFitnessData: function () {
-    var that = this
-    that.setData({ fitnessLoading: true })
-
-    // Fetch all required data in parallel
-    var pActions = api.get('/gym-action/all')
-    var pMuscles = api.get('/gym-muscle/all')
-    var pMuscleRels = api.get('/gym-action-muscle-rel', { page: 1, size: 500 })
-    var pEquipment = api.get('/gym-equipment', { page: 1, size: 500 })
-    var pEquipmentRels = api.get('/gym-action-equipment-rel', { page: 1, size: 500 })
-
-    Promise.all([pActions, pMuscles, pMuscleRels, pEquipment, pEquipmentRels])
-      .then(function (results) {
-        var actions = results[0].data || []
-        var muscles = results[1].data || []
-        var muscleRels = (results[2].data && results[2].data.records) || []
-        var equipment = (results[3].data && results[3].data.records) || []
-        var equipmentRels = (results[4].data && results[4].data.records) || []
-
-        // Build muscleId → muscleGroup map
-        var muscleGroupMap = {}
-        for (var i = 0; i < muscles.length; i++) {
-          muscleGroupMap[muscles[i].id] = muscles[i].muscleGroup
-        }
-
-        // Build muscleId → muscleName map
-        var muscleNameMap = {}
-        for (var i = 0; i < muscles.length; i++) {
-          muscleNameMap[muscles[i].id] = muscles[i].muscleName
-        }
-
-        // Build equipmentId → equipmentType map
-        var equipmentTypeMap = {}
-        for (var i = 0; i < equipment.length; i++) {
-          equipmentTypeMap[equipment[i].id] = equipment[i].equipmentType
-        }
-
-        // Translate English muscle group names to Chinese
-        var MG_TRANSLATIONS = {
-          'arm': '手臂',
-          'arms': '手臂',
-          'back': '背部',
-          'chest': '胸部',
-          'shoulder': '肩部',
-          'shoulders': '肩部',
-          'leg': '腿部',
-          'legs': '腿部',
-          'core': '核心',
-          'abs': '核心',
-          'glute': '臀部',
-          'glutes': '臀部',
-          'hip': '臀部',
-          'full body': '全身',
-          'fullbody': '全身',
-          'cardio': '有氧',
-        }
-
-        function translateMuscleGroup(name) {
-          var lower = (name || '').toLowerCase().trim()
-          return MG_TRANSLATIONS[lower] || name
-        }
-
-        // Build actionId → primary muscleGroup map (translated to Chinese)
-        var actionMuscleGroupMap = {}
-        var primaryMuscleByAction = {}
-        for (var i = 0; i < muscleRels.length; i++) {
-          var rel = muscleRels[i]
-          if (rel.isPrimary === 1) {
-            if (!primaryMuscleByAction[rel.actionId]) {
-              primaryMuscleByAction[rel.actionId] = rel.muscleId
-              actionMuscleGroupMap[rel.actionId] = translateMuscleGroup(muscleGroupMap[rel.muscleId] || '其他')
-            }
-          }
-        }
-
-        // Build actionId → [equipmentTypes] map
-        var actionEquipmentTypeMap = {}
-        for (var i = 0; i < equipmentRels.length; i++) {
-          var er = equipmentRels[i]
-          if (!actionEquipmentTypeMap[er.actionId]) {
-            actionEquipmentTypeMap[er.actionId] = []
-          }
-          var etype = equipmentTypeMap[er.equipmentId]
-          if (etype && actionEquipmentTypeMap[er.actionId].indexOf(etype) === -1) {
-            actionEquipmentTypeMap[er.actionId].push(etype)
-          }
-        }
-
-        // Extract unique muscle groups (sorted) – use translated names
-        var muscleGroupSet = {}
-        for (var key in muscleGroupMap) {
-          if (muscleGroupMap.hasOwnProperty(key)) {
-            muscleGroupSet[translateMuscleGroup(muscleGroupMap[key])] = true
-          }
-        }
-        var muscleGroups = Object.keys(muscleGroupSet)
-        // Put common groups first
-        var priorityGroups = ['胸部', '背部', '肩部', '手臂', '腿部', '核心', '臀部']
-        muscleGroups.sort(function (a, b) {
-          var ia = priorityGroups.indexOf(a)
-          var ib = priorityGroups.indexOf(b)
-          if (ia !== -1 && ib !== -1) return ia - ib
-          if (ia !== -1) return -1
-          if (ib !== -1) return 1
-          return a.localeCompare(b)
-        })
-        muscleGroups.unshift('全部')
-
-        // Extract unique equipment types (with "全部" prepended)
-        var equipmentTypeSet = {}
-        for (var i = 0; i < equipment.length; i++) {
-          if (equipment[i].equipmentType) {
-            equipmentTypeSet[equipment[i].equipmentType] = true
-          }
-        }
-        var equipmentTypesRaw = Object.keys(equipmentTypeSet)
-        var equipmentTypes = ['全部'].concat(equipmentTypesRaw)
-
-        // Extract unique movement patterns (with "全部" prepended)
-        var movementPatternSet = {}
-        for (var i = 0; i < actions.length; i++) {
-          if (actions[i].movementPattern) {
-            movementPatternSet[actions[i].movementPattern] = true
-          }
-        }
-        var movementPatternsRaw = Object.keys(movementPatternSet)
-        var movementPatterns = ['全部'].concat(movementPatternsRaw)
-
-        that.setData({
-          fitnessActions: actions,
-          fitnessAllMuscles: muscles,
-          fitnessAllEquipment: equipment,
-          fitnessActionMuscleGroupMap: actionMuscleGroupMap,
-          fitnessActionEquipmentTypeMap: actionEquipmentTypeMap,
-          fitnessMuscleGroups: muscleGroups,
-          fitnessEquipmentTypes: equipmentTypes,
-          fitnessMovementPatterns: movementPatterns,
-          fitnessDataReady: true,
-          fitnessActiveMuscleGroup: '全部',
-          fitnessActiveEquipmentType: '',
-          fitnessActiveMovementPattern: '',
-          fitnessActiveDifficultyLevel: 0,
-        })
-
-        that._applyFitnessFilters()
-      })
-      .catch(function (err) {
-        console.error('Failed to load fitness data:', err)
-        wx.showToast({ title: '加载健身数据失败', icon: 'none' })
-      })
-      .finally(function () {
-        that.setData({ fitnessLoading: false })
-      })
+  navigateToRanking: function () {
+    wx.navigateTo({ url: '/pages/workout/ranking/ranking' })
   },
 
-  // ── Filter handlers ──
-
-  handleFitnessMuscleGroupChange: function (e) {
-    var group = e.currentTarget.dataset.group
-    if (group === this.data.fitnessActiveMuscleGroup) return
-    this.setData({ fitnessActiveMuscleGroup: group })
-    this._applyFitnessFilters()
+  navigateToCheckin: function () {
+    wx.navigateTo({ url: '/pages/workout/checkin/checkin' })
   },
 
-  handleFitnessEquipmentTypeChange: function (e) {
-    var idx = Number(e.detail.value)
-    var types = this.data.fitnessEquipmentTypes
-    var type = idx === 0 ? '' : types[idx] || ''
-    if (type === this.data.fitnessActiveEquipmentType) return
-    this.setData({ fitnessActiveEquipmentType: type })
-    this._applyFitnessFilters()
+  navigateToMakeup: function () {
+    wx.navigateTo({ url: '/pages/workout/makeup/makeup' })
   },
 
-  handleFitnessMovementPatternChange: function (e) {
-    var idx = Number(e.detail.value)
-    var patterns = this.data.fitnessMovementPatterns
-    var pattern = idx === 0 ? '' : patterns[idx] || ''
-    if (pattern === this.data.fitnessActiveMovementPattern) return
-    this.setData({ fitnessActiveMovementPattern: pattern })
-    this._applyFitnessFilters()
+  navigateToWeekly: function () {
+    wx.navigateTo({ url: '/pages/workout/weekly/weekly' })
   },
 
-  handleFitnessDifficultyChange: function (e) {
-    var level = Number(e.currentTarget.dataset.level)
-    if (level === this.data.fitnessActiveDifficultyLevel) {
-      // Toggle off
-      level = 0
-    }
-    this.setData({ fitnessActiveDifficultyLevel: level })
-    this._applyFitnessFilters()
-  },
-
-  handleFitnessClearFilters: function () {
-    this.setData({
-      fitnessActiveMuscleGroup: '全部',
-      fitnessActiveEquipmentType: '',
-      fitnessActiveMovementPattern: '',
-      fitnessActiveDifficultyLevel: 0,
-    })
-    this._applyFitnessFilters()
-  },
-
-  _applyFitnessFilters: function () {
-    var that = this
-    var actions = that.data.fitnessActions
-    var activeGroup = that.data.fitnessActiveMuscleGroup
-    var activeEquipmentType = that.data.fitnessActiveEquipmentType
-    var activeMovementPattern = that.data.fitnessActiveMovementPattern
-    var activeDifficultyLevel = that.data.fitnessActiveDifficultyLevel
-    var muscleGroupMap = that.data.fitnessActionMuscleGroupMap
-    var equipmentTypeMap = that.data.fitnessActionEquipmentTypeMap
-
-    var filtered = []
-    for (var i = 0; i < actions.length; i++) {
-      var action = actions[i]
-
-      // Filter by muscle group
-      if (activeGroup && activeGroup !== '全部') {
-        var ag = muscleGroupMap[action.id] || '其他'
-        if (ag !== activeGroup) continue
-      }
-
-      // Filter by equipment type
-      if (activeEquipmentType) {
-        var etypes = equipmentTypeMap[action.id] || []
-        if (etypes.indexOf(activeEquipmentType) === -1) continue
-      }
-
-      // Filter by movement pattern
-      if (activeMovementPattern) {
-        if (action.movementPattern !== activeMovementPattern) continue
-      }
-
-      // Filter by difficulty level
-      if (activeDifficultyLevel > 0) {
-        if (action.difficultyLevel !== activeDifficultyLevel) continue
-      }
-
-      filtered.push(action)
-    }
-
-    that.setData({ fitnessFilteredActions: filtered })
-  },
-
-  // ── Navigate to action detail ──
-  navigateToActionDetail: function (e) {
-    var actionId = e.currentTarget.dataset.id
-    wx.navigateTo({
-      url: '/pages/action-detail/action-detail?actionId=' + actionId,
-    })
+  navigateToCalendar: function () {
+    wx.navigateTo({ url: '/pages/workout/calendar/calendar' })
   },
 
   // ── noop (阻冒泡) ──

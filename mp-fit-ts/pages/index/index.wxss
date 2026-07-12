@@ -616,334 +616,325 @@ page {
   background: #f5f7fa;
 }
 
-/* ===== 健身动作 ===== */
+/* ===== 健身打卡入口枢纽 ===== */
 
-/* ── Tier 1: 肌群大类横向滚动胶囊 ── */
-.fitness-muscle-tabs {
-  width: 100%;
-  margin-bottom: 12rpx;
-  white-space: nowrap;
-}
-
-.fitness-muscle-tabs-inner {
-  display: inline-flex;
-  gap: 10rpx;
-  padding: 4rpx 0;
-}
-
-.fitness-muscle-tab {
-  display: inline-flex;
+/* ── 通用入口卡片 ── */
+.workout-hub-card {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 12rpx 24rpx;
-  border-radius: 28rpx;
   background: #fff;
-  border: 2rpx solid #e4e7ed;
-  font-size: 24rpx;
-  font-weight: 500;
-  color: #606266;
-  flex-shrink: 0;
-  transition: all 0.2s;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
-.fitness-muscle-tab:active {
-  background: #f0f2f5;
-}
-
-.fitness-muscle-tab-active {
-  background: linear-gradient(135deg, #f56c6c, #e63946);
-  border-color: #e63946;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 4rpx 16rpx rgba(230, 57, 70, 0.35);
-}
-
-/* ── Tier 2: 筛选工具栏 ── */
-.fitness-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  margin-bottom: 10rpx;
-  flex-wrap: wrap;
-}
-
-.fitness-filter-dropdown {
-  flex-shrink: 0;
-}
-
-.fitness-filter-chip {
-  display: flex;
-  align-items: center;
-  gap: 4rpx;
-  padding: 10rpx 16rpx;
-  background: #fff;
-  border: 1rpx solid #dcdfe6;
-  border-radius: 10rpx;
-  font-size: 22rpx;
-  color: #606266;
-}
-
-.fitness-filter-chip:active {
-  border-color: #409eff;
-  background: #ecf5ff;
-  color: #409eff;
-}
-
-.fitness-filter-ico {
-  font-size: 22rpx;
-}
-
-.fitness-filter-arrow {
-  font-size: 18rpx;
-  color: #c0c4cc;
-  margin-left: 2rpx;
-}
-
-/* 难度筛选行 */
-.fitness-difficulty-row {
-  display: flex;
-  gap: 8rpx;
-  flex-wrap: nowrap;
-}
-
-.fitness-diff-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10rpx 20rpx;
-  background: #fff;
-  border: 2rpx solid #e4e7ed;
-  border-radius: 20rpx;
-  font-size: 22rpx;
-  font-weight: 500;
-  color: #909399;
-  flex-shrink: 0;
-}
-
-.fitness-diff-chip:active {
-  border-color: #409eff;
-  color: #409eff;
-}
-
-.fitness-diff-chip-active {
-  border-color: #e6a23c;
-  background: #fdf6ec;
-  color: #b88230;
-  font-weight: 700;
-}
-
-/* ── 筛选回显与清空 ── */
-.fitness-filter-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10rpx 16rpx;
-  background: #f0f9ff;
-  border-radius: 10rpx;
-  margin-bottom: 14rpx;
-  border: 1rpx solid #d9ecff;
-}
-
-.fitness-filter-summary-text {
-  font-size: 22rpx;
-  color: #606266;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  flex-wrap: wrap;
-}
-
-.fitness-tag-selected {
-  display: inline-flex;
-  align-items: center;
-  padding: 4rpx 12rpx;
-  background: #409eff;
-  color: #fff;
-  border-radius: 6rpx;
-  font-size: 20rpx;
-  font-weight: 600;
-}
-
-.fitness-clear-btn {
-  padding: 6rpx 16rpx;
-  background: #fff;
-  border: 1rpx solid #f56c6c;
-  border-radius: 8rpx;
-  flex-shrink: 0;
-}
-
-.fitness-clear-btn text {
-  font-size: 20rpx;
-  color: #f56c6c;
-  font-weight: 600;
-}
-
-.fitness-clear-btn:active {
-  background: #fef0f0;
-}
-
-/* ── Tier 3: 动作卡片网格 ── */
-.fitness-action-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-/* 单张动作卡片 */
-.fitness-action-card {
-  display: flex;
-  align-items: stretch;
-  background: #fff;
-  border-radius: 14rpx;
-  overflow: hidden;
-  box-shadow: 0 3rpx 16rpx rgba(0, 0, 0, 0.06);
-  border: 1rpx solid #ebeef5;
-}
-
-.fitness-action-card:active {
+.workout-hub-card:active {
   background: #fafbfc;
   transform: scale(0.985);
   transition: transform 0.15s;
 }
 
-/* 图片区域 */
-.faction-img-wrap {
-  width: 180rpx;
-  height: 180rpx;
+.hub-card-icon {
+  font-size: 48rpx;
   flex-shrink: 0;
-  position: relative;
+  margin-right: 20rpx;
+}
+
+.hub-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  background: #f2f3f5;
 }
 
-.faction-img {
-  width: 100%;
-  height: 100%;
+.hub-card-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #303133;
+  line-height: 1.3;
 }
 
-.faction-img-placeholder {
-  width: 100%;
-  height: 100%;
+.hub-card-desc {
+  font-size: 22rpx;
+  color: #909399;
+  margin-top: 4rpx;
+}
+
+.hub-card-arrow {
+  font-size: 36rpx;
+  font-weight: 300;
+  color: #c0c4cc;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+/* ── 下方双栏区域 ── */
+.workout-hub-bottom {
+  display: flex;
+  gap: 20rpx;
+}
+
+/* ── 左侧列 ── */
+.workout-hub-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* ── 右侧列 ── */
+.workout-hub-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/* ── 今日打卡 ── */
+.workout-hub-checkin {
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  border-left: 6rpx solid #67c23a;
+  padding: 20rpx 28rpx;
+}
+
+.workout-hub-checkin .hub-card-icon {
+  font-size: 40rpx;
+  margin-right: 0;
+  margin-bottom: 10rpx;
+}
+
+.workout-hub-checkin .hub-card-arrow {
+  align-self: flex-end;
+  margin-top: auto;
+  margin-left: 0;
+}
+
+/* ── 补记录 ── */
+.workout-hub-makeup {
+  border-left: 6rpx solid #e6a23c;
+  padding: 14rpx 28rpx;
+  flex: 0 0 auto;
+}
+
+.workout-hub-makeup .hub-card-icon {
+  font-size: 32rpx;
+}
+
+.workout-hub-makeup .hub-card-title {
+  font-size: 24rpx;
+}
+
+.workout-hub-makeup .hub-card-desc {
+  font-size: 20rpx;
+}
+
+/* ── 本周健身记录 ── */
+.workout-hub-weekly {
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  border-left: 6rpx solid #b37feb;
+  padding: 20rpx 28rpx;
+}
+
+.workout-hub-weekly .hub-card-icon {
+  font-size: 40rpx;
+  margin-right: 0;
+  margin-bottom: 10rpx;
+}
+
+.workout-hub-weekly .hub-card-arrow {
+  align-self: flex-end;
+  margin-top: auto;
+  margin-left: 0;
+}
+
+/* ── 我的所有记录 ── */
+.workout-hub-calendar {
+  border-left: 6rpx solid #909399;
+  padding: 14rpx 28rpx;
+  flex: 0 0 auto;
+}
+
+.workout-hub-calendar .hub-card-icon {
+  font-size: 32rpx;
+}
+
+.workout-hub-calendar .hub-card-title {
+  font-size: 24rpx;
+}
+
+.workout-hub-calendar .hub-card-desc {
+  font-size: 20rpx;
+}
+
+/* ===== 坚持榜双卡片 ===== */
+.consistency-cards {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.consistency-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  max-height: 380rpx;
+}
+
+/* 连续打卡卡片：暖橙左边线 */
+.cc-card-streak {
+  border-left: 6rpx solid #e6a23c;
+}
+
+/* 累计打卡卡片：蓝色左边线 */
+.cc-card-cumulative {
+  border-left: 6rpx solid #409eff;
+}
+
+/* 卡片头部 */
+.cc-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.cc-header-streak {
+  background: linear-gradient(135deg, #fff7ed, #fff);
+  border-bottom-color: #fed7aa;
+}
+
+.cc-header-cumulative {
+  background: linear-gradient(135deg, #ecf5ff, #fff);
+  border-bottom-color: #d9ecff;
+}
+
+.cc-header-icon {
+  font-size: 36rpx;
+}
+
+.cc-header-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+/* 卡片列表体（可滚动） */
+.cc-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8rpx 0;
+}
+
+.cc-row {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 20rpx;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.cc-row:last-child {
+  border-bottom: none;
+}
+
+.cc-rank-col {
+  width: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f56c6c, #e63946);
+  flex-shrink: 0;
 }
 
-.faction-placeholder-ico {
-  font-size: 48rpx;
+.cc-medal {
+  font-size: 32rpx;
+  line-height: 1;
 }
 
-.faction-video-tag {
-  position: absolute;
-  top: 8rpx;
-  right: 8rpx;
+.cc-rank {
   width: 36rpx;
   height: 36rpx;
-  background: rgba(0, 0, 0, 0.55);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #909399;
+  background: #f5f6f8;
 }
 
-.faction-video-tag text {
-  font-size: 18rpx;
-  color: #fff;
-}
-
-/* 信息区域 */
-.faction-info {
+.cc-name {
   flex: 1;
-  padding: 16rpx 24rpx;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.faction-name-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8rpx;
-  margin-bottom: 8rpx;
-}
-
-.faction-name {
   font-size: 28rpx;
-  font-weight: 700;
-  color: #1d1d1f;
-  line-height: 1.3;
+  color: #303133;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-left: 8rpx;
 }
 
-.faction-alias {
-  font-size: 20rpx;
-  color: #c0c4cc;
+.cc-value {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #409eff;
   flex-shrink: 0;
+  margin-left: 8rpx;
 }
 
-/* 标签行 */
-.faction-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6rpx;
-  margin-bottom: 8rpx;
-}
-
-.faction-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
-  font-size: 20rpx;
-  font-weight: 500;
-}
-
-.faction-tag-muscle {
-  background: #fef0f0;
-  color: #f56c6c;
-  border: 1rpx solid #fbc4c4;
-}
-
-.faction-tag-equip {
-  background: #edf2fc;
-  color: #5470c6;
-  border: 1rpx solid #d0d9f0;
-}
-
-.faction-tag-mode {
-  background: #e8f5e9;
-  color: #388e3c;
-  border: 1rpx solid #c8e6c9;
-}
-
-/* 难度星级 */
-.faction-difficulty {
-  display: flex;
-  gap: 4rpx;
-}
-
-.faction-star {
+.cc-unit {
   font-size: 24rpx;
-  color: #e4e7ed;
+  font-weight: 400;
+  color: #909399;
+  margin-left: 2rpx;
 }
 
-.faction-star-on {
-  color: #e6a23c;
-}
-
-/* 右箭头 */
-.faction-arrow-wrap {
+.cc-empty {
   display: flex;
   align-items: center;
-  padding: 0 12rpx;
-  flex-shrink: 0;
+  justify-content: center;
+  padding: 40rpx 0;
 }
 
-.faction-arrow {
+.cc-empty text {
+  font-size: 22rpx;
+  color: #c0c4cc;
+}
+
+/* 更多榜单入口 */
+.more-ranking-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border-left: 6rpx solid #409eff;
+}
+
+.more-ranking-entry:active {
+  background: #fafbfc;
+  transform: scale(0.985);
+  transition: transform 0.15s;
+}
+
+.more-ranking-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+.more-ranking-arrow {
   font-size: 36rpx;
   font-weight: 300;
   color: #c0c4cc;

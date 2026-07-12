@@ -68,6 +68,12 @@ public interface TrainingStatsService {
     List<RankingItemVO> getConsistencyRankingV2(int days);
 
     /**
+     * 坚持榜-连续打卡：周期内最长连续打卡天数排名（基于 gym_workout_record）
+     * @param days 统计天数
+     */
+    List<RankingItemVO> getConsistencyStreakRanking(int days);
+
+    /**
      * 容量榜：周期内训练总容量（weight × reps × setCount）排名
      * @param days 统计天数
      */

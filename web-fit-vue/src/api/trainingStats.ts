@@ -78,9 +78,9 @@ export function compareStrength(userId2: string): Promise<ApiResult<Record<strin
 // V2 榜单（基于 gym_workout_record，返回 RankingItemVO）
 // ═══════════════════════════════════════════════════════════
 
-/** 坚持榜 V2：周期内累计打卡天数排名 */
-export function getConsistencyRankingV2(days: number = 30): Promise<ApiResult<RankingItemVO[]>> {
-  return request.get('/training-stats/ranking/consistency-v2', { params: { days } })
+/** 坚持榜 V2：周期内坚持天数排名（累计 / 连续） */
+export function getConsistencyRankingV2(days: number = 30, mode: string = 'cumulative'): Promise<ApiResult<RankingItemVO[]>> {
+  return request.get('/training-stats/ranking/consistency-v2', { params: { days, mode } })
 }
 
 /** 容量榜：周期内训练总容量排名 */

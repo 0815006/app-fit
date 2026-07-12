@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "更多榜单",
+  "usingComponents": {
+    "ranking-board": "/components/workout/ranking-board/ranking-board"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "今日打卡",
+  "usingComponents": {
+    "checkin-hub": "/components/workout/checkin-hub/checkin-hub"
+  }
+}

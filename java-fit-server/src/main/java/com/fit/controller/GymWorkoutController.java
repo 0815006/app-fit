@@ -75,7 +75,8 @@ public class GymWorkoutController {
      */
     @PostMapping("/makeup")
     public Result<Void> makeupWorkout(@Valid @RequestBody MakeupWorkoutDTO dto) {
-        workoutService.makeupWorkout(currentUserId(), dto.getActionId(), dto.getStartTime(), dto.getExhaustionScore());
+        workoutService.makeupWorkout(currentUserId(), dto.getActionId(), dto.getStartTime(),
+                dto.getWeight(), dto.getReps(), dto.getSetCount(), dto.getExhaustionScore());
         return Result.success();
     }
 
@@ -86,6 +87,19 @@ public class GymWorkoutController {
     @GetMapping("/timeout-check")
     public Result<TimeoutRecordVO> checkTimeout() {
         return Result.success(workoutService.checkTimeout(currentUserId()));
+    }
+
+    /**
+     * 本周训练摘要
+     * GET /api/gym-workout/weekly-summary
+     */
+    /**
+     * 获取当前用户半年内打卡日期列表（YYYY-MM-DD，去重）
+     * GET /api/gym-workout/checkin-dates
+     */
+    @GetMapping("/checkin-dates")
+    public Result<java.util.List<String>> getCheckinDates() {
+        return Result.success(workoutService.getCheckinDates(currentUserId()));
     }
 
     /**

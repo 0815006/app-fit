@@ -25,6 +25,245 @@
 
 <view class="container">
   <scroll-view scroll-y class="main-scroll" style="height: {{ scrollHeight }}px">
+  <!-- ========== 健身打卡 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'fitness' }}">
+    <!-- 坚持榜双卡片 -->
+    <view class="consistency-cards">
+      <!-- 连续打卡 -->
+      <view class="consistency-card cc-card-streak">
+        <view class="cc-header cc-header-streak">
+          <text class="cc-header-icon">🏅</text>
+          <text class="cc-header-title">连续打卡</text>
+        </view>
+        <scroll-view scroll-y class="cc-body">
+          <block wx:if="{{ streakData.length > 0 }}">
+            <view class="cc-row" wx:for="{{ streakData }}" wx:key="userId">
+              <view class="cc-rank-col">
+                <text wx:if="{{ index === 0 }}" class="cc-medal">🥇</text>
+                <text wx:elif="{{ index === 1 }}" class="cc-medal">🥈</text>
+                <text wx:elif="{{ index === 2 }}" class="cc-medal">🥉</text>
+                <text wx:else class="cc-rank">{{ index + 1 }}</text>
+              </view>
+              <text class="cc-name">{{ item.nickname || item.empName || item.empNo }}</text>
+              <text class="cc-value">{{ item.value }}<text class="cc-unit">天</text></text>
+            </view>
+          </block>
+          <view class="cc-empty" wx:else>
+            <text>暂无数据</text>
+          </view>
+        </scroll-view>
+      </view>
+      <!-- 累计打卡 -->
+      <view class="consistency-card cc-card-cumulative">
+        <view class="cc-header cc-header-cumulative">
+          <text class="cc-header-icon">🏆</text>
+          <text class="cc-header-title">累计打卡</text>
+        </view>
+        <scroll-view scroll-y class="cc-body">
+          <block wx:if="{{ cumulativeData.length > 0 }}">
+            <view class="cc-row" wx:for="{{ cumulativeData }}" wx:key="userId">
+              <view class="cc-rank-col">
+                <text wx:if="{{ index === 0 }}" class="cc-medal">🥇</text>
+                <text wx:elif="{{ index === 1 }}" class="cc-medal">🥈</text>
+                <text wx:elif="{{ index === 2 }}" class="cc-medal">🥉</text>
+                <text wx:else class="cc-rank">{{ index + 1 }}</text>
+              </view>
+              <text class="cc-name">{{ item.nickname || item.empName || item.empNo }}</text>
+              <text class="cc-value">{{ item.value }}<text class="cc-unit">天</text></text>
+            </view>
+          </block>
+          <view class="cc-empty" wx:else>
+            <text>暂无数据</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+    <!-- 更多榜单入口 -->
+    <view class="more-ranking-entry" bindtap="navigateToRanking">
+      <view class="hub-card-icon">🏆</view>
+      <view class="hub-card-body">
+        <text class="hub-card-title">更多榜单</text>
+        <text class="hub-card-desc">坚持榜 · 容量榜 · 1RM巅峰榜 · 进步榜</text>
+      </view>
+      <view class="hub-card-arrow">›</view>
+    </view>
+
+    <!-- 下方双栏区域 -->
+    <view class="workout-hub-bottom">
+      <!-- 左侧：今日打卡 + 补记录 -->
+      <view class="workout-hub-left">
+        <view class="workout-hub-card workout-hub-checkin" bindtap="navigateToCheckin">
+          <view class="hub-card-icon">📋</view>
+          <view class="hub-card-body">
+            <text class="hub-card-title">今日打卡</text>
+            <text class="hub-card-desc">选择肌群 · 开始训练</text>
+          </view>
+          <view class="hub-card-arrow">›</view>
+        </view>
+        <view class="workout-hub-card workout-hub-makeup" bindtap="navigateToMakeup">
+          <view class="hub-card-icon">📝</view>
+          <view class="hub-card-body">
+            <text class="hub-card-title">补记录</text>
+            <text class="hub-card-desc">自由补打卡</text>
+          </view>
+          <view class="hub-card-arrow">›</view>
+        </view>
+      </view>
+
+      <!-- 右侧：本周健身记录 + 我的所有记录 -->
+      <view class="workout-hub-right">
+        <view class="workout-hub-card workout-hub-weekly" bindtap="navigateToWeekly">
+          <view class="hub-card-icon">📊</view>
+          <view class="hub-card-body">
+            <text class="hub-card-title">本周健身记录</text>
+            <text class="hub-card-desc">训练概览 · 7日视图</text>
+          </view>
+          <view class="hub-card-arrow">›</view>
+        </view>
+        <view class="workout-hub-card workout-hub-calendar" bindtap="navigateToCalendar">
+          <view class="hub-card-icon">📅</view>
+          <view class="hub-card-body">
+            <text class="hub-card-title">我的所有记录</text>
+            <text class="hub-card-desc">半年打卡日历</text>
+          </view>
+          <view class="hub-card-arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 今日菜单 ========== -->
+  <view class="content-area" wx:if="{{ activeTab === 'menu' }}">
+    <!-- ══════ 三层控制区 ══════ -->
+    <view class="menu-ctrl-wrap">
+      <!-- Tier 1: 食堂分段控制器 -->
+      <view class="segmented-ctrl">
+        <view
+          class="seg-btn {{ todayZone === '一期' ? 'seg-on' : '' }}"
+          data-zone="一期"
+          bindtap="handleTodayZoneChange"
+        ><text>🏢 一期食堂</text></view>
+        <view
+          class="seg-btn {{ todayZone === '二期' ? 'seg-on' : '' }}"
+          data-zone="二期"
+          bindtap="handleTodayZoneChange"
+        ><text>🏢 二期食堂</text></view>
+      </view>
+
+      <!-- Tier 2: 日期导航 -->
+      <view class="date-row">
+        <view class="date-arrow" bindtap="goToPrevDay">
+          <text>◀ 前一天</text>
+        </view>
+        <picker mode="date" value="{{ todayDate }}" bindchange="handleTodayDateChange">
+          <view class="date-display">
+            <text>{{ todayDateDisplay }}</text>
+          </view>
+        </picker>
+        <view class="date-arrow" bindtap="goToNextDay">
+          <text>后一天 ▶</text>
+        </view>
+      </view>
+      <view class="back-home-row" wx:if="{{ !isTodaySelected }}">
+        <view class="back-today-btn breathing" bindtap="goToToday">
+          <text>⭕ 回到今天</text>
+        </view>
+      </view>
+
+      <!-- Tier 3: 餐次胶囊 -->
+      <view class="capsule-row">
+        <view
+          wx:for="{{ todayMealTypes }}"
+          wx:key="value"
+          class="capsule capsule-{{ item.key }} {{ todayMealType === item.value ? 'capsule-on' : '' }}"
+          data-type="{{ item.value }}"
+          bindtap="handleTodayMealChange"
+        >
+          <text class="capsule-ico">{{ item.icon }}</text>
+          <text class="capsule-lbl">{{ item.label }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ══════ 数据展示区 ══════ -->
+    <!-- 骨架屏 -->
+    <view class="menu-skel-grid" wx:if="{{ todayShowSkeleton }}">
+      <view class="menu-skel-card" wx:for="{{ [1,2,3] }}" wx:key="*this">
+        <view class="sk-head">
+          <view class="sk-bar sk-bar-title"></view>
+          <view class="sk-bar sk-bar-badge"></view>
+        </view>
+        <view class="sk-body">
+          <block wx:for="{{ [1,2,3] }}" wx:key="*this">
+            <view class="sk-row">
+              <view class="sk-bar sk-bar-name"></view>
+              <view class="sk-bar sk-bar-info"></view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="menu-empty" wx:elif="{{ !todayLoading && todayMenuRecords.length === 0 }}">
+      <text class="empty-ico floating">🍽️</text>
+      <text class="empty-msg">今日该餐次暂无菜单排期</text>
+      <text class="empty-hint">去其他时段看看吧~</text>
+    </view>
+
+    <!-- 分类卡片 -->
+    <view class="menu-grid" wx:else>
+      <view
+        class="menu-card"
+        wx:for="{{ todayGrouped }}"
+        wx:key="name"
+      >
+        <!-- 卡片头部 -->
+        <view
+          class="menu-card-head"
+          style="border-bottom-color: {{ fmt.getMealColor(todayMealType) }};"
+        >
+          <text class="menu-card-title">{{ item.name }}</text>
+          <text class="menu-card-num">共 {{ item.items.length }} 款</text>
+        </view>
+
+        <!-- 卡片内容 -->
+        <view class="menu-card-body">
+          <view
+            class="dish {{ it.isSpicy === 1 ? 'dish-hot' : '' }}"
+            wx:for="{{ item.items }}"
+            wx:for-item="it"
+            wx:key="id"
+          >
+            <!-- 菜品名 + 辣标签 -->
+            <view class="dish-top">
+              <text class="dish-name">{{ it.dishName }}</text>
+              <view class="hot-tag" wx:if="{{ it.isSpicy === 1 }}">
+                <text>🌶️ 辣</text>
+              </view>
+            </view>
+
+            <!-- 价格 + 热量 -->
+            <view class="dish-bot">
+              <text class="dish-price">{{ fmt.formatPrice(it.price) }}<text wx:if="{{ it.unit }}" class="dish-price-unit">/{{ it.unit }}</text></text>
+              <text
+                wx:if="{{ it.energyKcal > 0 }}"
+                class="dish-kcal {{ fmt.getCalorieClass(it.energyKcal) }}"
+              >🔥 {{ it.energyKcal }} kcal</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 欢迎品尝卡片 -->
+    <view class="welcome-card" wx:if="{{ !todayLoading }}">
+      <view class="welcome-text">
+        <text>🍽️ 欢迎品尝</text>
+      </view>
+    </view>
+  </view>
+
   <!-- ========== 会议预定 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'meeting' }}">
     <!-- 加载中 -->
@@ -191,296 +430,6 @@
         <text class="empty-ico">🏢</text>
         <text class="empty-msg">暂无可用的会议室</text>
         <text class="empty-hint">请联系管理员添加会议室</text>
-      </view>
-    </block>
-  </view>
-
-  <!-- ========== 今日菜单 ========== -->
-  <view class="content-area" wx:if="{{ activeTab === 'menu' }}">
-    <!-- ══════ 三层控制区 ══════ -->
-    <view class="menu-ctrl-wrap">
-      <!-- Tier 1: 食堂分段控制器 -->
-      <view class="segmented-ctrl">
-        <view
-          class="seg-btn {{ todayZone === '一期' ? 'seg-on' : '' }}"
-          data-zone="一期"
-          bindtap="handleTodayZoneChange"
-        ><text>🏢 一期食堂</text></view>
-        <view
-          class="seg-btn {{ todayZone === '二期' ? 'seg-on' : '' }}"
-          data-zone="二期"
-          bindtap="handleTodayZoneChange"
-        ><text>🏢 二期食堂</text></view>
-      </view>
-
-      <!-- Tier 2: 日期导航 -->
-      <view class="date-row">
-        <view class="date-arrow" bindtap="goToPrevDay">
-          <text>◀ 前一天</text>
-        </view>
-        <picker mode="date" value="{{ todayDate }}" bindchange="handleTodayDateChange">
-          <view class="date-display">
-            <text>{{ todayDateDisplay }}</text>
-          </view>
-        </picker>
-        <view class="date-arrow" bindtap="goToNextDay">
-          <text>后一天 ▶</text>
-        </view>
-      </view>
-      <view class="back-home-row" wx:if="{{ !isTodaySelected }}">
-        <view class="back-today-btn breathing" bindtap="goToToday">
-          <text>⭕ 回到今天</text>
-        </view>
-      </view>
-
-      <!-- Tier 3: 餐次胶囊 -->
-      <view class="capsule-row">
-        <view
-          wx:for="{{ todayMealTypes }}"
-          wx:key="value"
-          class="capsule capsule-{{ item.key }} {{ todayMealType === item.value ? 'capsule-on' : '' }}"
-          data-type="{{ item.value }}"
-          bindtap="handleTodayMealChange"
-        >
-          <text class="capsule-ico">{{ item.icon }}</text>
-          <text class="capsule-lbl">{{ item.label }}</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- ══════ 数据展示区 ══════ -->
-    <!-- 骨架屏 -->
-    <view class="menu-skel-grid" wx:if="{{ todayShowSkeleton }}">
-      <view class="menu-skel-card" wx:for="{{ [1,2,3] }}" wx:key="*this">
-        <view class="sk-head">
-          <view class="sk-bar sk-bar-title"></view>
-          <view class="sk-bar sk-bar-badge"></view>
-        </view>
-        <view class="sk-body">
-          <block wx:for="{{ [1,2,3] }}" wx:key="*this">
-            <view class="sk-row">
-              <view class="sk-bar sk-bar-name"></view>
-              <view class="sk-bar sk-bar-info"></view>
-            </view>
-          </block>
-        </view>
-      </view>
-    </view>
-
-    <!-- 空状态 -->
-    <view class="menu-empty" wx:elif="{{ !todayLoading && todayMenuRecords.length === 0 }}">
-      <text class="empty-ico floating">🍽️</text>
-      <text class="empty-msg">今日该餐次暂无菜单排期</text>
-      <text class="empty-hint">去其他时段看看吧~</text>
-    </view>
-
-    <!-- 分类卡片 -->
-    <view class="menu-grid" wx:else>
-      <view
-        class="menu-card"
-        wx:for="{{ todayGrouped }}"
-        wx:key="name"
-      >
-        <!-- 卡片头部 -->
-        <view
-          class="menu-card-head"
-          style="border-bottom-color: {{ fmt.getMealColor(todayMealType) }};"
-        >
-          <text class="menu-card-title">{{ item.name }}</text>
-          <text class="menu-card-num">共 {{ item.items.length }} 款</text>
-        </view>
-
-        <!-- 卡片内容 -->
-        <view class="menu-card-body">
-          <view
-            class="dish {{ it.isSpicy === 1 ? 'dish-hot' : '' }}"
-            wx:for="{{ item.items }}"
-            wx:for-item="it"
-            wx:key="id"
-          >
-            <!-- 菜品名 + 辣标签 -->
-            <view class="dish-top">
-              <text class="dish-name">{{ it.dishName }}</text>
-              <view class="hot-tag" wx:if="{{ it.isSpicy === 1 }}">
-                <text>🌶️ 辣</text>
-              </view>
-            </view>
-
-            <!-- 价格 + 热量 -->
-            <view class="dish-bot">
-              <text class="dish-price">{{ fmt.formatPrice(it.price) }}<text wx:if="{{ it.unit }}" class="dish-price-unit">/{{ it.unit }}</text></text>
-              <text
-                wx:if="{{ it.energyKcal > 0 }}"
-                class="dish-kcal {{ fmt.getCalorieClass(it.energyKcal) }}"
-              >🔥 {{ it.energyKcal }} kcal</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 欢迎品尝卡片 -->
-    <view class="welcome-card" wx:if="{{ !todayLoading }}">
-      <view class="welcome-text">
-        <text>🍽️ 欢迎品尝</text>
-      </view>
-    </view>
-  </view>
-
-  <!-- ========== 健身动作 ========== -->
-  <view class="content-area" wx:if="{{ activeTab === 'fitness' }}">
-    <!-- 骨架屏 -->
-    <view class="menu-skel-grid" wx:if="{{ fitnessLoading }}">
-      <view class="menu-skel-card" wx:for="{{ [1,2,3] }}" wx:key="*this">
-        <view class="sk-head">
-          <view class="sk-bar sk-bar-title"></view>
-          <view class="sk-bar sk-bar-badge"></view>
-        </view>
-        <view class="sk-body">
-          <block wx:for="{{ [1,2,3] }}" wx:key="*this">
-            <view class="sk-row">
-              <view class="sk-bar sk-bar-name"></view>
-              <view class="sk-bar sk-bar-info"></view>
-            </view>
-          </block>
-        </view>
-      </view>
-    </view>
-
-    <!-- 加载完毕后的内容 -->
-    <block wx:elif="{{ fitnessDataReady }}">
-      <!-- ── Tier 1: 肌群大类 Tabs (横向滚动胶囊) ── -->
-      <scroll-view scroll-x class="fitness-muscle-tabs" wx:if="{{ fitnessMuscleGroups.length > 0 }}">
-        <view class="fitness-muscle-tabs-inner">
-          <view
-            wx:for="{{ fitnessMuscleGroups }}"
-            wx:key="*this"
-            class="fitness-muscle-tab {{ fitnessActiveMuscleGroup === item ? 'fitness-muscle-tab-active' : '' }}"
-            data-group="{{ item }}"
-            bindtap="handleFitnessMuscleGroupChange"
-          >
-            <text>{{ item }}</text>
-          </view>
-        </view>
-      </scroll-view>
-
-      <!-- ── Tier 2: 筛选工具栏 ── -->
-      <view class="fitness-filter-bar">
-        <!-- 器械类型 -->
-        <view class="fitness-filter-dropdown">
-          <picker
-            mode="selector"
-            range="{{ fitnessEquipmentTypes }}"
-            value="{{ fitnessActiveEquipmentType ? fitnessEquipmentTypes.indexOf(fitnessActiveEquipmentType) : 0 }}"
-            bindchange="handleFitnessEquipmentTypeChange"
-          >
-            <view class="fitness-filter-chip">
-              <text class="fitness-filter-ico">🔧</text>
-              <text>{{ fitnessActiveEquipmentType || '全部器械' }}</text>
-              <text class="fitness-filter-arrow">▾</text>
-            </view>
-          </picker>
-        </view>
-
-        <!-- 运动模式 -->
-        <view class="fitness-filter-dropdown">
-          <picker
-            mode="selector"
-            range="{{ fitnessMovementPatterns }}"
-            value="{{ fitnessActiveMovementPattern ? fitnessMovementPatterns.indexOf(fitnessActiveMovementPattern) : 0 }}"
-            bindchange="handleFitnessMovementPatternChange"
-          >
-            <view class="fitness-filter-chip">
-              <text class="fitness-filter-ico">🏃</text>
-              <text>{{ fitnessActiveMovementPattern || '全部模式' }}</text>
-              <text class="fitness-filter-arrow">▾</text>
-            </view>
-          </picker>
-        </view>
-
-        <!-- 难度 -->
-        <view class="fitness-difficulty-row">
-          <view
-            wx:for="{{ fitnessDifficultyLevels }}"
-            wx:key="value"
-            class="fitness-diff-chip {{ fitnessActiveDifficultyLevel === item.value ? 'fitness-diff-chip-active' : '' }}"
-            data-level="{{ item.value }}"
-            bindtap="handleFitnessDifficultyChange"
-          >
-            <text>{{ item.label }}</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- ── 已选筛选回显与清空 ── -->
-      <view class="fitness-filter-summary" wx:if="{{ fitnessActiveEquipmentType || fitnessActiveMovementPattern || fitnessActiveDifficultyLevel > 0 }}">
-        <text class="fitness-filter-summary-text">
-          已筛选：
-          <text wx:if="{{ fitnessActiveEquipmentType }}" class="fitness-tag-selected">🔧 {{ fitnessActiveEquipmentType }}</text>
-          <text wx:if="{{ fitnessActiveMovementPattern }}" class="fitness-tag-selected">🏃 {{ fitnessActiveMovementPattern }}</text>
-          <text wx:if="{{ fitnessActiveDifficultyLevel > 0 }}" class="fitness-tag-selected">⭐ Lv{{ fitnessActiveDifficultyLevel }}</text>
-        </text>
-        <view class="fitness-clear-btn" bindtap="handleFitnessClearFilters">
-          <text>✕ 清除筛选</text>
-        </view>
-      </view>
-
-      <!-- ── Tier 3: 动作卡片列表 ── -->
-      <view class="fitness-action-grid" wx:if="{{ fitnessFilteredActions.length > 0 }}">
-        <view
-          class="fitness-action-card"
-          wx:for="{{ fitnessFilteredActions }}"
-          wx:key="id"
-          data-id="{{ item.id }}"
-          bindtap="navigateToActionDetail"
-        >
-          <!-- 卡片信息区 -->
-          <view class="faction-info">
-            <view class="faction-name-row">
-              <text class="faction-name">{{ item.name }}</text>
-              <text class="faction-alias" wx:if="{{ item.alias }}">{{ item.alias }}</text>
-            </view>
-            <!-- 标签行 -->
-            <view class="faction-tags">
-              <!-- 肌群标签 -->
-              <view class="faction-tag faction-tag-muscle" wx:if="{{ fitnessActionMuscleGroupMap[item.id] }}">
-                <text>💪 {{ fitnessActionMuscleGroupMap[item.id] }}</text>
-              </view>
-              <!-- 器械标签列表 -->
-              <view
-                wx:for="{{ fitnessActionEquipmentTypeMap[item.id] || [] }}"
-                wx:key="*this"
-                wx:for-item="etype"
-                class="faction-tag faction-tag-equip"
-              >
-                <text>🔩 {{ etype }}</text>
-              </view>
-              <!-- 模式标签 -->
-              <view class="faction-tag faction-tag-mode" wx:if="{{ item.movementPattern }}">
-                <text>🏃 {{ item.movementPattern }}</text>
-              </view>
-            </view>
-            <!-- 难度星级 -->
-            <view class="faction-difficulty">
-              <text
-                wx:for="{{ [1,2,3] }}"
-                wx:key="*this"
-                class="faction-star {{ item.difficultyLevel >= item ? 'faction-star-on' : '' }}"
-              >★</text>
-            </view>
-          </view>
-          <!-- 右箭头 -->
-          <view class="faction-arrow-wrap">
-            <text class="faction-arrow">›</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 空结果 -->
-      <view class="menu-empty" wx:elif="{{ fitnessFilteredActions.length === 0 }}">
-        <text class="empty-ico">🏋️</text>
-        <text class="empty-msg">没有找到匹配的动作</text>
-        <text class="empty-hint">试试调整筛选条件吧~</text>
       </view>
     </block>
   </view>
@@ -712,4 +661,3 @@
     </view>
   </view>
 </view>
-

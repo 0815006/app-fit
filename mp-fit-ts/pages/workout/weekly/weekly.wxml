@@ -1,0 +1,3 @@
+<view class="page-container">
+  <weekly-summary />
+</view>

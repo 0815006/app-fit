@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { HomeFilled, TrendCharts, Tools, ForkSpoon, Cpu, Calendar, Timer } from '@element-plus/icons-vue'
+import { HomeFilled, TrendCharts, Tools, ForkSpoon, Cpu, Calendar, Timer, Trophy } from '@element-plus/icons-vue'
 import type { Component } from 'vue'
 
 interface MenuItem {
@@ -15,14 +15,14 @@ const route = useRoute()
 
 const menuItems: MenuItem[] = [
   { path: '/', title: '首页', icon: HomeFilled },
-  { path: '/health', title: '健身榜单', icon: TrendCharts },
-  // { path: '/workout', title: '运动记录', icon: Trophy },
-  { path: '/gym-workout', title: '健身打卡', icon: Timer },
-  { path: '/gym-library', title: '健身维护', icon: Tools },
+  { path: '/ranking', title: '健身榜单', icon: TrendCharts },
+  { path: '/training-center', title: '训练中心', icon: Trophy },
+  { path: '/gym-checkin', title: '健身打卡', icon: Timer },
+  { path: '/gym-maintenance', title: '健身维护', icon: Tools },
   { path: '/canteen-menu', title: '食堂菜单', icon: ForkSpoon },
   // { path: '/trip-check', title: '出行清单', icon: Suitcase },
   { path: '/meeting-room', title: '会议预定', icon: Calendar },
-  { path: '/tech-stack', title: '登录统计', icon: Cpu },
+  { path: '/login-stats', title: '登录统计', icon: Cpu },
 ]
 
 const activeMenu = ref<string>(route.path)

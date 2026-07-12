@@ -106,7 +106,11 @@ public class TrainingStatsController {
      */
     @GetMapping("/ranking/consistency-v2")
     public Result<List<RankingItemVO>> getConsistencyRankingV2(
-            @RequestParam(defaultValue = "30") int days) {
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "cumulative") String mode) {
+        if ("streak".equals(mode)) {
+            return Result.success(statsService.getConsistencyStreakRanking(days));
+        }
         return Result.success(statsService.getConsistencyRankingV2(days));
     }
 

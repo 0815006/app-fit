@@ -1,0 +1,216 @@
+<!-- 今日打卡中枢组件 -->
+<view class="checkin-hub">
+  <!-- 加载中 -->
+  <view class="hub-loading" wx:if="{{ loading }}">
+    <text>加载肌群数据...</text>
+  </view>
+
+  <!-- 主内容 -->
+  <view class="hub-main" wx:else>
+    <!-- ============================================================ -->
+    <!-- 训练计时横幅（当有训练进行中时显示） -->
+    <!-- ============================================================ -->
+    <view class="hub-active-banner" wx:if="{{ activeWorkoutMuscleGroup }}">
+      <!-- 计时器 + 动作名 -->
+      <view class="banner-top">
+        <view class="banner-title-row">
+          <text class="banner-title">⏱️ 训练进行中</text>
+          <text class="banner-muscle">💪 {{ activeWorkoutActionName }}</text>
+        </view>
+        <view class="banner-timer">{{ timerDisplay }}</view>
+      </view>
+
+      <!-- ====== 训练数据输入区 ====== -->
+      <view class="hub-data-section">
+        <text class="hub-data-title">📊 训练数据</text>
+
+        <!-- 模式 A：负重动作 -->
+        <view class="hub-data-form" wx:if="{{ inputMode === 'weighted' }}">
+          <view class="hub-form-item">
+            <text class="hub-form-label">重量 (kg)</text>
+            <input class="hub-form-input" type="digit" placeholder="如 60" value="{{ weight }}" bindinput="handleWeightInput" />
+          </view>
+          <view class="hub-form-item">
+            <text class="hub-form-label">次数</text>
+            <input class="hub-form-input" type="number" placeholder="如 10" value="{{ reps }}" bindinput="handleRepsInput" />
+          </view>
+          <view class="hub-form-item">
+            <text class="hub-form-label">组数</text>
+            <input class="hub-form-input" type="number" placeholder="如 4" value="{{ setCount }}" bindinput="handleSetCountInput" />
+          </view>
+        </view>
+
+        <!-- 模式 B：自重动作 -->
+        <view class="hub-data-form" wx:elif="{{ inputMode === 'bodyweight' }}">
+          <view class="hub-form-item">
+            <text class="hub-form-label">次数</text>
+            <input class="hub-form-input" type="number" placeholder="如 8" value="{{ reps }}" bindinput="handleRepsInput" />
+          </view>
+          <view class="hub-form-item">
+            <text class="hub-form-label">组数</text>
+            <input class="hub-form-input" type="number" placeholder="如 4" value="{{ setCount }}" bindinput="handleSetCountInput" />
+          </view>
+        </view>
+
+        <!-- 模式 C：有氧/拉伸 -->
+        <view wx:elif="{{ inputMode === 'cardio' }}">
+          <text class="hub-data-hint">💡 有氧训练，仅记录训练时长和力竭度，无需额外填写重量/次数数据</text>
+        </view>
+
+        <!-- 1RM / 总容量 估算 -->
+        <view class="hub-calc-result" wx:if="{{ estimated1RM || totalVolume }}">
+          <text wx:if="{{ estimated1RM }}" class="hub-calc-item">估计 1RM：<text class="hub-calc-strong">{{ estimated1RM }} kg</text></text>
+          <text wx:if="{{ estimated1RM && totalVolume }}" class="hub-calc-sep">|</text>
+          <text wx:if="{{ totalVolume }}" class="hub-calc-item">总容量：<text class="hub-calc-strong">{{ totalVolume }} kg</text></text>
+        </view>
+      </view>
+
+      <!-- ====== 训练参考信息（可折叠） ====== -->
+      <view class="hub-ref-section">
+        <view class="hub-ref-header" bindtap="handleToggleRefInfo">
+          <text class="hub-ref-title">📋 训练参考信息</text>
+          <text class="hub-ref-arrow">{{ refCollapsed ? '▶' : '▼' }}</text>
+        </view>
+        <view class="hub-ref-body" wx:if="{{ !refCollapsed }}">
+          <view class="hub-ref-loading" wx:if="{{ refLoading }}">
+            <text>加载中...</text>
+          </view>
+          <view wx:else>
+            <!-- 涉及肌群 -->
+            <view class="hub-ref-block" wx:if="{{ refMuscles.length > 0 }}">
+              <text class="hub-ref-label">🏋️ 涉及肌群</text>
+              <view class="hub-ref-tags">
+                <view wx:for="{{ refMuscles }}" wx:key="id" wx:for-item="m" class="hub-ref-tag">
+                  <text>{{ m.muscleName }}</text>
+                  <text wx:if="{{ m.isPrimary === 1 }}" class="hub-primary-badge">主</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 涉及器械 -->
+            <view class="hub-ref-block" wx:if="{{ refEquipments.length > 0 }}">
+              <text class="hub-ref-label">🔧 涉及器械</text>
+              <view class="hub-ref-tags">
+                <view wx:for="{{ refEquipments }}" wx:key="id" wx:for-item="eq" class="hub-ref-tag hub-ref-tag-equip">
+                  <text>{{ eq.equipmentName }}</text>
+                </view>
+              </view>
+            </view>
+
+            <!-- 训练建议 -->
+            <view class="hub-ref-block" wx:if="{{ refRecommendations.length > 0 }}">
+              <text class="hub-ref-label">📋 训练建议</text>
+              <view wx:for="{{ refRecommendations }}" wx:key="id" wx:for-item="rec" class="hub-rec-row">
+                <view class="hub-rec-goal">
+                  <text>{{ goalLabelMap[rec.trainingGoal] || rec.trainingGoal }}</text>
+                </view>
+                <view class="hub-rec-parts">
+                  <text wx:if="{{ rec._setDisplay }}" class="hub-rec-part">{{ rec._setDisplay }}</text>
+                  <text wx:if="{{ rec._repDisplay }}" class="hub-rec-part">{{ rec._repDisplay }}</text>
+                  <text wx:if="{{ rec._restDisplay }}" class="hub-rec-part">{{ rec._restDisplay }}</text>
+                </view>
+                <text wx:if="{{ rec.intensityTips }}" class="hub-rec-tips">💡 {{ rec.intensityTips }}</text>
+              </view>
+            </view>
+
+            <!-- 无数据 -->
+            <view class="hub-ref-empty" wx:if="{{ refMuscles.length === 0 && refEquipments.length === 0 && refRecommendations.length === 0 }}">
+              <text>暂无关联数据</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部操作按钮 -->
+      <view class="banner-actions">
+        <view class="banner-btn banner-btn-cancel" bindtap="handleCancelWorkout">
+          <text>放弃</text>
+        </view>
+        <view class="banner-btn banner-btn-end" bindtap="handleEndWorkout">
+          <text>结束训练</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 适合训练提示 -->
+    <view class="hub-ready-bar" wx:if="{{ readyMuscleNames.length > 0 && !activeWorkoutMuscleGroup }}">
+      <text class="ready-label">今天适合训练：</text>
+      <text class="ready-names">{{ readyMuscleNamesText }}</text>
+    </view>
+
+    <!-- ============ 肌群卡片网格（两列）- 训练中隐藏 ============ -->
+    <view class="hub-muscle-grid" wx:if="{{ muscleGroups.length > 0 && !activeWorkoutMuscleGroup }}">
+      <view
+        wx:for="{{ muscleGroups }}"
+        wx:key="muscleGroup"
+        wx:for-item="group"
+        class="hub-muscle-card {{ group.status === 'RECOVERING' ? 'hub-card-recovering' : '' }}"
+        style="border-left: 6rpx solid {{ group.groupColor || '#dcdfe6' }}"
+      >
+        <!-- 卡片头部 -->
+        <view class="hub-card-header" data-muscle-group="{{ group.muscleGroup }}" data-group-name="{{ group.muscleGroupName }}" bindtap="handleGroupHeaderTap">
+          <view class="hub-card-left">
+            <text class="hub-muscle-icon">{{ group.groupIcon || '🏋️' }}</text>
+            <text class="hub-muscle-name">{{ group.muscleGroupName }}</text>
+            <view class="hub-weekly-badge" wx:if="{{ group.weeklyCount > 0 }}">
+              <text>🔥×{{ group.weeklyCount }}</text>
+            </view>
+          </view>
+          <view class="hub-card-right">
+            <view class="hub-status-tag {{ group.status === 'READY' ? 'hub-status-ready' : 'hub-status-recovering' }}">
+              <text wx:if="{{ group.status === 'READY' }}">🟢 可练</text>
+              <text wx:else>{{ group.remainingLabel }}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 分割线 -->
+        <view class="hub-card-divider"></view>
+
+        <!-- 二级肌肉列表 -->
+        <view class="hub-sub-list">
+          <view
+            wx:for="{{ group.subMuscles }}"
+            wx:key="muscleCode"
+            wx:for-item="sub"
+            class="hub-sub-row"
+            data-muscle-group="{{ group.muscleGroup }}"
+            data-muscle-code="{{ sub.muscleCode }}"
+            data-muscle-name="{{ sub.muscleName }}"
+            bindtap="handleSubMuscleClick"
+          >
+            <view class="hub-sub-dot"></view>
+            <text class="hub-sub-name">{{ sub.muscleName }}</text>
+            <text wx:if="{{ sub.trainedThisWeek }}" class="hub-sub-fire">🔥</text>
+          </view>
+          <view wx:if="{{ group.subMuscles.length === 0 }}" class="hub-sub-empty">
+            <text>暂无细分肌肉数据</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 无数据 -->
+    <view class="hub-empty" wx:elif="{{ !loading && !activeWorkoutMuscleGroup }}">
+      <text class="hub-empty-ico">📭</text>
+      <text class="hub-empty-msg">暂无肌群数据</text>
+    </view>
+  </view>
+
+  <!-- 动作选择器弹窗 -->
+  <action-picker
+    visible="{{ pickerVisible }}"
+    muscle-group="{{ pickerMuscleGroup }}"
+    highlight-muscle-code="{{ pickerHighlightCode }}"
+    highlight-muscle-name="{{ pickerHighlightName }}"
+    bind:select="handleActionSelect"
+    bind:close="handlePickerClose"
+  />
+
+  <!-- 力竭度评价弹窗 -->
+  <exhaustion-picker
+    visible="{{ exhaustionVisible }}"
+    bind:submit="handleExhaustionSubmit"
+    bind:close="handleExhaustionClose"
+  />
+</view>

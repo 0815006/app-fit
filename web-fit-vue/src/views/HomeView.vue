@@ -20,12 +20,12 @@ const greeting = computed(() => {
 })
 
 const quickLinks = [
-  { path: '/gym-workout', title: '健身打卡', desc: '开始训练，记录组数，追踪肌肉恢复', icon: '⏱️', color: '#e6a23c' },
-  { path: '/health', title: '健身榜单', desc: '坚持榜 · 容量榜 · 1RM巅峰榜 · 进步榜', icon: '🏆', color: '#409eff' },
-  { path: '/gym-library', title: '健身维护', desc: '动作库、器械、肌群数据维护', icon: '💪', color: '#f56c6c' },
+  { path: '/gym-checkin', title: '健身打卡', desc: '开始训练，记录组数，追踪肌肉恢复', icon: '⏱️', color: '#e6a23c' },
+  { path: '/ranking', title: '健身榜单', desc: '坚持榜 · 容量榜 · 1RM巅峰榜 · 进步榜', icon: '🏆', color: '#409eff' },
+  { path: '/gym-maintenance', title: '健身维护', desc: '动作库、器械、肌群数据维护', icon: '💪', color: '#f56c6c' },
   { path: '/canteen-menu', title: '食堂菜单', desc: '查看各食堂每日菜品', icon: '🍽️', color: '#67c23a' },
   { path: '/meeting-room', title: '会议预定', desc: '会议室在线预定与管理', icon: '📅', color: '#9b59b6' },
-  { path: '/tech-stack', title: '登录统计', desc: '登录次数统计 · 用户列表 · 技术栈', icon: '📊', color: '#909399' },
+  { path: '/login-stats', title: '登录统计', desc: '登录次数统计 · 用户列表 · 技术栈', icon: '📊', color: '#909399' },
 ]
 </script>
 

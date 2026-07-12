@@ -1,0 +1,132 @@
+<!-- 补记录表单组件 -->
+<view class="makeup-form">
+  <!-- 成功提示 -->
+  <view class="makeup-saved-tip" wx:if="{{ savedTip }}">
+    <text>✅ 补卡已保存</text>
+  </view>
+
+  <!-- 日期选择 -->
+  <view class="makeup-section">
+    <text class="makeup-section-title">选择补卡日期</text>
+    <view class="makeup-date-row">
+      <picker mode="date" value="{{ makeupDate }}" bindchange="handleDateChange">
+        <view class="makeup-date-picker">
+          <text class="makeup-date-ico">📅</text>
+          <text class="makeup-date-text">{{ makeupDate || '请选择日期' }}</text>
+          <text class="makeup-date-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 训练记录 -->
+  <view class="makeup-section">
+    <view class="makeup-section-header">
+      <text class="makeup-section-title">训练记录</text>
+      <view class="makeup-add-btn" bindtap="handleAddRecord">
+        <text class="makeup-add-ico">+</text>
+        <text class="makeup-add-label">添加</text>
+      </view>
+    </view>
+
+    <!-- 记录列表 -->
+    <view
+      wx:for="{{ recordList }}"
+      wx:key="id"
+      wx:for-item="record"
+      wx:for-index="idx"
+      class="makeup-record-card"
+    >
+      <!-- 卡片头部：序号 + 删除 -->
+      <view class="makeup-record-head">
+        <text class="makeup-record-no">动作 {{ idx + 1 }}</text>
+        <view
+          class="makeup-record-del"
+          wx:if="{{ recordList.length > 1 }}"
+          data-index="{{ idx }}"
+          bindtap="handleRemoveRecord"
+        >
+          <text>✕</text>
+        </view>
+      </view>
+
+      <!-- 动作选择 -->
+      <view class="makeup-action-pick" data-index="{{ idx }}" bindtap="handleActionPick">
+        <text wx:if="{{ record.actionName }}" class="makeup-action-name">💪 {{ record.actionName }}</text>
+        <text wx:else class="makeup-action-placeholder">+ 选择动作</text>
+        <text class="makeup-action-arrow">▶</text>
+      </view>
+
+      <!-- 训练参数（重量、次数、组数同一行） -->
+      <view class="makeup-params-row">
+        <view class="makeup-param">
+          <text class="makeup-param-label">重量(kg)</text>
+          <input
+            class="makeup-param-input"
+            type="digit"
+            placeholder="0"
+            value="{{ record.weight }}"
+            data-index="{{ idx }}"
+            bindinput="handleWeightInput"
+          />
+        </view>
+        <view class="makeup-param">
+          <text class="makeup-param-label">次数</text>
+          <input
+            class="makeup-param-input"
+            type="number"
+            placeholder="0"
+            value="{{ record.reps }}"
+            data-index="{{ idx }}"
+            bindinput="handleRepsInput"
+          />
+        </view>
+        <view class="makeup-param">
+          <text class="makeup-param-label">组数</text>
+          <input
+            class="makeup-param-input"
+            type="number"
+            placeholder="3"
+            value="{{ record.setCount }}"
+            data-index="{{ idx }}"
+            bindinput="handleSetCountInput"
+          />
+        </view>
+      </view>
+
+      <!-- 力竭度 -->
+      <view class="makeup-exhaustion-row" data-index="{{ idx }}" bindtap="handleExhaustionPick">
+        <text class="makeup-exhaustion-label">力竭程度</text>
+        <view class="makeup-exhaustion-value">
+          <text class="makeup-exhaustion-tag">{{ record.exhaustionScore }}%</text>
+          <text class="makeup-exhaustion-desc">▶</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="makeup-submit-wrap">
+    <view class="makeup-submit-btn {{ submitting ? 'makeup-submit-loading' : '' }}" bindtap="handleSubmit">
+      <text wx:if="{{ submitting }}">提交中...</text>
+      <text wx:else>确认补卡</text>
+    </view>
+  </view>
+
+  <!-- 动作选择器弹窗（不限制肌群，展示全部动作） -->
+  <action-picker
+    visible="{{ pickerActiveIndex >= 0 }}"
+    muscle-group=""
+    highlight-muscle-code=""
+    highlight-muscle-name=""
+    bind:select="handleActionSelect"
+    bind:close="handlePickerClose"
+  />
+
+  <!-- 力竭度选择器 -->
+  <exhaustion-picker
+    visible="{{ exhaustionPickerIndex >= 0 }}"
+    bind:submit="handleExhaustionSubmit"
+    bind:close="handleExhaustionClose"
+  />
+</view>

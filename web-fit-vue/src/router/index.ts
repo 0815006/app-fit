@@ -1,15 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
-import HealthView from '@/views/HealthView.vue'
-import WorkoutView from '@/views/WorkoutView.vue'
+import RankingView from '@/views/RankingView.vue'
+import TrainingCenterView from '@/views/TrainingCenterView.vue'
 import CanteenMenuView from '@/views/CanteenMenuView.vue'
-import GymActionLibraryView from '@/views/GymActionLibraryView.vue'
-import TechStackView from '@/views/TechStackView.vue'
+import GymMaintenanceView from '@/views/GymMaintenanceView.vue'
+import LoginStatsView from '@/views/LoginStatsView.vue'
 import TripCheckView from '@/views/TripCheckView.vue'
 import MeetingRoomView from '@/views/MeetingRoomView.vue'
 import LoginView from '@/views/LoginView.vue'
-import GymWorkoutView from '@/views/GymWorkoutView.vue'
+import GymCheckinView from '@/views/GymCheckinView.vue'
 
 const TOKEN_KEY = 'satoken'
 
@@ -27,15 +27,15 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/health',
-    name: 'health',
-    component: HealthView,
+    path: '/ranking',
+    name: 'ranking',
+    component: RankingView,
     meta: { requiresAuth: true },
   },
   {
-    path: '/workout',
-    name: 'workout',
-    component: WorkoutView,
+    path: '/training-center',
+    name: 'trainingCenter',
+    component: TrainingCenterView,
     meta: { requiresAuth: true },
   },
   {
@@ -45,15 +45,15 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/gym-library',
-    name: 'gymLibrary',
-    component: GymActionLibraryView,
+    path: '/gym-maintenance',
+    name: 'gymMaintenance',
+    component: GymMaintenanceView,
     meta: { requiresAuth: true },
   },
   {
-    path: '/tech-stack',
-    name: 'techStack',
-    component: TechStackView,
+    path: '/login-stats',
+    name: 'loginStats',
+    component: LoginStatsView,
     meta: { requiresAuth: true },
   },
   {
@@ -69,9 +69,9 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/gym-workout',
-    name: 'gymWorkout',
-    component: GymWorkoutView,
+    path: '/gym-checkin',
+    name: 'gymCheckin',
+    component: GymCheckinView,
     meta: { requiresAuth: true },
   },
 ]

@@ -36,6 +36,8 @@ const emit = defineEmits<{
 // ---- 输入模式判定 ----
 const inputMode = computed<InputMode>(() => {
   if (props.actionType && ['CARDIO', 'STRETCH', 'MOBILITY'].includes(props.actionType)) return 'cardio'
+  // 复合动作强制负重模式，避免关键词误匹配（如"平板杠铃卧推"含"平板"被误判为自重）
+  if (props.actionType === 'COMPOUND') return 'weighted'
   if (BODYWEIGHT_KEYWORDS.some(k => props.actionName.includes(k))) return 'bodyweight'
   return 'weighted'
 })

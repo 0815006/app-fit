@@ -21,6 +21,9 @@ public class RankingItemVO {
     /** 员工姓名 */
     private String empName;
 
+    /** 用户昵称 */
+    private String nickname;
+
     /** 7位工号 */
     private String empNo;
 

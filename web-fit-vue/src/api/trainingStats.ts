@@ -6,6 +6,7 @@ export interface RankingItemVO {
   rank: number
   userId: string
   empName: string
+  nickname: string
   empNo: string
   avatarUrl: string
   value: number

@@ -17,7 +17,6 @@
     <scroll-view
       class="month-scroll"
       scroll-y="true"
-      scroll-top="{{ scrollTop }}"
       bindscrolltoupper="handleScrollUpper"
       upper-threshold="80"
     >
@@ -65,14 +64,9 @@
       <text>未打卡</text>
     </view>
 
-    <!-- 分享卡片 -->
-    <view class="share-card" bindtap="handleShare">
-      <text class="share-icon">📤</text>
-      <view class="share-text">
-        <text class="share-title">分享我的打卡记录</text>
-        <text class="share-desc">生成日历截图，分享给好友</text>
-      </view>
-      <text class="share-arrow">›</text>
+    <!-- 分享浮动按钮（右下角） -->
+    <view class="share-fab" bindtap="handleShare">
+      <text class="fab-icon">📤</text>
     </view>
 
     <!-- 隐藏 Canvas 用于绘制分享图（Canvas 2D API） -->

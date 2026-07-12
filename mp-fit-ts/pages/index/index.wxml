@@ -103,8 +103,7 @@
         <view class="workout-hub-card workout-hub-makeup" bindtap="navigateToMakeup">
           <view class="hub-card-icon">📝</view>
           <view class="hub-card-body">
-            <text class="hub-card-title">补记录</text>
-            <text class="hub-card-desc">自由补打卡</text>
+            <text class="hub-card-title">自由补打卡</text>
           </view>
           <view class="hub-card-arrow">›</view>
         </view>
@@ -124,7 +123,6 @@
           <view class="hub-card-icon">📅</view>
           <view class="hub-card-body">
             <text class="hub-card-title">我的所有记录</text>
-            <text class="hub-card-desc">半年打卡日历</text>
           </view>
           <view class="hub-card-arrow">›</view>
         </view>

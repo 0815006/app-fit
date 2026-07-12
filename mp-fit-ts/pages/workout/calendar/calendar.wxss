@@ -196,48 +196,29 @@
   flex-shrink: 0;
 }
 
-/* ── 分享卡片 ── */
-.share-card {
+/* ── 分享浮动按钮（右下角） ── */
+.share-fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: 80rpx;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  box-shadow: 0 8rpx 24rpx rgba(103, 194, 58, 0.4);
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-top: 20rpx;
-  padding: 24rpx 28rpx;
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-  border-radius: 16rpx;
-  color: #fff;
-  flex-shrink: 0;
+  justify-content: center;
+  z-index: 100;
 }
 
-.share-card:active {
+.share-fab:active {
   opacity: 0.85;
+  transform: scale(0.92);
 }
 
-.share-icon {
-  font-size: 40rpx;
-}
-
-.share-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.share-title {
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-.share-desc {
-  font-size: 22rpx;
-  opacity: 0.85;
-}
-
-.share-arrow {
-  font-size: 36rpx;
-  font-weight: 300;
-  opacity: 0.6;
+.fab-icon {
+  font-size: 44rpx;
 }
 
 /* ── 隐藏 Canvas ── */

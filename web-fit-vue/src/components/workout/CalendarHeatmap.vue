@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { getCheckinDates } from '@/api/gymWorkout'
 
 const scrollRef = ref<HTMLElement | null>(null)
-import { getCheckinDates } from '@/api/gymWorkout'
 
 const loading = ref(false)
 const loadingMore = ref(false)
 const checkedDateSet = ref<Set<string>>(new Set())
 
-/** 当前展示的最早月份（开区间，用于判定是否还有更多可加载） */
+/** 当前展示的最早月份游标 */
 const earliestYear = ref(0)
 const earliestMonth = ref(0)
 
@@ -23,9 +23,9 @@ const months = ref<MonthBlock[]>([])
 
 const totalDays = computed(() => checkedDateSet.value.size)
 
-/** 起始纪元：默认不小于 2024-01 */
-const EPOCH_YEAR = 2024
-const EPOCH_MONTH = 1
+/** 日历起始：2026年1月 */
+const START_YEAR = 2026
+const START_MONTH = 1
 
 /** 每批加载月数 */
 const BATCH_SIZE = 12
@@ -44,7 +44,6 @@ async function load(): Promise<void> {
     loadInitialMonths()
   } finally {
     loading.value = false
-    // 初始加载后滚动到底部（最近月份）
     await nextTick()
     if (scrollRef.value) {
       scrollRef.value.scrollTop = scrollRef.value.scrollHeight
@@ -52,15 +51,21 @@ async function load(): Promise<void> {
   }
 }
 
-/** 初次加载：当前月及其前 BATCH_SIZE-1 个月 */
+/** 初次加载：从 2026年1月 到当前月 */
 function loadInitialMonths(): void {
   const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1 // 1-based
+
+  // 月数 = 从2026-01到当前月的跨度 + 1
+  const totalMonths = (currentYear - START_YEAR) * 12 + (currentMonth - START_MONTH) + 1
+
   const result: MonthBlock[] = []
-  for (let i = BATCH_SIZE - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+  for (let i = totalMonths - 1; i >= 0; i--) {
+    const d = new Date(currentYear, currentMonth - 1 - i, 1)
     result.push(buildMonthBlock(d.getFullYear(), d.getMonth() + 1))
   }
-  // 更新最早游标
+
   const oldest = result[0]
   earliestYear.value = oldest.year
   earliestMonth.value = oldest.month
@@ -69,8 +74,7 @@ function loadInitialMonths(): void {
 
 /** 滚动加载更早的月份 */
 async function loadMoreMonths(): Promise<void> {
-  // 已到纪元边界
-  if (earliestYear.value <= EPOCH_YEAR && earliestMonth.value <= EPOCH_MONTH) return
+  if (earliestYear.value <= START_YEAR && earliestMonth.value <= START_MONTH) return
 
   loadingMore.value = true
   await nextTick()
@@ -80,20 +84,16 @@ async function loadMoreMonths(): Promise<void> {
   let m = earliestMonth.value
 
   for (let i = 0; i < BATCH_SIZE; i++) {
-    // 往过去推一个月
     m--
     if (m <= 0) {
       m = 12
       y--
     }
-    // 到达纪元边界则停止
-    if (y < EPOCH_YEAR || (y === EPOCH_YEAR && m < EPOCH_MONTH)) break
+    if (y < START_YEAR || (y === START_YEAR && m < START_MONTH)) break
     newBlocks.push(buildMonthBlock(y, m))
   }
 
   if (newBlocks.length > 0) {
-    // newBlocks 是从近到远排列的 (比如当前最早是4月, newBlocks 生成 3月/2月/1月...)
-    // 需要反转成正序插入到原数组前面
     newBlocks.reverse()
     months.value = [...newBlocks, ...months.value]
     const oldest = newBlocks[0]
@@ -125,15 +125,13 @@ function buildMonthBlock(year: number, month: number): MonthBlock {
   return { year, month, label, cells }
 }
 
-/** 滚动事件：触顶（向上滚动到历史更早区域）加载更多 */
+/** 滚动事件：触顶加载更多 */
 function handleScroll(e: Event): void {
   const el = e.target as HTMLElement
   if (!el || loadingMore.value) return
-  // 向上滚动到接近顶部时加载更早月份
   if (el.scrollTop <= 10) {
     const h = el.scrollHeight
     loadMoreMonths().then(() => {
-      // 保持滚动位置，不让新插入的内容把视口顶下去
       nextTick(() => {
         el.scrollTop = el.scrollHeight - h
       })

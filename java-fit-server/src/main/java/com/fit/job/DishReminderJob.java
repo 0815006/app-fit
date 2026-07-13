@@ -141,10 +141,15 @@ public class DishReminderJob {
 
                     Set<String> dishSet = groupEntry.getValue();
                     String dishNamesStr = String.join("、", dishSet);
-                    // thing3 限制 20 个字符，超出截断加 "等"
+                    // thing3 限制 20 个字符，超出截断加 "等"（在分隔符处截断，避免切断菜名）
                     String thing3 = dishNamesStr;
                     if (thing3.length() > 20) {
-                        thing3 = thing3.substring(0, 18) + "等";
+                        int cut = 18;
+                        int lastSep = thing3.lastIndexOf('、', cut);
+                        if (lastSep > 0) {
+                            cut = lastSep;
+                        }
+                        thing3 = thing3.substring(0, cut) + "等";
                     }
 
                     String thing2 = "您收藏的菜品今日供应";

@@ -129,7 +129,22 @@ Component({
           }
         },
         fail: function (err) {
-          console.error('[profile] 头像下载失败（请检查 downloadFile 域名白名单是否包含', config.BASE_URL, ')', err)
+          // errno 603302 = 文件数据为空，通常是刚上传的文件尚未就绪，延迟重试一次
+          if (err.errno === 603302 && !that._avatarRetried) {
+            that._avatarRetried = true
+            console.warn('[profile] 头像数据为空，500ms 后重试...')
+            setTimeout(function () {
+              that._loadAndDisplayAvatar(avatarUrl)
+            }, 500)
+            return
+          }
+          that._avatarRetried = false
+
+          if (err.errno === 600002) {
+            console.error('[profile] 头像下载失败：域名未加入 downloadFile 白名单，请在微信公众平台添加', config.BASE_URL, err)
+          } else {
+            console.error('[profile] 头像下载失败:', err)
+          }
           // 降级：直接使用远程 URL（开发者工具勾选"不校验域名"时可用）
           that.setData({ avatarUrl: fullUrl, _avatarError: false })
         }

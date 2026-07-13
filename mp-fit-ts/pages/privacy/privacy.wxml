@@ -1,0 +1,15 @@
+<view class="privacy-page">
+  <view class="privacy-card">
+    <block wx:for="{{ sections }}" wx:key="title">
+      <view class="privacy-section">
+        <view class="privacy-section-title">{{ item.title }}</view>
+        <view class="privacy-section-content">
+          <block wx:for="{{ item.lines }}" wx:for-item="line" wx:key="index">
+            <text wx:if="{{ !line.isEmpty }}" class="privacy-line">{{ line.text }}</text>
+            <view wx:else class="privacy-line-break"></view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

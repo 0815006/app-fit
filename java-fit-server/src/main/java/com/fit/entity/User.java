@@ -46,4 +46,7 @@ public class User {
 
     /** 更新时间 */
     private LocalDateTime updateTime;
+
+    /** 隐私协议同意时间 */
+    private LocalDateTime privacyAgreedTime;
 }

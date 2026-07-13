@@ -1,0 +1,36 @@
+<view class="privacy-popup" wx:if="{{ visible && _needAuth }}">
+  <!-- 遮罩 -->
+  <view class="mask"></view>
+
+  <!-- 弹窗 -->
+  <view class="dialog">
+    <text class="title">隐私保护提示</text>
+
+    <text class="desc">
+      为了保障您的账户安全及提供会议室预定服务，
+      我们需要收集您的头像、姓名及工号。
+      在您使用前，请务必仔细阅读并同意
+    </text>
+
+    <!-- 可点击跳转全文 -->
+    <text class="link" bindtap="goToPrivacy">
+      《卡园健身打卡小程序用户隐私保护指引》
+    </text>
+
+    <text class="desc">
+      如果您拒绝，将无法维护个人信息及预定会议室。
+    </text>
+
+    <!-- 按钮区域 -->
+    <view class="btns">
+      <button class="btn-refuse" bindtap="handleRefuse">暂不使用</button>
+      <button
+        class="btn-agree"
+        open-type="agreePrivacyAuthorization"
+        bindagreeprivacyauthorization="handleAgree"
+      >
+        同意并继续
+      </button>
+    </view>
+  </view>
+</view>

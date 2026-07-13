@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,6 +99,22 @@ public class UserController {
 
         log.info("密码修改成功: userId={}", userId);
         return Result.success("密码修改成功");
+    }
+
+    /**
+     * 记录当前用户隐私协议同意时间
+     */
+    @PostMapping("/agree-privacy")
+    public Result<Void> agreePrivacy() {
+        long userId = StpUtil.getLoginIdAsLong();
+        User user = userService.getById(userId);
+        if (user == null) {
+            return Result.error(404, "用户不存在");
+        }
+        user.setPrivacyAgreedTime(LocalDateTime.now());
+        userService.updateById(user);
+        log.info("隐私协议同意已记录: userId={}, empNo={}", userId, user.getEmpNo());
+        return Result.success();
     }
 
     /**

@@ -11,7 +11,8 @@ Component({
 
   data: {
     avatarUrl: '',
-    nickname: ''
+    nickname: '',
+    privacyAgreed: false   // 是否已同意隐私协议
   },
 
   methods: {
@@ -19,16 +20,27 @@ Component({
      * 关闭弹窗
      */
     onClose() {
-      this.setData({ avatarUrl: '', nickname: '' })
+      this.setData({ avatarUrl: '', nickname: '', privacyAgreed: false })
       this.triggerEvent('close')
     },
 
     /**
-     * 微信头像选择回调
+     * 选择头像（使用 wx.chooseMedia，不依赖隐私 scope）
      */
-    onChooseAvatar(e) {
-      var avatarUrl = e.detail.avatarUrl
-      this.setData({ avatarUrl: avatarUrl })
+    onChooseAvatar() {
+      var that = this
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera'],
+        success: function (res) {
+          var tempFilePath = res.tempFiles[0].tempFilePath
+          that.setData({ avatarUrl: tempFilePath })
+        },
+        fail: function () {
+          // 用户取消选择
+        }
+      })
     },
 
     /**
@@ -39,11 +51,41 @@ Component({
     },
 
     /**
+     * 隐私协议同意回调（由 open-type="agreePrivacyAuthorization" 触发）
+     */
+    handlePrivacyAgree: function () {
+      var that = this
+
+      // 调后端记录同意时间（容错：失败不影响流程）
+      request.post('/user/agree-privacy')
+        .then(function () {
+          console.log('[profile-completion] 隐私同意记录成功')
+        })
+        .catch(function (err) {
+          console.warn('[profile-completion] 隐私同意记录失败（不阻塞）:', err)
+        })
+
+      that.setData({ privacyAgreed: true })
+    },
+
+    /**
+     * 跳转隐私政策全文页面
+     */
+    goToPrivacy: function () {
+      wx.navigateTo({ url: '/pages/privacy/privacy' })
+    },
+
+    /**
      * 提交资料
      */
     submitProfile() {
       var that = this
       var nickname = this.data.nickname
+
+      if (!this.data.privacyAgreed) {
+        wx.showToast({ title: '请先阅读并同意隐私保护指引', icon: 'none' })
+        return
+      }
 
       if (!nickname || nickname.trim() === '') {
         wx.showToast({ title: '请输入名字', icon: 'none' })
@@ -62,7 +104,7 @@ Component({
           wx.showToast({ title: '资料完善成功', icon: 'success' })
           wx.setStorageSync('isNewUser', false)
           wx.removeStorageSync('showProfileModal')
-          that.setData({ avatarUrl: '', nickname: '' })
+          that.setData({ avatarUrl: '', nickname: '', privacyAgreed: false })
           that.triggerEvent('success')
         }).catch(function (err) {
           wx.hideLoading()

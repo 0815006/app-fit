@@ -7,19 +7,35 @@
     <text class="title">完善个人信息</text>
     <text class="desc">为了方便在后续服务中称呼您，请填写以下信息</text>
 
-    <!-- 头像选择 -->
-    <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-      <image class="avatar" src="{{avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    <!-- 头像选择（使用 wx.chooseMedia，不依赖隐私 scope） -->
+    <view class="avatar-wrapper" bindtap="onChooseAvatar">
+      <image wx:if="{{ avatarUrl }}" class="avatar" src="{{ avatarUrl }}" mode="aspectFill"></image>
+      <text wx:else class="avatar-placeholder">👤</text>
       <text class="avatar-hint">点击选择头像</text>
-    </button>
+    </view>
 
     <!-- 昵称输入 -->
     <input
-      type="nickname"
+      type="text"
       class="name-input"
       placeholder="请输入您的名字或昵称"
       bindinput="onNameInput"
     />
+
+    <!-- 隐私协议勾选区域 -->
+    <view class="privacy-check">
+      <button
+        class="privacy-agree-btn"
+        open-type="agreePrivacyAuthorization"
+        bindagreeprivacyauthorization="handlePrivacyAgree"
+      >
+        <view class="checkbox {{ privacyAgreed ? 'checked' : '' }}">
+          <text wx:if="{{ privacyAgreed }}">✓</text>
+        </view>
+        <text class="privacy-check-text">我已阅读并同意</text>
+      </button>
+      <text class="privacy-link" bindtap="goToPrivacy">《隐私保护指引》</text>
+    </view>
 
     <!-- 提交按钮 -->
     <button class="submit-btn" bindtap="submitProfile">开启体验</button>

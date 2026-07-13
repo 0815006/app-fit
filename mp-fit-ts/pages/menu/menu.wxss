@@ -1,0 +1,7 @@
+page {
+  background: #f5f6f8;
+}
+
+.menu-page {
+  min-height: 100vh;
+}

@@ -9,15 +9,44 @@ Page({
     nickname: '',
     empNo: '',
     empName: '',
-    saving: false
+    saving: false,
+
+    // 隐私弹窗相关
+    privacyPassed: false,
+    showPrivacyPopup: true
   },
 
   onLoad: function () {
-    this.loadUser()
+    // 先不加载数据，等待 privacy-popup 组件的 agree/refuse 事件
   },
 
   onShow: function () {
+    if (this.data.privacyPassed) {
+      this.loadUser()
+    }
+  },
+
+  /**
+   * 隐私协议已同意（包括历史已同意无需弹窗的情况）
+   */
+  onPrivacyAgreed: function () {
+    this.setData({ privacyPassed: true, showPrivacyPopup: false })
     this.loadUser()
+  },
+
+  /**
+   * 用户拒绝了隐私协议
+   */
+  onPrivacyRefused: function () {
+    this.setData({ privacyPassed: false, showPrivacyPopup: false })
+    wx.showToast({ title: '需要同意隐私协议才能使用', icon: 'none' })
+  },
+
+  /**
+   * 重新唤起隐私弹窗
+   */
+  retryPrivacy: function () {
+    this.setData({ showPrivacyPopup: true })
   },
 
   loadUser: function () {
@@ -46,11 +75,19 @@ Page({
   },
 
   /**
-   * 微信头像选择
+   * 选择头像（使用 wx.chooseMedia，不依赖隐私 scope）
    */
-  onChooseAvatar: function (e) {
-    var avatarUrl = e.detail.avatarUrl
-    this.setData({ avatarUrl: avatarUrl })
+  onChooseAvatar: function () {
+    var that = this
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: function (res) {
+        var tempFilePath = res.tempFiles[0].tempFilePath
+        that.setData({ avatarUrl: tempFilePath })
+      }
+    })
   },
 
   /**
@@ -153,5 +190,6 @@ Page({
    */
   goBack: function () {
     wx.navigateBack()
-  }
+  },
+
 })

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "今日菜单",
+  "usingComponents": {
+    "today-menu": "/components/today-menu/today-menu"
+  }
+}

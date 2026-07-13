@@ -1,7 +1,10 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/menu/menu",
+    "pages/meeting/meeting",
     "pages/profile/profile",
+    "pages/privacy/privacy",
     "pages/workout/ranking/ranking",
     "pages/workout/checkin/checkin",
     "pages/workout/makeup/makeup",

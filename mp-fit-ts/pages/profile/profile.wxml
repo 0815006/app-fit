@@ -1,71 +1,89 @@
 <!-- 个人信息页面 -->
 <view class="profile-page">
-  <!-- 加载中 -->
-  <view class="loading-area" wx:if="{{ loading }}">
-    <text class="loading-text">加载中...</text>
+  <!-- 隐私授权弹窗 -->
+  <privacy-popup
+    visible="{{ showPrivacyPopup }}"
+    bind:agree="onPrivacyAgreed"
+    bind:refuse="onPrivacyRefused"
+  />
+
+  <!-- 未通过隐私时的阻断提示 -->
+  <view wx:if="{{ !privacyPassed && !showPrivacyPopup }}" class="privacy-blocked">
+    <view class="blocked-icon">🔒</view>
+    <text class="blocked-text">需要同意隐私保护协议后才能维护个人信息</text>
+    <button class="retry-btn" bindtap="retryPrivacy">重新授权</button>
   </view>
 
-  <!-- 主内容 -->
-  <view class="profile-content" wx:if="{{ !loading }}">
-    <!-- 头像区域 -->
-    <view class="avatar-section">
-      <button class="avatar-wrapper" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
-        <image
-          wx:if="{{ avatarUrl }}"
-          class="avatar-img"
-          src="{{ avatarUrl }}"
-          mode="aspectFill"
-        />
-        <text wx:else class="avatar-placeholder">👤</text>
-        <text class="avatar-hint">点击更换头像</text>
-      </button>
+  <!-- 通过隐私后的原有内容 -->
+  <block wx:if="{{ privacyPassed }}">
+    <!-- 加载中 -->
+    <view class="loading-area" wx:if="{{ loading }}">
+      <text class="loading-text">加载中...</text>
     </view>
 
-    <!-- 表单区域 -->
-    <view class="form-section">
-      <!-- 昵称 -->
-      <view class="form-item">
-        <text class="form-label">昵称</text>
-        <input
-          class="form-input"
-          placeholder="请输入昵称"
-          value="{{ nickname }}"
-          bindinput="onNicknameInput"
-        />
+    <!-- 主内容 -->
+    <view class="profile-content" wx:if="{{ !loading }}">
+      <!-- 头像区域 -->
+      <view class="avatar-section">
+        <view class="avatar-wrapper" bindtap="onChooseAvatar">
+          <image
+            wx:if="{{ avatarUrl }}"
+            class="avatar-img"
+            src="{{ avatarUrl }}"
+            mode="aspectFill"
+          />
+          <text wx:else class="avatar-placeholder">👤</text>
+          <text class="avatar-hint">点击更换头像</text>
+        </view>
       </view>
 
-      <!-- 工号 -->
-      <view class="form-item">
-        <text class="form-label">工号</text>
-        <input
-          class="form-input"
-          type="number"
-          placeholder="请输入7位工号"
-          value="{{ empNo }}"
-          bindinput="onEmpNoInput"
-          maxlength="7"
-        />
-        <text class="form-hint" wx:if="{{ !empNo }}">（未维护工号，默认使用0000000）</text>
+      <!-- 表单区域 -->
+      <view class="form-section">
+        <!-- 昵称 -->
+        <view class="form-item">
+          <text class="form-label">昵称</text>
+          <input
+            class="form-input"
+            placeholder="请输入昵称"
+            value="{{ nickname }}"
+            bindinput="onNicknameInput"
+          />
+        </view>
+
+        <!-- 工号 -->
+        <view class="form-item">
+          <text class="form-label">工号</text>
+          <input
+            class="form-input"
+            type="number"
+            placeholder="请输入7位工号"
+            value="{{ empNo }}"
+            bindinput="onEmpNoInput"
+            maxlength="7"
+          />
+          <text class="form-hint" wx:if="{{ !empNo }}">（未维护工号，默认使用0000000）</text>
+        </view>
+
+        <!-- 员工姓名 -->
+        <view class="form-item">
+          <text class="form-label">姓名</text>
+          <input
+            class="form-input"
+            placeholder="请输入员工姓名"
+            value="{{ empName }}"
+            bindinput="onEmpNameInput"
+            maxlength="20"
+          />
+        </view>
       </view>
 
-      <!-- 员工姓名 -->
-      <view class="form-item">
-        <text class="form-label">姓名</text>
-        <input
-          class="form-input"
-          placeholder="请输入员工姓名"
-          value="{{ empName }}"
-          bindinput="onEmpNameInput"
-          maxlength="20"
-        />
+      <!-- 操作按钮 -->
+      <view class="action-section">
+        <button class="save-btn" bindtap="saveProfile" loading="{{ saving }}" disabled="{{ saving }}">
+          {{ saving ? '保存中...' : '保存' }}
+        </button>
       </view>
+
     </view>
-
-    <!-- 操作按钮 -->
-    <view class="action-section">
-      <button class="save-btn" bindtap="saveProfile" loading="{{ saving }}" disabled="{{ saving }}">
-        {{ saving ? '保存中...' : '保存' }}
-      </button>
-    </view>
-  </view>
+  </block>
 </view>

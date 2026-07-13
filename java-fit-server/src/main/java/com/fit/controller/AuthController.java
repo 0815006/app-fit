@@ -6,6 +6,7 @@ import com.fit.dto.LoginResultDTO;
 import com.fit.dto.WebLoginDTO;
 import com.fit.dto.WxLoginDTO;
 import com.fit.entity.User;
+import com.fit.service.LoginRecordService;
 import com.fit.service.UserService;
 import com.fit.service.WxService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class AuthController {
 
     private final UserService userService;
     private final WxService wxService;
+    private final LoginRecordService loginRecordService;
 
     /**
      * Web 端登录：用户名 + 密码
@@ -43,6 +45,11 @@ public class AuthController {
 
         // Sa-Token 登录
         StpUtil.login(user.getId());
+
+        // 记录 Web 端登录日志
+        String webEmpNo = user.getEmpNo() != null ? user.getEmpNo() : "0000000";
+        loginRecordService.record(user.getId(), webEmpNo, "WEB");
+
         log.info("Web 登录成功: username={}, empNo={}", user.getUsername(), user.getEmpNo());
 
         // 脱敏：不返回密码
@@ -79,6 +86,10 @@ public class AuthController {
 
         // Sa-Token 登录
         StpUtil.login(user.getId());
+
+        // 记录小程序登录日志
+        String empNo = user.getEmpNo() != null ? user.getEmpNo() : "0000000";
+        loginRecordService.record(user.getId(), empNo, "MINI_PROGRAM");
 
         boolean needsProfile = user.getStatus() != null && user.getStatus() == 0;
 

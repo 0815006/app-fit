@@ -58,9 +58,11 @@ Component({
     _resolveAvatarUrl: function (url) {
       if (!url) return ''
       if (url.indexOf('/uploads/') === 0) {
-        // /uploads/avatar/xxx.png -> http://localhost:8091/uploads/avatar/xxx.png
+        // /uploads/avatar/xxx.png -> https://realapex.site/uploads/avatar/xxx.png
         var base = config.BASE_URL.replace(/\/api\/?$/, '')
-        return base + url
+        var fullUrl = base + url
+        console.log('[profile] _resolveAvatarUrl:', url, '->', fullUrl)
+        return fullUrl
       }
       return url
     },
@@ -77,13 +79,15 @@ Component({
           var empName = user.empName || ''
           that.setData({
             user: user,
-            avatarUrl: that._resolveAvatarUrl(user.avatarUrl || ''),
             nickname: user.nickname || '',
             empNo: empNo,
             empName: empName,
-            _avatarError: false,
             loading: false
           })
+
+          // 头像通过 downloadFile 下载到本地临时文件后显示
+          // 这样能明确诊断 downloadFile 域名白名单问题
+          that._loadAndDisplayAvatar(user.avatarUrl)
         })
         .catch(function () {
           wx.showToast({ title: '获取用户信息失败', icon: 'none' })
@@ -92,30 +96,61 @@ Component({
     },
 
     /**
-     * 选择头像（wx.chooseMedia，兼容 Windows 模拟器和真机）
+     * 下载头像到本地临时文件再显示
+     * 微信小程序 <image> 加载网络图片底层走 downloadFile，
+     * 若域名未加入 downloadFile 白名单则静默失败。
+     * 直接用 wx.downloadFile 可以拿到明确的失败信息。
      */
-    onChooseAvatar: function () {
+    _loadAndDisplayAvatar: function (avatarUrl) {
       var that = this
-      wx.chooseMedia({
-        count: 1,
-        mediaType: ['image'],
-        sourceType: ['album', 'camera'],
+      if (!avatarUrl) {
+        that.setData({ avatarUrl: '', _avatarError: false })
+        return
+      }
+
+      // 如果当前 avatarUrl 已经是临时文件路径（刚选完还没保存），保持不变
+      if (avatarUrl.indexOf('wxfile://') === 0 || avatarUrl.indexOf('http://tmp/') === 0) {
+        that.setData({ avatarUrl: avatarUrl, _avatarError: false })
+        return
+      }
+
+      var fullUrl = that._resolveAvatarUrl(avatarUrl)
+      console.log('[profile] 下载头像:', fullUrl)
+
+      wx.downloadFile({
+        url: fullUrl,
         success: function (res) {
-          var tempFilePath = res.tempFiles[0].tempFilePath
-          if (tempFilePath) {
-            that.setData({ avatarUrl: tempFilePath, _avatarError: false })
+          if (res.statusCode === 200) {
+            console.log('[profile] 头像下载成功, tempFilePath:', res.tempFilePath)
+            that.setData({ avatarUrl: res.tempFilePath, _avatarError: false })
+          } else {
+            console.error('[profile] 头像下载 HTTP', res.statusCode, ', 降级使用远程 URL')
+            that.setData({ avatarUrl: fullUrl, _avatarError: false })
           }
         },
         fail: function (err) {
-          console.warn('[profile] 选择头像取消或失败:', err)
+          console.error('[profile] 头像下载失败（请检查 downloadFile 域名白名单是否包含', config.BASE_URL, ')', err)
+          // 降级：直接使用远程 URL（开发者工具勾选"不校验域名"时可用）
+          that.setData({ avatarUrl: fullUrl, _avatarError: false })
         }
       })
+    },
+
+    /**
+     * 使用微信头像（button open-type="chooseAvatar" 回调）
+     */
+    onWechatAvatar: function (e) {
+      var avatarUrl = e.detail.avatarUrl
+      if (avatarUrl) {
+        this.setData({ avatarUrl: avatarUrl, _avatarError: false })
+      }
     },
 
     /**
      * 头像加载失败时降级显示占位符
      */
     onAvatarError: function () {
+      console.warn('[profile] 头像图片加载失败，当前 avatarUrl:', this.data.avatarUrl)
       this.setData({ _avatarError: true })
     },
 

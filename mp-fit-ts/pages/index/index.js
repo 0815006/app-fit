@@ -1,4 +1,5 @@
 var api = require('../../utils/request')
+var config = require('../../utils/config')
 
 Page({
   data: {
@@ -110,6 +111,13 @@ Page({
       .then(function (results) {
         var statsData = results[0].data
         var userData  = results[1].data
+        // 解析头像相对路径为完整 URL
+        if (userData && userData.avatarUrl) {
+          if (userData.avatarUrl.indexOf('/uploads/') === 0) {
+            var base = config.BASE_URL.replace(/\/api\/?$/, '')
+            userData.avatarUrl = base + userData.avatarUrl
+          }
+        }
         that.setData({
           myLoginCount: statsData.myCount,
           totalLoginCount: statsData.totalCount,

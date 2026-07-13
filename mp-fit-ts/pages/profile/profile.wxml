@@ -23,20 +23,21 @@
 
     <!-- 主内容 -->
     <view class="profile-content" wx:if="{{ !loading }}">
-      <!-- 头像区域（wx.chooseMedia，兼容 Windows 模拟器和真机） -->
+      <!-- 头像区域 -->
       <view class="avatar-section">
-       <view class="avatar-wrapper" bindtap="onChooseAvatar">
-         <image
-           wx:if="{{ avatarUrl && !_avatarError }}"
-           class="avatar-img"
-           src="{{ avatarUrl }}"
-           mode="aspectFill"
-           binderror="onAvatarError"
-         />
-         <text wx:else class="avatar-placeholder">👤</text>
-         <text class="avatar-hint">点击更换头像</text>
-       </view>
-     </view>
+        <!-- 点击头像使用微信头像（button open-type="chooseAvatar"） -->
+        <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onWechatAvatar">
+          <image
+            wx:if="{{ avatarUrl && !_avatarError }}"
+            class="avatar-img"
+            src="{{ avatarUrl }}"
+            mode="aspectFill"
+            binderror="onAvatarError"
+          />
+          <text wx:else class="avatar-placeholder">👤</text>
+        </button>
+        <text class="avatar-hint">点击头像更换</text>
+      </view>
 
       <!-- 表单区域 -->
       <view class="form-section">

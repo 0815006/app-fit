@@ -51,15 +51,6 @@ watch(() => props.visible, (val) => {
   if (val) resetForm()
 })
 
-function toggleFacility(f: string): void {
-  const idx = selectedFacilities.value.indexOf(f)
-  if (idx >= 0) {
-    selectedFacilities.value.splice(idx, 1)
-  } else {
-    selectedFacilities.value.push(f)
-  }
-}
-
 async function handleSave(): Promise<void> {
   if (!form.value.name || !form.value.location) {
     ElMessage.warning('请填写会议室名称和位置')

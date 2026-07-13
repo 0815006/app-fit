@@ -43,12 +43,6 @@ async function loadData() {
   }
 }
 
-function switchConsistencyMode(mode: string) {
-  if (consistencyMode.value === mode) return
-  consistencyMode.value = mode
-  loadConsistency()
-}
-
 async function loadConsistency() {
   loading.value = true
   try {

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { changePassword } from '@/api/auth'
 
-const props = defineProps<{
+defineProps<{
   visible: boolean
 }>()
 

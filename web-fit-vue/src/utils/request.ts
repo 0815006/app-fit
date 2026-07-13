@@ -34,7 +34,7 @@ request.interceptors.response.use(
       console.error(`API Error: ${result.message}`)
       return Promise.reject(new Error(result.message || '请求失败'))
     }
-    return result
+    return result as unknown as typeof response
   },
   (error) => {
     if (error.response?.status === 401) {

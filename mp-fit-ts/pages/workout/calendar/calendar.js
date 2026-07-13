@@ -1,8 +1,8 @@
 var api = require('../../../utils/request')
 
-/** 日历起始：2026年1月 */
+/** 日历起始：2026年7月 */
 var START_YEAR = 2026
-var START_MONTH = 0
+var START_MONTH = 6
 
 Page({
   data: {
@@ -171,20 +171,40 @@ Page({
     }
   },
 
-  /** 点击分享浮动按钮：Canvas 绘制 → 保存图片 → 分享 */
+  /** 点击分享浮动按钮：Canvas 绘制 → 保存图片 → 分享（截取可视区域月份） */
   handleShare: function () {
     var that = this
-
     wx.showLoading({ title: '生成中...' })
 
-    // 取最近 6 个月用于分享卡片
     var allBlocks = that.data.monthBlocks
-    var shareMonths = allBlocks.slice(-6)
+    var query = wx.createSelectorQuery()
+    query.selectAll('.month-block').boundingClientRect()
+    query.selectViewport().boundingClientRect()
+    query.exec(function (res) {
+      var shareMonths
 
-    // 等数据就绪后再绘制
-    setTimeout(function () {
-      that.drawShareImage(shareMonths)
-    }, 200)
+      if (res && res[0] && res[0].length > 0 && res[1]) {
+        var blockRects = res[0]   // 所有 month-block 的视口位置
+        var vpHeight = res[1].height // 视口高度
+        var visible = []
+        for (var i = 0; i < blockRects.length; i++) {
+          var r = blockRects[i]
+          // 块与视口有重叠即算可视
+          if (r.bottom > 0 && r.top < vpHeight) {
+            visible.push(allBlocks[i])
+          }
+        }
+        // 最多截 6 个月防 Canvas 过高
+        shareMonths = visible.length > 0 ? visible.slice(0, 6) : allBlocks.slice(-6)
+      } else {
+        // 查询失败降级
+        shareMonths = allBlocks.slice(-6)
+      }
+
+      setTimeout(function () {
+        that.drawShareImage(shareMonths)
+      }, 200)
+    })
   },
 
   drawShareImage: function (shareMonths) {
@@ -243,7 +263,7 @@ Page({
         ctx.fillStyle = '#303133'
         ctx.font = 'bold 18px sans-serif'
         ctx.textAlign = 'center'
-        ctx.fillText('🏋️ 我的健身打卡记录', w / 2, 34)
+        ctx.fillText('我的健身打卡记录', w / 2, 34)
 
         // 统计
         ctx.fillStyle = '#909399'
@@ -319,22 +339,25 @@ Page({
         ctx.fillStyle = '#c0c4cc'
         ctx.font = '10px sans-serif'
         ctx.textAlign = 'center'
-        ctx.fillText('Fit 个人健身 · 口袋健身', w / 2, h - 14)
+        ctx.fillText('Fit 个人健身 · 卡园健身打卡', w / 2, h - 14)
 
-        // 导出图片
+        // 导出图片 → 保存相册 + 拉起原生分享菜单
         wx.canvasToTempFilePath({
           canvas: canvas,
           success: function (imgRes) {
+            console.log('[calendar] canvasToTempFilePath 成功:', imgRes.tempFilePath)
             wx.hideLoading()
+            // 同步保存到相册
             wx.saveImageToPhotosAlbum({
               filePath: imgRes.tempFilePath,
-              success: function () {
-                wx.showToast({ title: '已保存到相册', icon: 'success' })
-              },
+              success: function () { /* 静默保存 */ },
+              fail: function () { /* 忽略 */ }
+            })
+            // 真机通用：拉起原生图片分享菜单（转发/朋友圈/收藏）
+            wx.showShareImageMenu({
+              path: imgRes.tempFilePath,
               fail: function (e) {
-                if (e.errMsg.indexOf('auth deny') >= 0) {
-                  wx.showToast({ title: '请允许保存到相册', icon: 'none' })
-                }
+                console.error('[calendar] showShareImageMenu 失败:', JSON.stringify(e))
               }
             })
           },

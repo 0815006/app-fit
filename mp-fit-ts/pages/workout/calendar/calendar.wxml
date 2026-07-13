@@ -65,9 +65,7 @@
     </view>
 
     <!-- 分享浮动按钮（右下角） -->
-    <view class="share-fab" bindtap="handleShare">
-      <text class="fab-icon">📤</text>
-    </view>
+    <view class="share-fab" bindtap="handleShare"></view>
 
     <!-- 隐藏 Canvas 用于绘制分享图（Canvas 2D API） -->
     <canvas

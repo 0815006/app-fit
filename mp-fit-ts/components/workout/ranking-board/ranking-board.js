@@ -1,4 +1,5 @@
 var api = require('../../../utils/request')
+var config = require('../../../utils/config')
 
 Component({
   data: {
@@ -88,7 +89,9 @@ Component({
 
       api.get(url)
         .then(function (res) {
-          that.setData({ rankingData: res.data || [] })
+          var data = res.data || []
+          that._resolveAvatarUrls(data)
+          that.setData({ rankingData: data })
         })
         .catch(function () {
           that.setData({ rankingData: [] })
@@ -96,6 +99,18 @@ Component({
         .finally(function () {
           that.setData({ loading: false })
         })
+    },
+
+    /** 将相对路径头像 URL 解析为完整 URL */
+    _resolveAvatarUrls: function (list) {
+      if (!list || list.length === 0) return
+      var base = config.BASE_URL.replace(/\/api\/?$/, '')
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i]
+        if (item.avatarUrl && item.avatarUrl.indexOf('/uploads/') === 0) {
+          item.avatarUrl = base + item.avatarUrl
+        }
+      }
     },
 
     /** 获取排名勋章 */

@@ -70,7 +70,7 @@ function getRankClass(index: number): string {
 }
 
 function getUserLabel(row: RankingItemVO): string {
-  return row.empName || row.empNo || row.userId
+  return row.nickname || row.empNo || row.userId
 }
 
 onMounted(loadData)

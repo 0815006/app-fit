@@ -79,7 +79,7 @@
           <text wx:else class="ranking-avatar-placeholder">👤</text>
         </view>
         <view class="ranking-user-info">
-          <text class="ranking-user-name">{{ item.empName || item.nickname }}</text>
+          <text class="ranking-user-name">{{ item.nickname }}</text>
         </view>
       </view>
 

@@ -12,7 +12,8 @@ Component({
   data: {
     avatarUrl: '',
     nickname: '',
-    privacyAgreed: false   // 是否已同意隐私协议
+    privacyAgreed: false,   // 是否已同意隐私协议
+    _avatarError: false     // 头像加载失败降级
   },
 
   methods: {
@@ -21,11 +22,16 @@ Component({
      */
     onClose() {
       this.setData({ avatarUrl: '', nickname: '', privacyAgreed: false })
+      // 通知 app 层资料完善取消，拒绝所有挂起的请求
+      var app = getApp()
+      if (app && app.onProfileCancel) {
+        app.onProfileCancel()
+      }
       this.triggerEvent('close')
     },
 
     /**
-     * 选择头像（使用 wx.chooseMedia，不依赖隐私 scope）
+     * 选择头像（wx.chooseMedia，兼容 Windows 模拟器和真机）
      */
     onChooseAvatar() {
       var that = this
@@ -35,12 +41,21 @@ Component({
         sourceType: ['album', 'camera'],
         success: function (res) {
           var tempFilePath = res.tempFiles[0].tempFilePath
-          that.setData({ avatarUrl: tempFilePath })
+          if (tempFilePath) {
+            that.setData({ avatarUrl: tempFilePath, _avatarError: false })
+          }
         },
-        fail: function () {
-          // 用户取消选择
+        fail: function (err) {
+          console.warn('[profile-completion] 选择头像取消或失败:', err)
         }
       })
+    },
+
+    /**
+     * 头像加载失败时降级显示占位符
+     */
+    onAvatarError: function () {
+      this.setData({ _avatarError: true })
     },
 
     /**
@@ -92,6 +107,32 @@ Component({
         return
       }
 
+      // 内容安全检测：先检测昵称文本
+      wx.showLoading({ title: '安全检测中...' })
+      request.post('/security/check-text', { content: nickname.trim() })
+        .then(function (checkRes) {
+          wx.hideLoading()
+          var pass = checkRes.data && checkRes.data.pass
+          if (!pass) {
+            wx.showToast({ title: '内容含违规信息，请修改后重试', icon: 'none' })
+            return
+          }
+          // 检测通过，继续提交
+          that._doSubmit()
+        })
+        .catch(function (err) {
+          wx.hideLoading()
+          wx.showToast({ title: err.message || '安全检测失败', icon: 'none' })
+        })
+    },
+
+    /**
+     * 执行实际提交（安全检测通过后）
+     */
+    _doSubmit: function () {
+      var that = this
+      var nickname = this.data.nickname
+
       wx.showLoading({ title: '保存中...' })
 
       // 先上传头像（如果有选），再更新资料
@@ -102,8 +143,11 @@ Component({
         }).then(function () {
           wx.hideLoading()
           wx.showToast({ title: '资料完善成功', icon: 'success' })
-          wx.setStorageSync('isNewUser', false)
-          wx.removeStorageSync('showProfileModal')
+          // 通知 app 层资料完善完成，重试所有挂起的请求
+          var app = getApp()
+          if (app && app.onProfileDone) {
+            app.onProfileDone()
+          }
           that.setData({ avatarUrl: '', nickname: '', privacyAgreed: false })
           that.triggerEvent('success')
         }).catch(function (err) {

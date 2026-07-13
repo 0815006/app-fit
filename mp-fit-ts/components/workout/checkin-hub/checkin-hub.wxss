@@ -480,7 +480,7 @@
   text-align: center;
 }
 
-.hub-sub-empty text {
+.hub-sub-empty-text {
   font-size: 20rpx;
   color: #c0c4cc;
 }

@@ -214,7 +214,7 @@
   text-align: center;
 }
 
-.picker-empty text {
+.picker-empty-text {
   font-size: 24rpx;
   color: #909399;
 }

@@ -23,7 +23,11 @@ Component({
       if (!this.properties.autoCheck) {
         return
       }
-      this._checkPrivacySetting()
+      var that = this
+      // 延迟到下一帧，确保父组件事件绑定已完成
+      wx.nextTick(function () {
+        that._checkPrivacySetting()
+      })
     }
   },
 
@@ -31,7 +35,11 @@ Component({
     'visible': function (newVal) {
       // 每次 visible 变为 true 时重新检查
       if (newVal && this.properties.autoCheck) {
-        this._checkPrivacySetting()
+        var that = this
+        // 延迟到下一帧，确保父组件事件绑定已完成
+        wx.nextTick(function () {
+          that._checkPrivacySetting()
+        })
       }
     }
   },

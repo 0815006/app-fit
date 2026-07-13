@@ -141,51 +141,6 @@ page {
   color: #c0c4cc;
 }
 
-/* 技术选型（关于子菜单展开内容） */
-.about-tech-list {
-  padding: 0 0 6rpx;
-  border-top: 1rpx solid #f0f0f0;
-  background: #fafbfc;
-}
-
-.tech-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16rpx 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.tech-row:last-child {
-  border-bottom: none;
-}
-
-.tech-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.tech-category {
-  font-size: 24rpx;
-  color: #303133;
-}
-
-.tech-name {
-  font-size: 20rpx;
-  color: #909399;
-  margin-top: 4rpx;
-}
-
-.tech-right { flex-shrink: 0; }
-
-.tech-version {
-  font-size: 22rpx;
-  color: #c0c4cc;
-  background: #f5f7fa;
-  padding: 4rpx 10rpx;
-  border-radius: 6rpx;
-}
-
 .about-item-arrow-open {
   color: #409eff;
   font-weight: 700;
@@ -763,4 +718,48 @@ page {
   font-size: 36rpx;
   color: #c0c4cc;
   font-weight: 300;
+}
+
+/* ===== 信息不完善横幅 ===== */
+.profile-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+  border: 1rpx solid #fdba74;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 16rpx;
+  flex-shrink: 0;
+}
+
+.profile-banner:active {
+  opacity: 0.85;
+}
+
+.profile-banner-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.profile-banner-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.profile-banner-text {
+  font-size: 26rpx;
+  color: #9a3412;
+  font-weight: 500;
+}
+
+.profile-banner-arrow {
+  font-size: 36rpx;
+  color: #c2410c;
+  font-weight: 300;
+  margin-left: 12rpx;
+  flex-shrink: 0;
 }

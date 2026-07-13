@@ -2,6 +2,8 @@ package com.fit.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.fit.common.Result;
+import com.fit.service.SecurityCheckService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,20 +12,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * 文件上传 Controller
+ * 文件上传 Controller —— 头像上传内置内容安全检测
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/upload")
+@RequiredArgsConstructor
 public class UploadController {
 
     @Value("${app.upload.avatar-path:./uploads/avatar}")
@@ -32,8 +33,10 @@ public class UploadController {
     @Value("${app.upload.avatar-url-prefix:/uploads/avatar}")
     private String avatarUrlPrefix;
 
+    private final SecurityCheckService securityCheckService;
+
     /**
-     * 上传头像
+     * 上传头像（内置图片内容安全检测）
      */
     @PostMapping("/avatar")
     public Result<Map<String, String>> uploadAvatar(@RequestParam("file") MultipartFile file) {
@@ -51,8 +54,18 @@ public class UploadController {
         }
 
         try {
-            // 确保目录存在
-            Path uploadDir = Paths.get(avatarPath);
+            // 先读取字节用于安全检测
+            byte[] imageBytes = file.getBytes();
+
+            // 内容安全检测
+            boolean safe = securityCheckService.checkImage(imageBytes);
+            if (!safe) {
+                log.warn("头像安全检测不通过: fileName={}, size={}", file.getOriginalFilename(), imageBytes.length);
+                return Result.error(400, "内容含违规信息，请修改后重试");
+            }
+
+            // 确保目录存在 —— 转换为绝对路径确保与 WebConfig 静态资源映射一致
+            Path uploadDir = Path.of(avatarPath).toAbsolutePath().normalize();
             Files.createDirectories(uploadDir);
 
             // 生成唯一文件名
@@ -65,7 +78,9 @@ public class UploadController {
 
             // 保存文件
             Path targetPath = uploadDir.resolve(filename);
-            file.transferTo(targetPath.toFile());
+            Files.write(targetPath, imageBytes);
+
+            log.info("头像已保存至: {}", targetPath.toAbsolutePath());
 
             // 构造可访问 URL
             String url = avatarUrlPrefix + "/" + filename;

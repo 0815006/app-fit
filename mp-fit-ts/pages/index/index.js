@@ -3,10 +3,10 @@ var api = require('../../utils/request')
 Page({
   data: {
     showProfileModal: false,
+    showProfileBanner: false,   // 信息不完善横幅
     myLoginCount: null,
     totalLoginCount: null,
     statsLoading: false,
-    techDetailOpen: false,
     currentUser: null,
     activeTab: 'fitness',
 
@@ -20,21 +20,6 @@ Page({
       { key: 'meeting', label: '会议预定', icon: '📅' },
       { key: 'tech', label: '个人信息', icon: '👤' },
     ],
-    techStack: [
-      { category: '后端框架', name: 'Spring Boot', version: '3.4+' },
-      { category: '后端语言', name: 'Java', version: '21' },
-      { category: 'ORM', name: 'MyBatis Plus', version: '3.5.11' },
-      { category: '数据库', name: 'MySQL', version: '8.4 LTS' },
-      { category: '数据库迁移', name: 'Flyway', version: 'Latest' },
-      { category: 'Web框架', name: 'Vue', version: '3.5+' },
-      { category: '构建工具', name: 'Vite', version: '6.x' },
-      { category: 'Web语言', name: 'TypeScript', version: '5.7+' },
-      { category: 'Web UI库', name: 'Element Plus', version: '2.9+' },
-      { category: '小程序框架', name: '微信原生', version: 'Latest' },
-      { category: '小程序语言', name: 'JavaScript', version: 'ES6+' },
-      { category: '小程序 UI库', name: 'TDesign Miniprogram', version: 'Latest' },
-    ],
-
     // scroll-view height for content above tab-bar
     scrollHeight: 500,
   },
@@ -45,9 +30,6 @@ Page({
     var tabBarPx = Math.round(100 * rpx)
     var scrollHeight = windowInfo.windowHeight - tabBarPx
     this.setData({ scrollHeight: scrollHeight })
-
-    // 检查是否需要弹出资料完善弹窗（基于上次已存储的标记）
-    this._checkProfileModal()
   },
 
   /**
@@ -56,10 +38,10 @@ Page({
   onLoginReady: function () {
     this._loginReady = true
     this.loadMiniProgramStats()
-    // 登录完成后重新检查资料完善弹窗（新用户标记在登录时才写入）
-    this._checkProfileModal()
     // 默认Tab为健身打卡，加载坚持榜数据
     this.loadRankings()
+    // 检查是否需要展示信息不完善横幅
+    this._checkProfileBanner()
   },
 
   onShow: function () {
@@ -67,8 +49,8 @@ Page({
     if (this._loginReady) {
       this.loadMiniProgramStats()
     }
-    // 每次回到前台也检查一次资料完善弹窗
-    this._checkProfileModal()
+    // 每次回到前台检查横幅
+    this._checkProfileBanner()
   },
 
   // ── Tab switching ──
@@ -109,11 +91,6 @@ Page({
     })
   },
 
-  // ── Tech Stack Collapse ──
-  toggleTechDetail: function () {
-    this.setData({ techDetailOpen: !this.data.techDetailOpen })
-  },
-
   // ── 跳转个人信息页 ──
   goToProfile: function () {
     wx.navigateTo({
@@ -149,42 +126,67 @@ Page({
 
   // ── 健身打卡入口导航 ──
 
+  _guardWriteNav: function (url) {
+    var isNewUser = wx.getStorageSync('isNewUser')
+    if (isNewUser) {
+      // 新用户尚未完善资料，拦截导航并弹出完善资料弹窗
+      this.showProfileModal()
+      return
+    }
+    wx.navigateTo({ url: url })
+  },
+
   navigateToRanking: function () {
     wx.navigateTo({ url: '/pages/workout/ranking/ranking' })
   },
 
   navigateToCheckin: function () {
-    wx.navigateTo({ url: '/pages/workout/checkin/checkin' })
+    this._guardWriteNav('/pages/workout/checkin/checkin')
   },
 
   navigateToMakeup: function () {
-    wx.navigateTo({ url: '/pages/workout/makeup/makeup' })
+    this._guardWriteNav('/pages/workout/makeup/makeup')
   },
 
   navigateToWeekly: function () {
-    wx.navigateTo({ url: '/pages/workout/weekly/weekly' })
+    this._guardWriteNav('/pages/workout/weekly/weekly')
   },
 
   navigateToCalendar: function () {
-    wx.navigateTo({ url: '/pages/workout/calendar/calendar' })
+    this._guardWriteNav('/pages/workout/calendar/calendar')
   },
 
   // ── noop (阻冒泡) ──
   noop: function () {},
 
-  // ── 资料完善弹窗 ──
-  _checkProfileModal: function () {
-    if (wx.getStorageSync('showProfileModal')) {
-      this.setData({ showProfileModal: true })
+  // ── 信息不完善横幅 ──
+  _checkProfileBanner: function () {
+    var isNewUser = wx.getStorageSync('isNewUser')
+    if (isNewUser) {
+      this.setData({ showProfileBanner: true })
+    } else {
+      this.setData({ showProfileBanner: false })
     }
+  },
+
+  onTapProfileBanner: function () {
+    this.showProfileModal()
+  },
+
+  // ── 资料完善弹窗（由 app.requestProfile() 驱动） ──
+  showProfileModal: function () {
+    // 隐藏横幅，展示弹窗
+    this.setData({ showProfileModal: true, showProfileBanner: false })
   },
 
   onProfileClose: function () {
     this.setData({ showProfileModal: false })
+    // 弹窗关闭后重新检查横幅
+    this._checkProfileBanner()
   },
 
   onProfileSuccess: function () {
-    this.setData({ showProfileModal: false })
+    this.setData({ showProfileModal: false, showProfileBanner: false })
     // 刷新小程序统计数据
     this.loadMiniProgramStats()
   },

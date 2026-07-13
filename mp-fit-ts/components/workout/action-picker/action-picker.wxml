@@ -92,7 +92,7 @@
 
       <!-- 空状态 -->
       <view class="picker-empty" wx:if="{{ highlightedActions.length === 0 && normalActions.length === 0 && !loading }}">
-        <text>没有找到匹配的动作</text>
+        <text class="picker-empty-text">没有找到匹配的动作</text>
       </view>
     </scroll-view>
   </view>

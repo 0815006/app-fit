@@ -716,7 +716,7 @@
   background: #fde2e2;
 }
 
-.meeting-modal-btn-danger text {
+.meeting-modal-btn-danger-text {
   font-size: 26rpx;
   font-weight: 500;
   color: #f56c6c;

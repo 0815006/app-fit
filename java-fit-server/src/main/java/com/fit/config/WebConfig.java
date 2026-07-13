@@ -8,15 +8,13 @@ import com.fit.entity.User;
 import com.fit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Web 配置 —— Sa-Token 拦截器 + EmpContext 融合 + 静态资源映射
+ * Web 配置 —— Sa-Token 拦截器 + EmpContext 融合
  */
 @Slf4j
 @Configuration
@@ -24,9 +22,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final UserService userService;
-
-    @Value("${app.upload.avatar-path:./uploads/avatar}")
-    private String avatarPath;
 
     @Override
     public void addInterceptors(@NonNull InterceptorRegistry registry) {
@@ -44,12 +39,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 // 排除登录接口（登录时还没有session）
                 .excludePathPatterns("/api/auth/web-login", "/api/auth/wx-login");
-    }
-
-    @Override
-    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // 头像静态资源映射
-        registry.addResourceHandler("/uploads/avatar/**")
-                .addResourceLocations("file:" + avatarPath + "/");
     }
 }

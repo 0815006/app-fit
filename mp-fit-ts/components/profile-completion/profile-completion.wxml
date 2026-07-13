@@ -7,16 +7,16 @@
     <text class="title">完善个人信息</text>
     <text class="desc">为了方便在后续服务中称呼您，请填写以下信息</text>
 
-    <!-- 头像选择（使用 wx.chooseMedia，不依赖隐私 scope） -->
+    <!-- 头像选择（wx.chooseMedia，兼容 Windows 模拟器和真机） -->
     <view class="avatar-wrapper" bindtap="onChooseAvatar">
-      <image wx:if="{{ avatarUrl }}" class="avatar" src="{{ avatarUrl }}" mode="aspectFill"></image>
+      <image wx:if="{{ avatarUrl && !_avatarError }}" class="avatar" src="{{ avatarUrl }}" mode="aspectFill" binderror="onAvatarError"></image>
       <text wx:else class="avatar-placeholder">👤</text>
       <text class="avatar-hint">点击选择头像</text>
     </view>
 
-    <!-- 昵称输入 -->
+    <!-- 昵称输入（type="nickname" 支持微信昵称键盘） -->
     <input
-      type="text"
+      type="nickname"
       class="name-input"
       placeholder="请输入您的名字或昵称"
       bindinput="onNameInput"

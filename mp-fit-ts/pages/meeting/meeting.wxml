@@ -1,3 +1,10 @@
 <view class="meeting-page">
   <meeting-booking />
+
+  <!-- 资料完善弹窗（由 app.requestProfile() 驱动） -->
+  <profile-completion
+    visible="{{ showProfileModal }}"
+    bind:close="onProfileClose"
+    bind:success="onProfileSuccess"
+  />
 </view>

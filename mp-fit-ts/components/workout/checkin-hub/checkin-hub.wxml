@@ -184,7 +184,7 @@
             <text wx:if="{{ sub.trainedThisWeek }}" class="hub-sub-fire">🔥</text>
           </view>
           <view wx:if="{{ group.subMuscles.length === 0 }}" class="hub-sub-empty">
-            <text>暂无细分肌肉数据</text>
+            <text class="hub-sub-empty-text">暂无细分肌肉数据</text>
           </view>
         </view>
       </view>

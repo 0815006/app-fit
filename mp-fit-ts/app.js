@@ -1,6 +1,56 @@
 var request = require('./utils/request.js')
 
 App({
+  /**
+   * 全局资料完善请求管理
+   * - _profileCallbacks: 待重试的请求队列 [{ resolve, reject }]
+   * - requestProfile(): 返回 Promise，挂起当前操作直到资料完善完成
+   * - onProfileDone(): 资料完善成功 → 重试所有挂起的请求
+   * - onProfileCancel(): 资料完善取消/关闭 → 拒绝所有挂起的请求
+   */
+  _profileCallbacks: [],
+
+  /**
+   * 请求完善资料（挂起当前操作）
+   * @returns {Promise<void>} 资料完成后 resolve，取消后 reject
+   */
+  requestProfile: function () {
+    var app = this
+    return new Promise(function (resolve, reject) {
+      app._profileCallbacks.push({ resolve: resolve, reject: reject })
+
+      // 通知当前页面展示资料完善弹窗
+      var pages = getCurrentPages()
+      var currentPage = pages[pages.length - 1]
+      if (currentPage && typeof currentPage.showProfileModal === 'function') {
+        currentPage.showProfileModal()
+      }
+    })
+  },
+
+  /**
+   * 资料完善成功回调
+   * 清除 isNewUser 标记，重试所有挂起的请求
+   */
+  onProfileDone: function () {
+    wx.setStorageSync('isNewUser', false)
+    var callbacks = this._profileCallbacks.splice(0)
+    for (var i = 0; i < callbacks.length; i++) {
+      callbacks[i].resolve()
+    }
+  },
+
+  /**
+   * 资料完善取消回调
+   * 拒绝所有挂起的请求
+   */
+  onProfileCancel: function () {
+    var callbacks = this._profileCallbacks.splice(0)
+    for (var i = 0; i < callbacks.length; i++) {
+      callbacks[i].reject(new Error('请先完善个人资料'))
+    }
+  },
+
   onLaunch() {
     this.silentLogin()
   },
@@ -31,6 +81,7 @@ App({
             url: request._BASE_URL + '/auth/wx-login',
             method: 'POST',
             data: { code: res.code },
+            timeout: 15000,
             header: {
               'Content-Type': 'application/json',
               'satoken': satoken
@@ -44,9 +95,7 @@ App({
                 wx.setStorageSync('userInfo', data.userInfo)
                 console.log('静默登录成功, isNewUser:', data.isNewUser)
 
-                if (data.isNewUser) {
-                  wx.setStorageSync('showProfileModal', true)
-                }
+                // 不再强制弹出资料完善弹窗，改为按需触发（request.js 拦截写操作时）
 
                 var pages = getCurrentPages()
                 for (var i = 0; i < pages.length; i++) {
@@ -77,22 +126,6 @@ App({
       })
     })
     return that._loginPromise
-  },
-
-  /**
-   * 检查用户状态
-   * 新用户 → 弹出资料完善弹窗；老用户 → 直接执行 callback
-   * @param {Function} callback 校验通过后执行的回调
-   */
-  checkUserStatus(callback) {
-    var isNewUser = wx.getStorageSync('isNewUser')
-    if (isNewUser) {
-      // 触发全局事件，让页面展示资料完善弹窗
-      wx.setStorageSync('showProfileModal', true)
-      // 页面监听 storage 变化来展示弹窗
-    } else if (typeof callback === 'function') {
-      callback()
-    }
   },
 
   globalData: {

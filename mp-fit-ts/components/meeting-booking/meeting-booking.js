@@ -395,8 +395,31 @@ Component({
     // ── noop (阻冒泡) ──
     noop: function () {},
 
-    // ── 预约前检查用户信息是否完善 ──
+    // ── 预约前双层守卫：① isNewUser → 完善资料弹窗  ② empNo/empName → 跳转个人信息页 ──
     _checkProfileBeforeBooking: function (onPassed) {
+      var that = this
+
+      // 第一层：检查是否新用户（资料未完善）
+      var isNewUser = wx.getStorageSync('isNewUser')
+      if (isNewUser) {
+        var app = getApp()
+        if (app && app.requestProfile) {
+          app.requestProfile().then(function () {
+            // 资料完善成功，继续第二层检查
+            that._checkEmpInfoBeforeBooking(onPassed)
+          }).catch(function () {
+            // 用户取消完善资料
+          })
+          return
+        }
+      }
+
+      // 非新用户，直接进入第二层检查
+      that._checkEmpInfoBeforeBooking(onPassed)
+    },
+
+    // ── 第二层：检查工号和姓名是否已维护 ──
+    _checkEmpInfoBeforeBooking: function (onPassed) {
       var that = this
       api.get('/user/current').then(function (res) {
         var user = res.data

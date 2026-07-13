@@ -1,4 +1,13 @@
 <view class="container">
+  <!-- 信息不完善横幅 -->
+  <view class="profile-banner" wx:if="{{ showProfileBanner }}" bindtap="onTapProfileBanner">
+    <view class="profile-banner-left">
+      <text class="profile-banner-icon">⚠️</text>
+      <text class="profile-banner-text">个人信息未完善，点击完善资料</text>
+    </view>
+    <text class="profile-banner-arrow">›</text>
+  </view>
+
   <scroll-view scroll-y class="main-scroll" style="height: {{ scrollHeight }}px">
   <!-- ========== 健身打卡 ========== -->
   <view class="content-area" wx:if="{{ activeTab === 'fitness' }}">
@@ -159,21 +168,6 @@
         <text class="about-item-label">隐私保护协议</text>
         <text class="about-item-arrow">›</text>
       </view>
-      <view class="about-item" bindtap="toggleTechDetail">
-        <text class="about-item-label">技术选型</text>
-        <text class="about-item-arrow {{ techDetailOpen ? 'about-item-arrow-open' : '' }}">{{ techDetailOpen ? '˅' : '›' }}</text>
-      </view>
-      <view class="about-tech-list" wx:if="{{ techDetailOpen }}">
-        <view class="tech-row" wx:for="{{ techStack }}" wx:key="name">
-          <view class="tech-left">
-            <text class="tech-category">{{ item.category }}</text>
-            <text class="tech-name">{{ item.name }}</text>
-          </view>
-          <view class="tech-right">
-            <text class="tech-version">{{ item.version }}</text>
-          </view>
-        </view>
-      </view>
     </view>
   </view>
 
@@ -192,7 +186,7 @@
       <text class="tab-label">{{ item.label }}</text>
     </view>
   </view>
-  <!-- 资料完善弹窗 -->
+  <!-- 资料完善弹窗（由 app.requestProfile() 驱动） -->
   <profile-completion
     visible="{{ showProfileModal }}"
     bind:close="onProfileClose"

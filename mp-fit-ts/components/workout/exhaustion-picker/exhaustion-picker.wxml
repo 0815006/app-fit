@@ -5,7 +5,7 @@
     <view class="exh-header">
       <text class="exh-title">评价本次训练</text>
       <view class="exh-close" bindtap="handleClose">
-        <text>✕</text>
+        <text class="exh-close-text">✕</text>
       </view>
     </view>
 

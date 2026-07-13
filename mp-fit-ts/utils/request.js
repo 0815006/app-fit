@@ -5,13 +5,52 @@
  * - 基础路径指向后端 /api（由 config.js 统一管理）
  * - 返回 Promise，自动解析 Result 结构
  * - 401 时自动重新登录并重试原请求（最多 1 次）
+ * - 写操作（POST/PUT/DELETE）时若 isNewUser 则先触发资料完善弹窗
  */
 
 var config = require('./config.js')
 var BASE_URL = config.BASE_URL
 var TOKEN_KEY = 'satoken'
 
+/**
+ * 无需完善资料即可调用的写接口白名单
+ */
+var PROFILE_SKIP_URLS = [
+  '/security/check-text',
+  '/user/update-profile',
+  '/user/agree-privacy',
+  '/upload/avatar'
+]
+
 function request(options, _retried) {
+  var method = (options.method || 'GET').toUpperCase()
+  var isWrite = method === 'POST' || method === 'PUT' || method === 'DELETE'
+
+  // 写操作且非白名单路径：检查是否需要完善资料
+  if (isWrite && !_retried) {
+    var skipProfile = false
+    for (var i = 0; i < PROFILE_SKIP_URLS.length; i++) {
+      if (options.url.indexOf(PROFILE_SKIP_URLS[i]) === 0) {
+        skipProfile = true
+        break
+      }
+    }
+
+    if (!skipProfile) {
+      var isNewUser = wx.getStorageSync('isNewUser')
+      if (isNewUser) {
+        // 挂起请求，等待资料完善完成后再重试
+        var app = getApp()
+        if (app && app.requestProfile) {
+          return app.requestProfile().then(function () {
+            // 资料完善成功，重试原请求（标记已重试，不再检查 isNewUser）
+            return request(options, true)
+          })
+        }
+      }
+    }
+  }
+
   return new Promise(function (resolve, reject) {
     var satoken = wx.getStorageSync(TOKEN_KEY) || ''
     var empNo = wx.getStorageSync('empNo') || '0000000'
@@ -20,6 +59,7 @@ function request(options, _retried) {
       url: BASE_URL + options.url,
       method: options.method || 'GET',
       data: options.data,
+      timeout: 15000,  // 15 秒超时，避免长时间挂起
       header: Object.assign(
         {
           'Content-Type': 'application/json',

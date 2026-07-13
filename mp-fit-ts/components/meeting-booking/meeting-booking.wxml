@@ -306,7 +306,7 @@
               <text>一键取消后续</text>
             </view>
             <view class="meeting-modal-btn-danger" bindtap="handleMeetingCancel">
-              <text>取消本次</text>
+              <text class="meeting-modal-btn-danger-text">取消本次</text>
             </view>
             <view class="meeting-modal-btn-primary" bindtap="handleMeetingUpdate">
               <text>{{ meetingSaving ? '保存中...' : '保存修改' }}</text>

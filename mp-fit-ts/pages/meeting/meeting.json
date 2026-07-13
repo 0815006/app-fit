@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "会议预定",
   "usingComponents": {
-    "meeting-booking": "/components/meeting-booking/meeting-booking"
+    "meeting-booking": "/components/meeting-booking/meeting-booking",
+    "profile-completion": "/components/profile-completion/profile-completion"
   }
 }

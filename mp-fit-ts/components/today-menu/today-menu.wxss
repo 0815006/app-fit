@@ -490,7 +490,7 @@
   padding: 28rpx 0;
 }
 
-.welcome-text text {
+.welcome-text-inner {
   font-size: 28rpx;
   font-weight: 700;
   color: #909399;

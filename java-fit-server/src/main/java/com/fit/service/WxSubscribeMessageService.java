@@ -21,9 +21,4 @@ public interface WxSubscribeMessageService {
     Map<String, Object> sendSubscribeMessage(String openId, String templateId,
                                               String thing2, String thing3,
                                               String time1, String page);
-
-    /**
-     * 获取或刷新 access_token
-     */
-    String getAccessToken();
 }

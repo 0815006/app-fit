@@ -663,6 +663,66 @@ page {
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* ===== 收藏菜品入口卡片 ===== */
+
+.fav-dish-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  border-left: 6rpx solid #e6a23c;
+}
+
+.fav-dish-entry:active {
+  background: #fafbfc;
+  transform: scale(0.985);
+  transition: transform 0.15s;
+}
+
+.fav-entry-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.fav-entry-icon {
+  font-size: 48rpx;
+  flex-shrink: 0;
+  margin-right: 18rpx;
+}
+
+.fav-entry-body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fav-entry-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #303133;
+  line-height: 1.3;
+}
+
+.fav-entry-desc {
+  font-size: 22rpx;
+  color: #909399;
+  margin-top: 4rpx;
+}
+
+.fav-entry-arrow {
+  font-size: 36rpx;
+  font-weight: 300;
+  color: #c0c4cc;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
 /* ===== 关于区域 ===== */
 .about-section {
   background: #fff;

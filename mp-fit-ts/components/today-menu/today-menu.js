@@ -55,6 +55,11 @@ Component({
     todayShowSkeleton: false,
     isTodaySelected: true,
 
+    // 收藏相关
+    favSet: {},
+    favLoading: false,
+    expandedDishId: null,   // 当前展开延申区域的菜品ID
+
     todayMealTypes: [
       { label: '早餐', icon: '🍳', value: '早餐', key: 'breakfast' },
       { label: '午餐', icon: '🍛', value: '午餐', key: 'lunch' },
@@ -69,10 +74,96 @@ Component({
     },
   },
 
+  pageLifetimes: {
+    show: function () {
+      // 每次页面显示时刷新收藏状态
+      this.loadFavorites()
+    },
+  },
+
   methods: {
+    // ── 加载收藏状态 ──
+    loadFavorites: function () {
+      var that = this
+      var records = that.data.todayMenuRecords
+      if (!records || records.length === 0) return
+
+      var dishNames = []
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].dishName && dishNames.indexOf(records[i].dishName) < 0) {
+          dishNames.push(records[i].dishName)
+        }
+      }
+      if (dishNames.length === 0) return
+
+      api.get('/favorite-dish/check', { dishNames: dishNames.join(',') })
+        .then(function (res) {
+          var favList = res.data || []
+          var favSet = {}
+          for (var i = 0; i < favList.length; i++) {
+            favSet[favList[i]] = true
+          }
+          that.setData({ favSet: favSet })
+        })
+        .catch(function () {
+          // 静默失败
+        })
+    },
+
+    // ── 点击菜品卡片展开/收起延申区域 ──
+    handleDishTap: function (e) {
+      var id = e.currentTarget.dataset.id
+      // 如果点的是同一个菜品，则收起；否则展开新菜品
+      if (this.data.expandedDishId === id) {
+        this.setData({ expandedDishId: null })
+      } else {
+        this.setData({ expandedDishId: id })
+      }
+    },
+
+    // ── 点击星标切换收藏 ──
+    handleToggleFavorite: function (e) {
+      var that = this
+      var dishName = e.currentTarget.dataset.dish
+      if (!dishName) return
+
+      if (that.data.favLoading) return
+      that.setData({ favLoading: true })
+
+      api.post('/favorite-dish/toggle', { dishName: dishName })
+        .then(function (res) {
+          var data = res.data
+          var favSet = that.data.favSet
+          if (data.favorited) {
+            favSet[dishName] = true
+            // 首次收藏时调用 wx.requestSubscribeMessage 收集订阅授权
+            try {
+              wx.requestSubscribeMessage({
+                tmplIds: ['KABRC3CxbGsD2TZQNjPWcWEl17kU1q0rNipugHkMUmA'],
+                success: function () {
+                  // 用户授权成功，次数已在后端 toggle 中 +1
+                },
+                fail: function () {
+                  // 用户拒绝授权，不影响收藏
+                },
+              })
+            } catch (err) {
+              // 忽略错误
+            }
+          } else {
+            delete favSet[dishName]
+          }
+          that.setData({ favSet: favSet, favLoading: false })
+        })
+        .catch(function () {
+          that.setData({ favLoading: false })
+          wx.showToast({ title: '操作失败', icon: 'none' })
+        })
+    },
+
     loadTodayMenu: function () {
       var that = this
-      that.setData({ todayLoading: true, todayShowSkeleton: true })
+      that.setData({ todayLoading: true, todayShowSkeleton: true, expandedDishId: null })
 
       api
         .get('/canteen-menu/records', {
@@ -89,6 +180,8 @@ Component({
             todayMenuRecords: records,
             todayGrouped: grouped,
           })
+          // 菜单加载完成后加载收藏状态
+          that.loadFavorites()
         })
         .catch(function () {
           that.setData({ todayMenuRecords: [], todayGrouped: [] })

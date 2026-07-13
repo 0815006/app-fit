@@ -54,6 +54,8 @@ wx:
   app-id: ${WX_APP_ID:wx6bb890ad9c1e9c52}
   app-secret: ${WX_APP_SECRET:6e4c1ae7fcb99e203b13cd91c377a892}
   mock: false            # 本地调试可临时改为 true
+  subscribe:
+    template-id: KABRC3CxbGsD2TZQNjPWcWEl17kU1q0rNipugHkMUmA
 
 # ========== 头像上传 ==========
 app:

@@ -1,0 +1,236 @@
+page {
+  background: #f5f6f8;
+}
+
+.container {
+  padding: 24rpx;
+  padding-bottom: 40rpx;
+}
+
+/* ===== 推送次数卡片 ===== */
+.quota-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.quota-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.quota-icon {
+  font-size: 40rpx;
+  margin-right: 10rpx;
+}
+
+.quota-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #303133;
+}
+
+.quota-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 12rpx;
+}
+
+.quota-count {
+  display: flex;
+  align-items: baseline;
+}
+
+.quota-number {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #409eff;
+  line-height: 1;
+}
+
+.quota-unit {
+  font-size: 24rpx;
+  color: #909399;
+  margin-left: 8rpx;
+}
+
+.quota-loading-text {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+.push-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.push-switch-label {
+  font-size: 24rpx;
+  color: #606266;
+  font-weight: 500;
+}
+
+.quota-hint-text {
+  font-size: 22rpx;
+  color: #909399;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
+.quota-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.quota-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+  border-radius: 12rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.quota-btn:active {
+  opacity: 0.85;
+}
+
+.quota-btn-browse {
+  background: #ecf5ff;
+  color: #409eff;
+  border: 2rpx solid #d9ecff;
+}
+
+.quota-btn-menu {
+  background: #fef4ea;
+  color: #e6a23c;
+  border: 2rpx solid #fad3a5;
+}
+
+/* ===== 收藏列表 ===== */
+.fav-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 0;
+}
+
+.fav-loading text {
+  font-size: 24rpx;
+  color: #909399;
+}
+
+.fav-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 90rpx;
+  opacity: 0.5;
+  margin-bottom: 20rpx;
+}
+
+.empty-msg {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #606266;
+  margin-bottom: 8rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #909399;
+  margin-bottom: 30rpx;
+}
+
+.empty-btn {
+  padding: 14rpx 40rpx;
+  background: #409eff;
+  border-radius: 28rpx;
+}
+
+.empty-btn:active {
+  background: #337ecc;
+}
+
+.empty-btn text {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+.fav-items {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.fav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.fav-item:last-child {
+  border-bottom: none;
+}
+
+.fav-item-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.fav-star {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.fav-item-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fav-item-right {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.fav-cancel-btn {
+  padding: 10rpx 20rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #f56c6c;
+  background: #fff;
+}
+
+.fav-cancel-btn:active {
+  background: #fef0f0;
+}
+
+.fav-cancel-btn text {
+  font-size: 22rpx;
+  color: #f56c6c;
+  font-weight: 500;
+}

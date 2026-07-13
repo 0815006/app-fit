@@ -1,0 +1,79 @@
+<view class="container">
+  <!-- 顶部：推送次数卡片 -->
+  <view class="quota-card">
+    <view class="quota-header">
+      <text class="quota-icon">📬</text>
+      <text class="quota-title">订阅消息推送</text>
+    </view>
+
+    <!-- 次数展示 -->
+    <view class="quota-count-row" wx:if="{{ !quotaLoading }}">
+      <view class="quota-count">
+        <text class="quota-number">{{ remainingCount }}</text>
+        <text class="quota-unit">次剩余</text>
+      </view>
+      <!-- 推送开关 -->
+      <view class="push-switch-row">
+        <text class="push-switch-label">推送提醒</text>
+        <switch
+          checked="{{ pushEnabled }}"
+          bindchange="handleTogglePush"
+          color="#67c23a"
+        />
+      </view>
+    </view>
+    <view class="quota-count-row" wx:else>
+      <text class="quota-loading-text">加载中...</text>
+    </view>
+
+    <!-- 提示文案 + 操作按钮 -->
+    <view class="quota-hint-text">
+      多浏览菜品可攒推送次数，收藏的菜品上架时会推送提醒你哦～（每日最多 +5，累计不超过 30）
+    </view>
+    <view class="quota-actions">
+      <view class="quota-btn quota-btn-browse" bindtap="handleBrowseDishes">
+        <text>🔍 浏览菜品攒次数</text>
+      </view>
+      <view class="quota-btn quota-btn-menu" bindtap="goToMenu">
+        <text>🍽️ 去看今日菜单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 中部：收藏列表 -->
+  <view class="fav-list">
+    <!-- 加载中 -->
+    <view class="fav-loading" wx:if="{{ listLoading }}">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="fav-empty" wx:elif="{{ favoriteList.length === 0 }}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-msg">还没有收藏菜品</text>
+      <text class="empty-hint">去今日菜单看看吧～</text>
+      <view class="empty-btn" bindtap="goToMenu">
+        <text>去看今日菜单</text>
+      </view>
+    </view>
+
+    <!-- 列表 -->
+    <view class="fav-items" wx:else>
+      <view
+        class="fav-item"
+        wx:for="{{ favoriteList }}"
+        wx:key="id"
+      >
+        <view class="fav-item-left">
+          <text class="fav-star">⭐</text>
+          <text class="fav-item-name">{{ item.dishName }}</text>
+        </view>
+        <view class="fav-item-right">
+          <view class="fav-cancel-btn" data-dish="{{ item.dishName }}" catchtap="handleCancelFav">
+            <text>取消收藏</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

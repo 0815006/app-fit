@@ -271,7 +271,6 @@
 .menu-card {
   background: #fff;
   border-radius: 14rpx;
-  overflow: hidden;
   box-shadow: 0 3rpx 16rpx rgba(0, 0, 0, 0.06);
   border: 1rpx solid #ebeef5;
 }
@@ -315,6 +314,7 @@
   padding: 14rpx 20rpx;
   border-bottom: 1rpx solid #f2f3f5;
   border-right: 1rpx solid #f2f3f5;
+  position: relative;
 }
 
 .dish:nth-child(2n) {
@@ -356,6 +356,76 @@
   font-size: 20rpx;
   font-weight: 800;
   color: #f56c6c;
+}
+
+/* 浮动延申浮窗 */
+.dish-expand {
+  position: absolute;
+  left: 50%;
+  bottom: -10rpx;
+  transform: translateX(-50%) translateY(100%);
+  z-index: 20;
+  animation: floatIn 0.25s ease-out;
+  white-space: nowrap;
+}
+
+@keyframes floatIn {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(80%); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(100%); }
+}
+
+.dish-expand-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14rpx 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+}
+
+/* 收藏按钮 */
+.fav-star-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 28rpx;
+  border-radius: 24rpx;
+  background: #f5f6f8;
+  border: 2rpx solid #e4e7ed;
+  transition: all 0.2s;
+}
+
+.fav-star-btn:active {
+  transform: scale(0.96);
+}
+
+.fav-star-btn-on {
+  background: #fef8ed;
+  border-color: #f5dab1;
+}
+
+.fav-star-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.fav-star-on {
+  /* 实心高亮 */
+}
+
+.fav-star-off {
+  filter: grayscale(100%) opacity(0.35);
+}
+
+.fav-star-text {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #909399;
+}
+
+.fav-star-btn-on .fav-star-text {
+  color: #e6a23c;
 }
 
 /* 价格 + 热量行 */

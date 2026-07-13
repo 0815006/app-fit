@@ -120,10 +120,12 @@
       <!-- 卡片内容 -->
       <view class="menu-card-body">
         <view
-          class="dish {{ it.isSpicy === 1 ? 'dish-hot' : '' }}"
+          class="dish {{ it.isSpicy === 1 ? 'dish-hot' : '' }} {{ expandedDishId === it.id ? 'dish-expanded' : '' }}"
           wx:for="{{ item.items }}"
           wx:for-item="it"
           wx:key="id"
+          data-id="{{ it.id }}"
+          bindtap="handleDishTap"
         >
           <!-- 菜品名 + 辣标签 -->
           <view class="dish-top">
@@ -140,6 +142,20 @@
               wx:if="{{ it.energyKcal > 0 }}"
               class="dish-kcal {{ fmt.getCalorieClass(it.energyKcal) }}"
             >🔥 {{ it.energyKcal }} kcal</text>
+          </view>
+
+          <!-- 隐藏延申区域：收藏星标 -->
+          <view class="dish-expand" wx:if="{{ expandedDishId === it.id }}">
+            <view class="dish-expand-inner">
+              <view
+                class="fav-star-btn {{ favSet[it.dishName] ? 'fav-star-btn-on' : '' }}"
+                data-dish="{{ it.dishName }}"
+                catchtap="handleToggleFavorite"
+              >
+                <text class="fav-star-icon {{ favSet[it.dishName] ? 'fav-star-on' : 'fav-star-off' }}">⭐</text>
+                <text class="fav-star-text">{{ favSet[it.dishName] ? '已收藏' : '点击收藏' }}</text>
+              </view>
+            </view>
           </view>
         </view>
       </view>

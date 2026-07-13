@@ -194,6 +194,11 @@ Page({
     wx.navigateTo({ url: '/pages/privacy/privacy' })
   },
 
+  // ── 跳转收藏菜品页 ──
+  goToFavoriteDishes: function () {
+    wx.navigateTo({ url: '/pages/favorite-dishes/favorite-dishes' })
+  },
+
   // ── Share ──
   onShareAppMessage: function () {
     return {

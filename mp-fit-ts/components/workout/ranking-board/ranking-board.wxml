@@ -79,15 +79,14 @@
           <text wx:else class="ranking-avatar-placeholder">👤</text>
         </view>
         <view class="ranking-user-info">
-          <text class="ranking-user-name">{{ item.empName || item.nickname || item.empNo }}</text>
-          <text class="ranking-user-empno" wx:if="{{ item.empNo }}">{{ item.empNo }}</text>
+          <text class="ranking-user-name">{{ item.empName || item.nickname }}</text>
         </view>
       </view>
 
       <!-- 数值 -->
       <view class="ranking-value-col">
         <text class="ranking-value">{{ item.value }}</text>
-        <text class="ranking-value-unit" wx:if="{{ activeTab === 'consistency' }}">{{ consistencyMode === 'streak' ? '连续' : '累计' }}</text>
+        <text class="ranking-value-unit" wx:if="{{ activeTab === 'consistency' }}">天</text>
         <text class="ranking-aux-value" wx:if="{{ item.auxiliaryValue != null }}">{{ item.auxiliaryValue }}</text>
         <text class="ranking-trend" wx:if="{{ item.trend }}">
           {{ item.trend === 'up' ? '📈' : (item.trend === 'down' ? '📉' : '🆕') }}

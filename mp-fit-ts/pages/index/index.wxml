@@ -8,7 +8,7 @@
       <view class="consistency-card cc-card-streak">
         <view class="cc-header cc-header-streak">
           <text class="cc-header-icon">🏅</text>
-          <text class="cc-header-title">连续打卡</text>
+          <text class="cc-header-title">连续打卡排行榜</text>
         </view>
         <scroll-view scroll-y class="cc-body">
           <block wx:if="{{ streakData.length > 0 }}">
@@ -32,7 +32,7 @@
       <view class="consistency-card cc-card-cumulative">
         <view class="cc-header cc-header-cumulative">
           <text class="cc-header-icon">🏆</text>
-          <text class="cc-header-title">累计打卡</text>
+          <text class="cc-header-title">累计打卡排行榜</text>
         </view>
         <scroll-view scroll-y class="cc-body">
           <block wx:if="{{ cumulativeData.length > 0 }}">

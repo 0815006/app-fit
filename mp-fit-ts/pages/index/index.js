@@ -46,11 +46,12 @@ Page({
   },
 
   onShow: function () {
-    // 仅当静默登录已完成后才加载统计数据
-    if (this._loginReady) {
-      this.loadMiniProgramStats()
+    // 每次回到前台直接加载统计数据（App.onShow 已保证 token 有效）
+    this.loadMiniProgramStats()
+    // 如果榜单数据为空，补拉
+    if (this.data.streakData.length === 0 && this.data.cumulativeData.length === 0) {
+      this.loadRankings()
     }
-    // 每次回到前台检查横幅
     this._checkProfileBanner()
   },
 

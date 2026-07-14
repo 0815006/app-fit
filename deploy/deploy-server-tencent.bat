@@ -35,7 +35,7 @@ echo ===================================================
 echo [3/4] 远程连接服务器，通过环境变量注入参数并重启容器...
 echo ===================================================
 :: -p 8091:8091：把云端规划的外部 8091 端口映射到代码里的 8091
-ssh root@%SERVER_IP% "cd %SERVER_DIR% && docker build -t %CONTAINER_NAME% . && docker stop %CONTAINER_NAME% 2>/dev/null || true && docker rm %CONTAINER_NAME% 2>/dev/null || true && docker run -d --name %CONTAINER_NAME% -p %PORT%:8091 --restart always --add-host=host.docker.internal:host-gateway -e DB_HOST=host.docker.internal -e DB_PORT=3306 -e DB_USER=root -e DB_PASSWORD=root %CONTAINER_NAME%"
+ssh root@%SERVER_IP% "cd %SERVER_DIR% && docker build -t %CONTAINER_NAME% . && docker stop %CONTAINER_NAME% 2>/dev/null || true && docker rm %CONTAINER_NAME% 2>/dev/null || true && docker run -d --name %CONTAINER_NAME% -p %PORT%:8091 --restart always --add-host=host.docker.internal:host-gateway -e DB_HOST=host.docker.internal -e DB_PORT=3306 -e DB_USER=root -e DB_PASSWORD=root -e REDIS_HOST=host.docker.internal -e REDIS_PORT=6379 -e REDIS_PASSWORD= %CONTAINER_NAME%"
 
 echo ===================================================
 echo 恭喜！项目 %CONTAINER_NAME% 后端部署成功！

@@ -51,22 +51,41 @@ App({
     }
   },
 
+  _lastLoginSuccess: 0,
+
   onLaunch() {
     this.silentLogin()
   },
 
   /**
-   * 静默登录（返回 Promise，支持外部 await）
-   * wx.login → POST /api/auth/wx-login → 存储 satoken + userInfo
+   * 热启动时检查登录态
+   * - 本地无 token → 立即登录
+   * - 上次登录超过 60 秒 → 重新登录（防止频繁 wx.login）
    */
-  silentLogin() {
+  onShow: function () {
+    var hasToken = wx.getStorageSync('satoken')
+    var now = Date.now()
+    if (!hasToken || now - this._lastLoginSuccess > 60000) {
+      this.silentLogin()
+    }
+  },
+
+  /**
+   * 静默登录（返回 Promise，带重试机制）
+   * wx.login → POST /api/auth/wx-login → 存储 satoken + userInfo
+   * @param {number} _attempt 内部重试计数，外部调用无需传参
+   */
+  silentLogin: function (_attempt) {
     var that = this
+    var attempt = _attempt || 0
+    var MAX_RETRY = 2
+
     // 如果正在登录中，返回同一个 Promise（防止并发重复登录）
     if (that._loginPromise) return that._loginPromise
 
     that._loginPromise = new Promise(function (resolve, reject) {
       wx.login({
-        success(res) {
+        success: function (res) {
           if (!res.code) {
             console.error('wx.login 失败：未获取到 code')
             that._loginPromise = null
@@ -75,7 +94,6 @@ App({
           }
           console.log('wx.login 成功, code:', res.code)
 
-          // 直接用 wx.request 避免循环依赖（request.js 里 401 会调用 silentLogin）
           var satoken = wx.getStorageSync('satoken') || ''
           wx.request({
             url: request._BASE_URL + '/auth/wx-login',
@@ -93,9 +111,8 @@ App({
                 wx.setStorageSync('satoken', data.token)
                 wx.setStorageSync('isNewUser', data.isNewUser)
                 wx.setStorageSync('userInfo', data.userInfo)
+                that._lastLoginSuccess = Date.now()
                 console.log('静默登录成功, isNewUser:', data.isNewUser)
-
-                // 不再强制弹出资料完善弹窗，改为按需触发（request.js 拦截写操作时）
 
                 var pages = getCurrentPages()
                 for (var i = 0; i < pages.length; i++) {
@@ -114,14 +131,28 @@ App({
             fail: function (err) {
               console.error('静默登录请求失败:', err)
               that._loginPromise = null
-              reject(err)
+              if (attempt < MAX_RETRY) {
+                console.log('静默登录重试 ' + (attempt + 1) + '/' + MAX_RETRY)
+                setTimeout(function () {
+                  resolve(that.silentLogin(attempt + 1))
+                }, 2000)
+              } else {
+                reject(err)
+              }
             }
           })
         },
-        fail(err) {
+        fail: function (err) {
           console.error('wx.login 调用失败:', err)
           that._loginPromise = null
-          reject(err)
+          if (attempt < MAX_RETRY) {
+            console.log('静默登录重试 ' + (attempt + 1) + '/' + MAX_RETRY)
+            setTimeout(function () {
+              resolve(that.silentLogin(attempt + 1))
+            }, 2000)
+          } else {
+            reject(err)
+          }
         }
       })
     })

@@ -78,6 +78,10 @@ Component({
     show: function () {
       // 每次页面显示时刷新收藏状态
       this.loadFavorites()
+      // 热启动 data 可能被清空，无数据时主动拉菜单
+      if (!this.data.todayMenuRecords || this.data.todayMenuRecords.length === 0) {
+        this.loadTodayMenu()
+      }
     },
   },
 

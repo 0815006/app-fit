@@ -6,6 +6,9 @@ import com.fit.service.WxService;
 import com.fit.service.WxSubscribeMessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -55,7 +58,14 @@ public class WxSubscribeMessageServiceImpl implements WxSubscribeMessageService 
             String url = String.format(SEND_SUBSCRIBE_URL, accessToken);
             log.debug("发送订阅消息: openId={}, templateId={}, body={}", openId, templateId, body);
 
-            String resp = restTemplate.postForObject(url, body, String.class);
+            // 微信 API 要求 Content-Type: application/json
+            // RestTemplate 传 Map 默认用 x-www-form-urlencoded，需要显式设置
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String jsonBody = objectMapper.writeValueAsString(body);
+            HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
+
+            String resp = restTemplate.postForObject(url, request, String.class);
             JsonNode node = objectMapper.readTree(resp);
 
             int errcode = node.has("errcode") ? node.get("errcode").asInt() : -1;

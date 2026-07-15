@@ -27,10 +27,11 @@ public class EmpContextInjectorInterceptor implements HandlerInterceptor {
                              @NonNull HttpServletResponse response,
                              @NonNull Object handler) {
         try {
-            // 1. 优先从 Sa-Token 获取当前登录用户 ID，推导 empNo
+            // 1. 优先从 Sa-Token 获取当前登录用户 ID
             long userId = StpUtil.getLoginIdAsLong();
             User user = userService.getById(userId);
-            if (user != null && user.getEmpNo() != null) {
+            if (user != null) {
+                EmpContext.setUserId(String.valueOf(userId));
                 EmpContext.setEmpNo(user.getEmpNo());
                 return true;
             }

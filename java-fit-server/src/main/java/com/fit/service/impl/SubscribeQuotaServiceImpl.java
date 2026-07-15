@@ -27,22 +27,22 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
 
     @Override
     @Transactional
-    public Map<String, Object> increment(String empNo, String templateId, int count) {
+    public Map<String, Object> increment(String userId, String templateId, int count) {
         LambdaQueryWrapper<UserSubscribeQuota> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserSubscribeQuota::getEmpNo, empNo)
+        qw.eq(UserSubscribeQuota::getUserId, userId)
           .eq(UserSubscribeQuota::getTemplateId, templateId);
         UserSubscribeQuota entity = mapper.selectOne(qw);
 
         if (entity == null) {
             // 记录不存在 → 创建
             entity = new UserSubscribeQuota();
-            entity.setEmpNo(empNo);
+            entity.setUserId(userId);
             entity.setTemplateId(templateId);
             int initialCount = Math.min(count, TOTAL_LIMIT);
             entity.setRemainingCount(initialCount);
             entity.setPushEnabled(1);
             mapper.insert(entity);
-            log.info("创建订阅配额: empNo={}, remainingCount={}", empNo, initialCount);
+            log.info("创建订阅配额: userId={}, remainingCount={}", userId, initialCount);
 
             Map<String, Object> result = new HashMap<>();
             result.put("remainingCount", initialCount);
@@ -56,7 +56,7 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
         }
         entity.setRemainingCount(newCount);
         mapper.updateById(entity);
-        log.info("增加订阅次数: empNo={}, +{}, total={}", empNo, count, newCount);
+        log.info("增加订阅次数: userId={}, +{}, total={}", userId, count, newCount);
 
         Map<String, Object> result = new HashMap<>();
         result.put("remainingCount", newCount);
@@ -64,9 +64,9 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
     }
 
     @Override
-    public Map<String, Object> query(String empNo, String templateId) {
+    public Map<String, Object> query(String userId, String templateId) {
         LambdaQueryWrapper<UserSubscribeQuota> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserSubscribeQuota::getEmpNo, empNo)
+        qw.eq(UserSubscribeQuota::getUserId, userId)
           .eq(UserSubscribeQuota::getTemplateId, templateId);
         UserSubscribeQuota entity = mapper.selectOne(qw);
 
@@ -85,9 +85,9 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
 
     @Override
     @Transactional
-    public Map<String, Object> togglePush(String empNo, String templateId, boolean pushEnabled) {
+    public Map<String, Object> togglePush(String userId, String templateId, boolean pushEnabled) {
         LambdaQueryWrapper<UserSubscribeQuota> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserSubscribeQuota::getEmpNo, empNo)
+        qw.eq(UserSubscribeQuota::getUserId, userId)
           .eq(UserSubscribeQuota::getTemplateId, templateId);
         UserSubscribeQuota entity = mapper.selectOne(qw);
 
@@ -96,16 +96,16 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
         if (entity == null) {
             // 记录不存在时自动创建
             entity = new UserSubscribeQuota();
-            entity.setEmpNo(empNo);
+            entity.setUserId(userId);
             entity.setTemplateId(templateId);
             entity.setRemainingCount(0);
             entity.setPushEnabled(flag);
             mapper.insert(entity);
-            log.info("创建订阅配额并设置推送开关: empNo={}, pushEnabled={}", empNo, pushEnabled);
+            log.info("创建订阅配额并设置推送开关: userId={}, pushEnabled={}", userId, pushEnabled);
         } else {
             entity.setPushEnabled(flag);
             mapper.updateById(entity);
-            log.info("切换推送开关: empNo={}, pushEnabled={}", empNo, pushEnabled);
+            log.info("切换推送开关: userId={}, pushEnabled={}", userId, pushEnabled);
         }
 
         Map<String, Object> result = new HashMap<>();

@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 /**
  * 调试用 Controller —— 手动触发菜品收藏推送，仅本地开发使用。
  *
- * <p>本地开发环境没有 X-Emp-No 请求头，收藏/配额都落在 emp_no='0000000' 下。
- * 此接口只认 userId（user 表主键 id），用 userId 拿 openid，其余收藏/quota 全部查 "0000000"。
+ * <p>通过 userId（user 表主键 id）直接查询收藏、配额和 openid，
+ * 复刻 DishReminderJob 的完整推送流程。
  *
  * <p>Postman 调用示例：
  * <pre>
@@ -36,9 +36,6 @@ import java.util.stream.Collectors;
 public class DebugPushController {
 
     private static final String TEMPLATE_ID = "KABRC3CxbGsD2TZQNjPWcWEl17kU1q0rNipugHkMUmA";
-
-    /** 本地开发环境 EmpContext 默认返回的工号 */
-    private static final String DEV_EMP_NO = "0000000";
 
     private static final Map<String, String> MEAL_TIME_MAP = Map.of(
             "早餐", "08:00",
@@ -67,7 +64,7 @@ public class DebugPushController {
         s.put("userId", userId);
 
         try {
-            // 0. 通过 userId 拿 openid
+            // 0. 通过 userId 获取用户信息（含 openid）
             User user = userMapper.selectById(userId);
             if (user == null) {
                 s.put("result", "SKIPPED");
@@ -100,20 +97,20 @@ public class DebugPushController {
             Set<String> todayDishNames = dishMenuMap.keySet();
             s.put("todayDishCount", todayDishNames.size());
 
-            // 2. 收藏 —— 本地开发全查 emp_no = "0000000"
+            // 2. 收藏 —— 按 userId 查询
             List<UserFavoriteDish> allFav = userFavoriteDishMapper.selectList(
                     new LambdaQueryWrapper<UserFavoriteDish>()
-                            .eq(UserFavoriteDish::getEmpNo, DEV_EMP_NO));
+                            .eq(UserFavoriteDish::getUserId, userId));
             List<String> allFavNames = allFav.stream().map(UserFavoriteDish::getDishName).distinct().toList();
             s.put("allFavoriteDishes", allFavNames);
 
             List<UserFavoriteDish> matched = userFavoriteDishMapper.selectList(
                     new LambdaQueryWrapper<UserFavoriteDish>()
-                            .eq(UserFavoriteDish::getEmpNo, DEV_EMP_NO)
+                            .eq(UserFavoriteDish::getUserId, userId)
                             .in(UserFavoriteDish::getDishName, todayDishNames));
             if (matched.isEmpty()) {
                 s.put("result", "SKIPPED");
-                s.put("reason", "emp_no='" + DEV_EMP_NO + "' 下收藏了 " + allFavNames.size()
+                s.put("reason", "userId=" + userId + " 共收藏了 " + allFavNames.size()
                         + " 个菜品，今日共 " + todayDishNames.size() + " 个，交集为 0");
                 if (!todayDishNames.isEmpty()) {
                     s.put("sampleTodayDishes", todayDishNames.stream().limit(10).collect(Collectors.toList()));
@@ -125,14 +122,14 @@ public class DebugPushController {
                     .map(UserFavoriteDish::getDishName).distinct().collect(Collectors.toList());
             s.put("matchedDishes", matchedDishNames);
 
-            // 3. quota —— 全查 emp_no = "0000000"
+            // 3. quota —— 按 userId 查询
             UserSubscribeQuota quota = userSubscribeQuotaMapper.selectOne(
                     new LambdaQueryWrapper<UserSubscribeQuota>()
-                            .eq(UserSubscribeQuota::getEmpNo, DEV_EMP_NO)
+                            .eq(UserSubscribeQuota::getUserId, userId)
                             .eq(UserSubscribeQuota::getTemplateId, TEMPLATE_ID));
             if (quota == null) {
                 s.put("result", "SKIPPED");
-                s.put("reason", "user_subscribe_quota 无记录（emp_no='" + DEV_EMP_NO + "'），没收藏过菜品或 quota 未初始化");
+                s.put("reason", "user_subscribe_quota 无记录（userId=" + userId + "），没收藏过菜品或 quota 未初始化");
                 return Result.success(s);
             }
             s.put("remainingCount", quota.getRemainingCount());
@@ -185,7 +182,7 @@ public class DebugPushController {
                 String msg = (String) resp.getOrDefault("errmsg", "未知");
 
                 PushMessageHistory h = new PushMessageHistory();
-                h.setEmpNo(DEV_EMP_NO);
+                h.setUserId(userId);
                 h.setTemplateId(TEMPLATE_ID);
                 h.setDishNames(String.join(",", dishes));
                 h.setCanteenZone(zone);

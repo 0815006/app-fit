@@ -24,16 +24,16 @@ public class FavoriteDishServiceImpl implements FavoriteDishService {
 
     @Override
     @Transactional
-    public Map<String, Object> toggle(String empNo, String dishName) {
+    public Map<String, Object> toggle(String userId, String dishName) {
         LambdaQueryWrapper<UserFavoriteDish> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserFavoriteDish::getEmpNo, empNo)
+        qw.eq(UserFavoriteDish::getUserId, userId)
           .eq(UserFavoriteDish::getDishName, dishName);
         UserFavoriteDish existing = mapper.selectOne(qw);
 
         if (existing != null) {
             // 已存在 → 取消收藏
             mapper.deleteById(existing.getId());
-            log.info("取消收藏: empNo={}, dishName={}", empNo, dishName);
+            log.info("取消收藏: userId={}, dishName={}", userId, dishName);
             Map<String, Object> result = new HashMap<>();
             result.put("favorited", false);
             result.put("dishName", dishName);
@@ -41,18 +41,18 @@ public class FavoriteDishServiceImpl implements FavoriteDishService {
         } else {
             // 不存在 → 收藏，并增加 1 次订阅次数
             UserFavoriteDish entity = new UserFavoriteDish();
-            entity.setEmpNo(empNo);
+            entity.setUserId(userId);
             entity.setDishName(dishName);
             mapper.insert(entity);
 
             // 收藏成功后增加 1 次订阅次数
             try {
-                subscribeQuotaService.increment(empNo, TEMPLATE_ID, 1);
+                subscribeQuotaService.increment(userId, TEMPLATE_ID, 1);
             } catch (Exception e) {
-                log.warn("增加订阅次数失败 (不影响收藏): empNo={}, error={}", empNo, e.getMessage());
+                log.warn("增加订阅次数失败 (不影响收藏): userId={}, error={}", userId, e.getMessage());
             }
 
-            log.info("收藏成功: empNo={}, dishName={}", empNo, dishName);
+            log.info("收藏成功: userId={}, dishName={}", userId, dishName);
             Map<String, Object> result = new HashMap<>();
             result.put("favorited", true);
             result.put("dishName", dishName);
@@ -61,12 +61,12 @@ public class FavoriteDishServiceImpl implements FavoriteDishService {
     }
 
     @Override
-    public List<String> check(String empNo, List<String> dishNames) {
+    public List<String> check(String userId, List<String> dishNames) {
         if (dishNames == null || dishNames.isEmpty()) {
             return Collections.emptyList();
         }
         LambdaQueryWrapper<UserFavoriteDish> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserFavoriteDish::getEmpNo, empNo)
+        qw.eq(UserFavoriteDish::getUserId, userId)
           .in(UserFavoriteDish::getDishName, dishNames);
         return mapper.selectList(qw).stream()
                 .map(UserFavoriteDish::getDishName)
@@ -74,19 +74,19 @@ public class FavoriteDishServiceImpl implements FavoriteDishService {
     }
 
     @Override
-    public List<UserFavoriteDish> list(String empNo) {
+    public List<UserFavoriteDish> list(String userId) {
         LambdaQueryWrapper<UserFavoriteDish> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserFavoriteDish::getEmpNo, empNo)
+        qw.eq(UserFavoriteDish::getUserId, userId)
           .orderByDesc(UserFavoriteDish::getCreateTime);
         return mapper.selectList(qw);
     }
 
     @Override
-    public void delete(String empNo, String dishName) {
+    public void delete(String userId, String dishName) {
         LambdaQueryWrapper<UserFavoriteDish> qw = new LambdaQueryWrapper<>();
-        qw.eq(UserFavoriteDish::getEmpNo, empNo)
+        qw.eq(UserFavoriteDish::getUserId, userId)
           .eq(UserFavoriteDish::getDishName, dishName);
         mapper.delete(qw);
-        log.info("删除收藏: empNo={}, dishName={}", empNo, dishName);
+        log.info("删除收藏: userId={}, dishName={}", userId, dishName);
     }
 }

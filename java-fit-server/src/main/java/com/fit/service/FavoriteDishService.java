@@ -9,31 +9,31 @@ public interface FavoriteDishService {
 
     /**
      * 收藏/取消收藏（Toggle）
-     * @param empNo   用户工号
+     * @param userId   用户主键 ID
      * @param dishName 菜品名称
      * @return Map { "favorited": true/false, "dishName": "菜品名" }
      */
-    Map<String, Object> toggle(String empNo, String dishName);
+    Map<String, Object> toggle(String userId, String dishName);
 
     /**
      * 批量查询收藏状态
-     * @param empNo     用户工号
+     * @param userId    用户主键 ID
      * @param dishNames 菜品名称列表
      * @return 已收藏的菜品名称列表
      */
-    List<String> check(String empNo, List<String> dishNames);
+    List<String> check(String userId, List<String> dishNames);
 
     /**
      * 获取收藏列表
-     * @param empNo 用户工号
+     * @param userId 用户主键 ID
      * @return 收藏列表
      */
-    List<UserFavoriteDish> list(String empNo);
+    List<UserFavoriteDish> list(String userId);
 
     /**
      * 删除单个收藏
-     * @param empNo    用户工号
+     * @param userId   用户主键 ID
      * @param dishName 菜品名称
      */
-    void delete(String empNo, String dishName);
+    void delete(String userId, String dishName);
 }

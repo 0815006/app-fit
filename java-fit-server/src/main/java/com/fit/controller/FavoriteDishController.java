@@ -25,12 +25,12 @@ public class FavoriteDishController {
      */
     @PostMapping("/toggle")
     public Result<Map<String, Object>> toggle(@RequestBody Map<String, String> body) {
-        String empNo = EmpContext.getEmpNo();
+        String userId = EmpContext.getUserId();
         String dishName = body.get("dishName");
         if (dishName == null || dishName.isBlank()) {
             return Result.error("dishName 不能为空");
         }
-        Map<String, Object> data = service.toggle(empNo, dishName.trim());
+        Map<String, Object> data = service.toggle(userId, dishName.trim());
         return Result.success(data);
     }
 
@@ -39,7 +39,7 @@ public class FavoriteDishController {
      */
     @GetMapping("/check")
     public Result<List<String>> check(@RequestParam String dishNames) {
-        String empNo = EmpContext.getEmpNo();
+        String userId = EmpContext.getUserId();
         if (dishNames == null || dishNames.isBlank()) {
             return Result.success(List.of());
         }
@@ -47,7 +47,7 @@ public class FavoriteDishController {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();
-        List<String> data = service.check(empNo, nameList);
+        List<String> data = service.check(userId, nameList);
         return Result.success(data);
     }
 
@@ -56,8 +56,8 @@ public class FavoriteDishController {
      */
     @GetMapping("/list")
     public Result<List<UserFavoriteDish>> list() {
-        String empNo = EmpContext.getEmpNo();
-        List<UserFavoriteDish> data = service.list(empNo);
+        String userId = EmpContext.getUserId();
+        List<UserFavoriteDish> data = service.list(userId);
         return Result.success(data);
     }
 
@@ -66,8 +66,8 @@ public class FavoriteDishController {
      */
     @DeleteMapping("/{dishName}")
     public Result<Void> delete(@PathVariable String dishName) {
-        String empNo = EmpContext.getEmpNo();
-        service.delete(empNo, dishName);
+        String userId = EmpContext.getUserId();
+        service.delete(userId, dishName);
         return Result.success();
     }
 }

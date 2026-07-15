@@ -22,7 +22,7 @@ public class SubscribeQuotaController {
      */
     @PostMapping("/increment")
     public Result<Map<String, Object>> increment(@RequestBody Map<String, Object> body) {
-        String empNo = EmpContext.getEmpNo();
+        String userId = EmpContext.getUserId();
         String templateId = (String) body.get("templateId");
         int count = body.containsKey("count") ? ((Number) body.get("count")).intValue() : 1;
 
@@ -30,7 +30,7 @@ public class SubscribeQuotaController {
             return Result.error("templateId 不能为空");
         }
 
-        Map<String, Object> data = service.increment(empNo, templateId, count);
+        Map<String, Object> data = service.increment(userId, templateId, count);
         return Result.success(data);
     }
 
@@ -39,8 +39,8 @@ public class SubscribeQuotaController {
      */
     @GetMapping
     public Result<Map<String, Object>> query(@RequestParam String templateId) {
-        String empNo = EmpContext.getEmpNo();
-        Map<String, Object> data = service.query(empNo, templateId);
+        String userId = EmpContext.getUserId();
+        Map<String, Object> data = service.query(userId, templateId);
         return Result.success(data);
     }
 
@@ -49,7 +49,7 @@ public class SubscribeQuotaController {
      */
     @PostMapping("/toggle-push")
     public Result<Map<String, Object>> togglePush(@RequestBody Map<String, Object> body) {
-        String empNo = EmpContext.getEmpNo();
+        String userId = EmpContext.getUserId();
         String templateId = (String) body.get("templateId");
         boolean pushEnabled = Boolean.TRUE.equals(body.get("pushEnabled"));
 
@@ -57,7 +57,7 @@ public class SubscribeQuotaController {
             return Result.error("templateId 不能为空");
         }
 
-        Map<String, Object> data = service.togglePush(empNo, templateId, pushEnabled);
+        Map<String, Object> data = service.togglePush(userId, templateId, pushEnabled);
         return Result.success(data);
     }
 }

@@ -14,8 +14,8 @@ public class UserFavoriteDish {
     @TableId(type = IdType.ASSIGN_ID)
     private String id;
 
-    /** 用户工号 */
-    private String empNo;
+    /** 用户ID（user表主键） */
+    private String userId;
 
     /** 收藏的菜品名称 */
     private String dishName;

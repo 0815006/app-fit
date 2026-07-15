@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 
 /**
  * 菜品收藏定时推送任务 —— 每天 8:00 执行
+ * <p>
+ * 通过不可变的 user_id 关联 user 表查找 openid，
+ * 解决用户修改工号后收藏/配额数据断裂问题。
  */
 @Slf4j
 @Component
@@ -80,39 +83,37 @@ public class DishReminderJob {
                 return;
             }
 
-            // 按 emp_no 分组
-            Map<String, List<UserFavoriteDish>> empFavMap = matchedFavorites.stream()
-                    .collect(Collectors.groupingBy(UserFavoriteDish::getEmpNo));
+            // 按 userId 分组
+            Map<String, List<UserFavoriteDish>> userFavMap = matchedFavorites.stream()
+                    .collect(Collectors.groupingBy(UserFavoriteDish::getUserId));
 
-            log.info("匹配到 {} 个用户的收藏菜品", empFavMap.size());
+            log.info("匹配到 {} 个用户的收藏菜品", userFavMap.size());
 
             // 3. 过滤推送条件：remaining_count > 0 且 push_enabled = 1
             int successCount = 0;
             int failCount = 0;
 
-            for (Map.Entry<String, List<UserFavoriteDish>> entry : empFavMap.entrySet()) {
-                String empNo = entry.getKey();
+            for (Map.Entry<String, List<UserFavoriteDish>> entry : userFavMap.entrySet()) {
+                String userId = entry.getKey();
                 List<UserFavoriteDish> favDishes = entry.getValue();
 
-                // 查询订阅配额
+                // 查询订阅配额 —— 按 userId
                 LambdaQueryWrapper<UserSubscribeQuota> quotaQw = new LambdaQueryWrapper<>();
-                quotaQw.eq(UserSubscribeQuota::getEmpNo, empNo)
+                quotaQw.eq(UserSubscribeQuota::getUserId, userId)
                         .eq(UserSubscribeQuota::getTemplateId, TEMPLATE_ID);
                 UserSubscribeQuota quota = userSubscribeQuotaMapper.selectOne(quotaQw);
 
                 if (quota == null || quota.getRemainingCount() <= 0 || quota.getPushEnabled() != 1) {
-                    log.debug("用户 {} 不满足推送条件: quota={}", empNo,
+                    log.debug("用户 {} 不满足推送条件: quota={}", userId,
                             quota == null ? "null" :
                                     "remaining=" + quota.getRemainingCount() + ", enabled=" + quota.getPushEnabled());
                     continue;
                 }
 
-                // 查询用户 openid
-                LambdaQueryWrapper<User> userQw = new LambdaQueryWrapper<>();
-                userQw.eq(User::getEmpNo, empNo);
-                User user = userMapper.selectOne(userQw);
+                // 通过 userId 直接查 user 表获取 openid
+                User user = userMapper.selectById(userId);
                 if (user == null || user.getWxOpenid() == null || user.getWxOpenid().isBlank()) {
-                    log.warn("用户 {} 没有 openid，跳过推送", empNo);
+                    log.warn("用户 {} 没有 openid，跳过推送", userId);
                     continue;
                 }
 
@@ -164,7 +165,7 @@ public class DishReminderJob {
 
                     // 6. 记录推送历史
                     PushMessageHistory history = new PushMessageHistory();
-                    history.setEmpNo(empNo);
+                    history.setUserId(userId);
                     history.setTemplateId(TEMPLATE_ID);
                     history.setDishNames(String.join(",", dishSet));
                     history.setCanteenZone(canteenZone);

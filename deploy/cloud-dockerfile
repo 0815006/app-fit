@@ -1,4 +1,5 @@
 FROM eclipse-temurin:21-jre-alpine
+ENV TZ=Asia/Shanghai
 WORKDIR /app
 # 接收本地 .bat 脚本传上来的 jar 包
 COPY app.jar app.jar

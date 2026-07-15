@@ -11,6 +11,7 @@ COPY src ./src
 RUN mvn clean package -Dmaven.test.skip=true -q
 
 FROM eclipse-temurin:21-jre-alpine
+ENV TZ=Asia/Shanghai
 WORKDIR /app
 COPY --from=builder /build/target/*.jar app.jar
 EXPOSE 8091

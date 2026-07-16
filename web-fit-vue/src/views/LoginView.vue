@@ -88,7 +88,13 @@ async function handleLogin() {
         Copyright &copy; 2026 realapex.site 个人健身记录网站 All Rights Reserved. RealMadrid 版权所有
       </p>
       <p class="copyright-line">
-        <a class="icp-link" href="https://beian.miit.gov.cn" target="_blank" rel="noopener">沪ICP备2026003602号-2</a>
+        <a class="icp-link" href="https://beian.miit.gov.cn" target="_blank" rel="noopener">ICP备案/许可证号：沪ICP备2026003602号-2</a>
+      </p>
+      <p class="copyright-line">
+        <a class="icp-link" href="https://beian.mps.gov.cn" target="_blank" rel="noopener">
+          <img class="police-icon" src="/police_logo.png" alt="公安备案" width="14" height="14" />
+          沪公网安备31011502406692号
+        </a>
       </p>
     </div>
   </div>
@@ -158,5 +164,11 @@ async function handleLogin() {
 
 .icp-link:hover {
   color: #fff;
+}
+
+.police-icon {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-right: 2px;
 }
 </style>

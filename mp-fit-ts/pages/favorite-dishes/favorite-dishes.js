@@ -136,19 +136,51 @@ Page({
     var that = this
     wx.showLoading({ title: '攒次数中...' })
 
-    api.post('/subscribe-quota/increment', {
+    api.post('/subscribe-quota/browse', {
       templateId: TEMPLATE_ID,
-      count: 1,
     })
       .then(function (res) {
         wx.hideLoading()
-        that.setData({ remainingCount: res.data.remainingCount })
+        var newCount = res.data.remainingCount
+        that.setData({ remainingCount: newCount })
         wx.showToast({ title: '推送次数 +1', icon: 'success' })
+
+        // 攒次数成功后立即弹微信授权弹窗
+        try {
+          wx.requestSubscribeMessage({
+            tmplIds: [TEMPLATE_ID],
+            success: function () {
+              // 用户授权成功
+            },
+            fail: function () {
+              // 用户拒绝授权，不影响已攒的次数
+            },
+          })
+        } catch (err) {
+          // 忽略错误
+        }
       })
       .catch(function () {
         wx.hideLoading()
-        wx.showToast({ title: '已达每日上限', icon: 'none' })
+        // request.js 已自动显示错误 toast，这里只关闭 loading
       })
+  },
+
+  // ── 重新授权接收推送（不消耗次数） ──
+  handleReAuth: function () {
+    try {
+      wx.requestSubscribeMessage({
+        tmplIds: [TEMPLATE_ID],
+        success: function () {
+          wx.showToast({ title: '授权成功', icon: 'success' })
+        },
+        fail: function () {
+          wx.showToast({ title: '授权失败，请稍后再试', icon: 'none' })
+        },
+      })
+    } catch (err) {
+      wx.showToast({ title: '当前版本不支持', icon: 'none' })
+    }
   },
 
   // ── 跳转今日菜单 ──

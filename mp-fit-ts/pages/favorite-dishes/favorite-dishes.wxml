@@ -38,6 +38,11 @@
         <text>🍽️ 去看今日菜单</text>
       </view>
     </view>
+    <view class="quota-reauth" wx:if="{{ remainingCount > 0 }}">
+      <view class="quota-btn quota-btn-reauth" bindtap="handleReAuth">
+        <text>🔔 重新授权接收推送</text>
+      </view>
+    </view>
   </view>
 
   <!-- 中部：收藏列表 -->

@@ -22,6 +22,15 @@ public interface SubscribeQuotaService {
     Map<String, Object> query(String userId, String templateId);
 
     /**
+     * 浏览菜品攒次数（受每日 5 次上限约束）
+     * @param userId     用户主键 ID
+     * @param templateId 模板ID
+     * @return Map { "remainingCount": N }
+     * @throws RuntimeException 当日浏览次数已达上限
+     */
+    Map<String, Object> browseIncrement(String userId, String templateId);
+
+    /**
      * 切换推送开关
      * @param userId      用户主键 ID
      * @param templateId  模板ID

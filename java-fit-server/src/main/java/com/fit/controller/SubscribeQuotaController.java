@@ -35,6 +35,29 @@ public class SubscribeQuotaController {
     }
 
     /**
+     * 浏览菜品攒次数（受每日 5 次上限约束）
+     */
+    @PostMapping("/browse")
+    public Result<Map<String, Object>> browse(@RequestBody Map<String, Object> body) {
+        String userId = EmpContext.getUserId();
+        String templateId = (String) body.get("templateId");
+
+        if (templateId == null || templateId.isBlank()) {
+            return Result.error("templateId 不能为空");
+        }
+
+        try {
+            Map<String, Object> data = service.browseIncrement(userId, templateId);
+            return Result.success(data);
+        } catch (RuntimeException e) {
+            if ("DAILY_LIMIT".equals(e.getMessage())) {
+                return Result.error("今日浏览攒次数已达上限（5次），请明天再来");
+            }
+            throw e;
+        }
+    }
+
+    /**
      * 查询当前用户订阅次数
      */
     @GetMapping

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,6 +58,59 @@ public class SubscribeQuotaServiceImpl implements SubscribeQuotaService {
         entity.setRemainingCount(newCount);
         mapper.updateById(entity);
         log.info("增加订阅次数: userId={}, +{}, total={}", userId, count, newCount);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("remainingCount", newCount);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> browseIncrement(String userId, String templateId) {
+        LambdaQueryWrapper<UserSubscribeQuota> qw = new LambdaQueryWrapper<>();
+        qw.eq(UserSubscribeQuota::getUserId, userId)
+          .eq(UserSubscribeQuota::getTemplateId, templateId);
+        UserSubscribeQuota entity = mapper.selectOne(qw);
+
+        if (entity == null) {
+            entity = new UserSubscribeQuota();
+            entity.setUserId(userId);
+            entity.setTemplateId(templateId);
+            entity.setRemainingCount(1);
+            entity.setPushEnabled(1);
+            entity.setLastBrowseDate(LocalDate.now());
+            entity.setTodayBrowseCount(1);
+            mapper.insert(entity);
+            log.info("创建订阅配额（浏览）: userId={}, remainingCount=1, todayBrowseCount=1", userId);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("remainingCount", 1);
+            return result;
+        }
+
+        // 检查每日上限
+        LocalDate today = LocalDate.now();
+        if (entity.getLastBrowseDate() != null && entity.getLastBrowseDate().equals(today)) {
+            int todayCount = entity.getTodayBrowseCount() != null ? entity.getTodayBrowseCount() : 0;
+            if (todayCount >= DAILY_BROWSE_LIMIT) {
+                throw new RuntimeException("DAILY_LIMIT");
+            }
+            entity.setTodayBrowseCount(todayCount + 1);
+        } else {
+            // 新的一天，重置计数
+            entity.setLastBrowseDate(today);
+            entity.setTodayBrowseCount(1);
+        }
+
+        // 累加总次数（上限 30）
+        int newCount = entity.getRemainingCount() + 1;
+        if (newCount > TOTAL_LIMIT) {
+            newCount = TOTAL_LIMIT;
+        }
+        entity.setRemainingCount(newCount);
+        mapper.updateById(entity);
+        log.info("浏览攒次数: userId={}, +1, remaining={}, todayBrowse={}",
+                userId, newCount, entity.getTodayBrowseCount());
 
         Map<String, Object> result = new HashMap<>();
         result.put("remainingCount", newCount);

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,6 +26,12 @@ public class UserSubscribeQuota {
 
     /** 推送开关：1-开启，0-关闭 */
     private Integer pushEnabled;
+
+    /** 最近一次浏览攒次数日期 */
+    private LocalDate lastBrowseDate;
+
+    /** 今日已浏览攒次数 */
+    private Integer todayBrowseCount;
 
     /** 创建时间 */
     private LocalDateTime createTime;

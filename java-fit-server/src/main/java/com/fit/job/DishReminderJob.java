@@ -117,28 +117,32 @@ public class DishReminderJob {
                     continue;
                 }
 
-                // 4. 从收藏的菜品中拿出今日供应的，按 canteen_zone + meal_type 分组
+                // 4. 从收藏的菜品中拿出今日供应的，按 meal_type 分组（跨食堂区域合并去重）
                 List<String> matchedDishNames = favDishes.stream()
                         .map(UserFavoriteDish::getDishName)
                         .collect(Collectors.toList());
 
-                // 构建分组：Map<canteenZone_mealType, Set<dishName>>
-                Map<String, Set<String>> groupMap = new LinkedHashMap<>();
+                // 构建分组：Map<mealType, Set<dishName>>  +  Map<mealType, Set<canteenZone>>
+                Map<String, Set<String>> dishGroupMap = new LinkedHashMap<>();
+                Map<String, Set<String>> zoneGroupMap = new LinkedHashMap<>();
                 for (String dishName : matchedDishNames) {
                     List<CanteenMenuRecord> records = dishMenuMap.get(dishName);
                     if (records == null) continue;
                     for (CanteenMenuRecord record : records) {
-                        String key = record.getCanteenZone() + "_" + record.getMealType();
-                        groupMap.computeIfAbsent(key, k -> new LinkedHashSet<>()).add(dishName);
+                        String mealType = record.getMealType();
+                        dishGroupMap.computeIfAbsent(mealType, k -> new LinkedHashSet<>()).add(dishName);
+                        zoneGroupMap.computeIfAbsent(mealType, k -> new LinkedHashSet<>())
+                                .add(record.getCanteenZone());
                     }
                 }
 
-                // 5. 每个分组发送一条模板消息
-                for (Map.Entry<String, Set<String>> groupEntry : groupMap.entrySet()) {
-                    String key = groupEntry.getKey();
-                    String[] parts = key.split("_", 2);
-                    String canteenZone = parts[0];
-                    String mealType = parts.length > 1 ? parts[1] : "";
+                // 5. 每个餐次发送一条模板消息
+                for (Map.Entry<String, Set<String>> groupEntry : dishGroupMap.entrySet()) {
+                    String mealType = groupEntry.getKey();
+                    Set<String> canteenZones = zoneGroupMap.get(mealType);
+                    String canteenZone = canteenZones != null && !canteenZones.isEmpty()
+                            ? String.join("、", canteenZones)
+                            : "";
 
                     Set<String> dishSet = groupEntry.getValue();
                     String dishNamesStr = String.join("、", dishSet);

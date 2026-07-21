@@ -145,23 +145,29 @@ public class DebugPushController {
                 return Result.success(s);
             }
 
-            // 4. 按 canteen_zone + meal_type 分组
-            Map<String, Set<String>> groupMap = new LinkedHashMap<>();
+            // 4. 按 meal_type 分组（跨食堂区域合并去重）
+            Map<String, Set<String>> dishGroupMap = new LinkedHashMap<>();
+            Map<String, Set<String>> zoneGroupMap = new LinkedHashMap<>();
             for (String dishName : matchedDishNames) {
                 List<CanteenMenuRecord> records = dishMenuMap.get(dishName);
                 if (records == null) continue;
                 for (CanteenMenuRecord r : records) {
-                    groupMap.computeIfAbsent(r.getCanteenZone() + "_" + r.getMealType(),
-                            k -> new LinkedHashSet<>()).add(dishName);
+                    String mealType = r.getMealType();
+                    dishGroupMap.computeIfAbsent(mealType, k -> new LinkedHashSet<>()).add(dishName);
+                    zoneGroupMap.computeIfAbsent(mealType, k -> new LinkedHashSet<>())
+                            .add(r.getCanteenZone());
                 }
             }
 
-            // 5. 逐组发送
+            // 5. 每个餐次发送一条模板消息
             List<Map<String, Object>> details = new ArrayList<>();
             int ok = 0, fail = 0;
-            for (Map.Entry<String, Set<String>> g : groupMap.entrySet()) {
-                String[] parts = g.getKey().split("_", 2);
-                String zone = parts[0], meal = parts.length > 1 ? parts[1] : "";
+            for (Map.Entry<String, Set<String>> g : dishGroupMap.entrySet()) {
+                String meal = g.getKey();
+                Set<String> canteenZones = zoneGroupMap.get(meal);
+                String zone = canteenZones != null && !canteenZones.isEmpty()
+                        ? String.join("、", canteenZones)
+                        : "";
                 Set<String> dishes = g.getValue();
                 String thing3 = String.join("、", dishes);
                 if (thing3.length() > 20) {

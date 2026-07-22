@@ -75,3 +75,13 @@ app:
   upload:
     avatar-path: ${AVATAR_PATH:./uploads/avatar}
     avatar-url-prefix: /uploads/avatar
+
+# ========== Actuator / Prometheus 监控 ==========
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info
+  metrics:
+    tags:
+      application: ${spring.application.name}
